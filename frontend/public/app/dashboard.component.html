@@ -1,0 +1,8 @@
+<h3>Top Documents</h3>
+<div class="grid grid-pad">
+    <div *ngFor="let document of documents" (click)="gotoDetail(document)" class="col-1-4">
+        <div class="module document">
+            <h4>{{document.title}}</h4>
+        </div>
+    </div>
+</div>

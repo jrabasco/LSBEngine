@@ -2,7 +2,9 @@ package me.sblog.database
 
 import reactivemongo.api.DefaultDB
 import reactivemongo.api.collections.bson.BSONCollection
-import reactivemongo.bson.{BSONDocument, BSONDocumentReader}
+import reactivemongo.api.commands.UpdateWriteResult
+import reactivemongo.api.commands.WriteConcern
+import reactivemongo.bson.{BSONDocument, BSONDocumentReader, BSONDocumentWriter}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -21,5 +23,9 @@ class DatabaseAccessor[T](db: DefaultDB, collectionName: String) {
 
   def listItems(implicit reader: BSONDocumentReader[T]): Future[List[T]] = {
     getItems(BSONDocument())
+  }
+
+  def upsertItem(selector: BSONDocument, item: T)(implicit writer: BSONDocumentWriter[T]): Future[UpdateWriteResult] = {
+    getCollection.update(selector, item, WriteConcern.Acknowledged, upsert = true)
   }
 }

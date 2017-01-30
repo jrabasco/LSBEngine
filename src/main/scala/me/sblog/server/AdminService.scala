@@ -3,11 +3,13 @@ package me.sblog.server
 import akka.actor.Props
 import com.github.nscala_time.time.Imports._
 import me.sblog.api.admin.security._
-import me.sblog.database.model.Token
+import me.sblog.api.public.PostsWorker
+import me.sblog.api.public.PostsWorker.UpsertPost
+import me.sblog.database.model.{Post, PostForm, Token}
 import reactivemongo.api.MongoConnection
 import spray.http.HttpCookie
-import spray.http.StatusCodes.InternalServerError
-import spray.routing.Route
+import spray.http.StatusCodes._
+import spray.routing.{RequestContext, Route}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
@@ -26,8 +28,8 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String)
 
   override val routes: Route =
     pathPrefix("api") {
-      authenticate(basicUserAuthenticator) { user =>
-        path("token") {
+      path("token") {
+        authenticate(basicUserAuthenticator) { user =>
           log.info(s"[$apiScope] Getting token for user ${user.userName}.")
           get {
             onComplete(dbConnection.database(dbName)) {
@@ -63,8 +65,8 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String)
             }
           }
         }
-      } ~ authenticate(cookieAuthenticator) { token =>
-        path("check") {
+      } ~ path("check") {
+        authenticate(cookieAuthenticator) { token =>
           log.info(s"[$apiScope] Checking token for user ${token.userName}.")
           get {
             val now = DateTime.now
@@ -79,8 +81,8 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String)
             complete(s"User ${token.userName} is logged in.")
           }
         }
-      } ~ authenticate(cookieAuthenticator) { token =>
-        path("logout") {
+      } ~ path("logout") {
+        authenticate(cookieAuthenticator) { token =>
           log.info(s"[$apiScope] Logging out user ${token.userName}.")
           deleteCookie(cookieName) {
             dbConnection.database(dbName).map {
@@ -89,6 +91,23 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String)
                 tokensAccessor.removeToken(token.tokenId)
             }
             complete("Successfully logged out.")
+          }
+        }
+      } ~ pathPrefix("posts") {
+        authenticate(cookieAuthenticator) { token =>
+          path(IntNumber) {
+            id =>
+              post {
+                entity(as[PostForm]) {
+                  postForm =>
+                    if (postForm.csrf == token.csrf) {
+                      val post = Post(id = postForm.id, title = postForm.title, summary = postForm.summary)
+                      ctx => upsertPost(ctx, token, id, post)
+                    } else {
+                      complete(Forbidden, "CSRF Prevented")
+                    }
+                }
+              }
           }
         }
       }
@@ -100,6 +119,15 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String)
       TokenGenerator.renewToken(token)
     } else {
       token
+    }
+  }
+
+  def upsertPost(reqContext: RequestContext, token: Token, id: Int, post: Post): Unit = {
+    log.info(s"[$apiScope] Upserting post with id $id: $post.")
+    handleWithDb(reqContext) {
+      db =>
+        val postsWorker = context.actorOf(PostsWorker.props(reqContext, db))
+        postsWorker ! UpsertPost(id, post)
     }
   }
 

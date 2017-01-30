@@ -37,31 +37,31 @@ abstract class ServerService(dbConnection: MongoConnection, dbName: String) exte
     } ~ pathPrefix("posts") {
       path("list") {
         get {
-          ctx => listDocuments(ctx)
+          ctx => listPosts(ctx)
         }
       } ~ path(IntNumber) {
         id =>
           get {
-            ctx => fetchDocument(ctx, id)
+            ctx => fetchPost(ctx, id)
           }
       }
     }
 
-  def listDocuments(reqContext: RequestContext): Unit = {
+  def listPosts(reqContext: RequestContext): Unit = {
     log.info(s"[$apiScope] Listing posts.")
     handleWithDb(reqContext) {
       db =>
-        val documentsWorker = context.actorOf(PostsWorker.props(reqContext, db))
-        documentsWorker ! ListAction()
+        val postsWorker = context.actorOf(PostsWorker.props(reqContext, db))
+        postsWorker ! ListAction()
     }
   }
 
-  def fetchDocument(reqContext: RequestContext, id: Int): Unit = {
+  def fetchPost(reqContext: RequestContext, id: Int): Unit = {
     log.info(s"[$apiScope] Fetching post $id.")
     handleWithDb(reqContext) {
       db =>
-        val documentsWorker = context.actorOf(PostsWorker.props(reqContext, db))
-        documentsWorker ! FetchDocument(id)
+        val postsWorker = context.actorOf(PostsWorker.props(reqContext, db))
+        postsWorker ! FetchDocument(id)
     }
   }
 

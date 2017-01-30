@@ -2,7 +2,7 @@ package me.sblog.api.public
 
 import akka.actor.Props
 import me.sblog.api.ApiWorker
-import me.sblog.api.public.PostsWorker.{FetchDocument, FetchPostResponse, ListAction, ListActionResponse}
+import me.sblog.api.public.PostsWorker._
 import me.sblog.database.DatabaseAccessor
 import me.sblog.database.model.{MongoCollections, Post}
 import reactivemongo.api.DefaultDB
@@ -20,7 +20,9 @@ object PostsWorker {
 
   case class ListActionResponse(list: List[Post])
 
-  case class FetchPostResponse(document: Post)
+  case class FetchPostResponse(post: Post)
+
+  case class UpsertPost(id: Int, post: Post)
 
   def props(ctx: RequestContext, db: DefaultDB): Props = {
     Props(new PostsWorker(ctx, db))
@@ -33,7 +35,6 @@ class PostsWorker(ctx: RequestContext, db: DefaultDB) extends ApiWorker(ctx) {
 
   def receive: Receive = {
     case ListAction() =>
-      log.info(s"Listing posts.")
       postsAccessor.listItems.onComplete {
         case Success(list) =>
           ok(ListActionResponse(list))
@@ -43,7 +44,6 @@ class PostsWorker(ctx: RequestContext, db: DefaultDB) extends ApiWorker(ctx) {
 
     case FetchDocument(id) =>
       val query = BSONDocument("id" -> id)
-      log.info(s"Fetching post $id.")
       postsAccessor.getItem(query).onComplete {
         case Success(maybeDocument) =>
           maybeDocument match {
@@ -52,6 +52,18 @@ class PostsWorker(ctx: RequestContext, db: DefaultDB) extends ApiWorker(ctx) {
           }
         case Failure(e) =>
           internalError(e)
+      }
+
+    case UpsertPost(id, post) =>
+      val selector = BSONDocument("id" -> id)
+      postsAccessor.upsertItem(selector, post).onComplete {
+        case Success(updateWriteResult) =>
+          if (updateWriteResult.ok) {
+            ok("Updated.")
+          } else {
+            internalError("Write result is not ok.")
+          }
+        case Failure(e) => internalError(e)
       }
     case _ =>
       badRequest("Unknown request sent to PostsWorker.")

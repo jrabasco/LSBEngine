@@ -26,6 +26,8 @@ package object model {
     implicit val postFormat: Formatter[Post] = Macros.handler[Post]
   }
 
+  case class PostForm(id: Int, title: String, summary: String, csrf: String)
+
   case class User(userName: String, password: String, salt: String)
 
   object User {

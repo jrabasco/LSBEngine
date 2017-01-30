@@ -13,6 +13,7 @@ My personal blog code.
 
 The server is configured with environment variables:
 
+- `APP_CONTEXT`: context of the application (`PROD` or `DEV`, default is `DEV`)
 - `SERVER_HOST`: the host on which to bind. Default used is `localhost` which makes it unreachable from the outside
 - `PUBLIC_PORT`: the port for the public api (default `8080`)
 - `ADMIN_PORT`: the port for the admin api (default `9090`)

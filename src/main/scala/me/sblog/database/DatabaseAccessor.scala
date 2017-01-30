@@ -7,10 +7,6 @@ import reactivemongo.bson.{BSONDocument, BSONDocumentReader}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object DatabaseAccessor {
-  val postsCollectionName = "posts"
-}
-
 class DatabaseAccessor[T](db: DefaultDB, collectionName: String) {
 
   def getCollection: BSONCollection = db[BSONCollection](collectionName)

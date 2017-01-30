@@ -1,9 +1,10 @@
-package me.sblog.api
+package me.sblog.api.public
 
 import akka.actor.Props
-import me.sblog.api.PostsWorker.{FetchDocument, FetchPostResponse, ListAction, ListActionResponse}
+import me.sblog.api.ApiWorker
+import me.sblog.api.public.PostsWorker.{FetchDocument, FetchPostResponse, ListAction, ListActionResponse}
 import me.sblog.database.DatabaseAccessor
-import me.sblog.database.model.Post
+import me.sblog.database.model.{MongoCollections, Post}
 import reactivemongo.api.DefaultDB
 import reactivemongo.bson.BSONDocument
 import spray.routing.RequestContext
@@ -28,7 +29,7 @@ object PostsWorker {
 }
 
 class PostsWorker(ctx: RequestContext, db: DefaultDB) extends ApiWorker(ctx) {
-  val postsAccessor = new DatabaseAccessor[Post](db, DatabaseAccessor.postsCollectionName)
+  val postsAccessor = new DatabaseAccessor[Post](db, MongoCollections.postsCollectionName)
 
   def receive: Receive = {
     case ListAction() =>

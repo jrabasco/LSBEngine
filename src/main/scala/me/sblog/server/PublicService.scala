@@ -2,9 +2,8 @@ package me.sblog.server
 
 import akka.actor.Props
 import me.sblog.database.DatabaseAccessor
-import me.sblog.database.model.Post
+import me.sblog.database.model.{MongoCollections, Post}
 import reactivemongo.api.MongoConnection
-import spray.http.StatusCodes._
 import spray.httpx.PlayTwirlSupport._
 import spray.routing.{RequestContext, Route}
 
@@ -31,13 +30,13 @@ class PublicService(dbConnection: MongoConnection, dbName: String) extends Serve
 
   def index(reqContext: RequestContext): Unit = {
     handleWithDb(reqContext) {
-      (db, ctx) =>
-        val postsAccessor = new DatabaseAccessor[Post](db, DatabaseAccessor.postsCollectionName)
+      db =>
+        val postsAccessor = new DatabaseAccessor[Post](db, MongoCollections.postsCollectionName)
         postsAccessor.listItems.onComplete {
           case Success(list) =>
-            ctx.complete(html.index.render(list))
+            reqContext.complete(html.index.render(list))
           case Failure(e) =>
-            ctx.complete(html.index.render(List()))
+            reqContext.complete(html.index.render(List()))
         }
     }
   }

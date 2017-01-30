@@ -1,24 +1,25 @@
-package server
+package me.sblog.server
 
 import akka.actor.Props
-import reactivemongo.api.DefaultDB
+import reactivemongo.api.MongoConnection
 import spray.http.StatusCodes.NotImplemented
+import spray.routing.Route
 
 object AdminService {
-  def props(db: DefaultDB): Props =
-    Props(new AdminService(db))
+  def props(dbConnection: MongoConnection, dbName: String): Props =
+    Props(new AdminService(dbConnection, dbName))
 }
 
-class AdminService(db: DefaultDB) extends ServerService(db) {
+class AdminService(dbConnection: MongoConnection, dbName: String) extends ServerService(dbConnection, dbName) {
 
-  override val routes =
+  override val routes: Route =
     path("token") {
       get {
         complete(NotImplemented, "Cannot get a token yet.")
       }
     }
 
-  override def getInfo = {
+  override def getInfo: Map[String, Any] = {
     super.getInfo + ("apiScope" -> "admin")
   }
 

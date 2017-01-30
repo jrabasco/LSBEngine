@@ -1,9 +1,9 @@
-package api
+package me.sblog.api
 
 import akka.actor.Props
-import api.DocumentsWorker.{FetchDocument, FetchDocumentResponse, ListAction, ListActionResponse}
-import database.DatabaseAccessor
-import database.MongoDBEntities.Document
+import me.sblog.api.DocumentsWorker.{FetchDocument, FetchDocumentResponse, ListAction, ListActionResponse}
+import me.sblog.database.DatabaseAccessor
+import me.sblog.database.MongoDBEntities.Document
 import reactivemongo.api.DefaultDB
 import reactivemongo.bson.BSONDocument
 import spray.routing.RequestContext
@@ -30,7 +30,7 @@ object DocumentsWorker {
 class DocumentsWorker(ctx: RequestContext, db: DefaultDB) extends ApiWorker(ctx) {
   val documentsAccessor = new DatabaseAccessor[Document](db, DatabaseAccessor.documentsCollectionName)
 
-  def receive = {
+  def receive: Receive = {
     case ListAction() =>
       documentsAccessor.listItems.onComplete {
         case Success(list) =>

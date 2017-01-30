@@ -1,4 +1,4 @@
-package server
+package me.sblog.server
 
 import java.util.concurrent.TimeUnit
 
@@ -22,14 +22,12 @@ object Application extends App {
   val mongoHost = ApplicationConfiguration.mongoDBHost
   val mongodbName = ApplicationConfiguration.mongoDBName
   val connection: MongoConnection = driver.connection(List(mongoHost))
-  val db: DefaultDB = connection(mongodbName)
-
   val hostName = ApplicationConfiguration.hostName
   val frontendPort = ApplicationConfiguration.frontendPort
   val adminPort = ApplicationConfiguration.adminPort
 
-  val frontendService = system.actorOf(PublicService.props(db), "frontend-service")
-  val adminService = system.actorOf(AdminService.props(db), "admin-service")
+  val frontendService = system.actorOf(PublicService.props(connection, mongodbName), "public-service")
+  val adminService = system.actorOf(AdminService.props(connection, mongodbName), "admin-service")
 
   DateTimeZone.setDefault(DateTimeZone.forID("UTC"))
 
@@ -52,8 +50,8 @@ object Application extends App {
     println("System is shutting down...")
     IO(Http) ! Http.Unbind(Duration(10, TimeUnit.SECONDS))
     connection.close()
-    driver.system.shutdown()
+    driver.system.terminate()
     driver.close()
-    system.shutdown()
+    system.terminate()
   }
 }

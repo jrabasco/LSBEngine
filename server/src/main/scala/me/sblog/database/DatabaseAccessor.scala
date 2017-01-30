@@ -1,7 +1,7 @@
-package database
+package me.sblog.database
 
 import reactivemongo.api.DefaultDB
-import reactivemongo.api.collections.default.BSONCollection
+import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.bson.{BSONDocument, BSONDocumentReader}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -16,7 +16,7 @@ class DatabaseAccessor[T](db: DefaultDB, collectionName: String) {
   def getCollection: BSONCollection = db[BSONCollection](collectionName)
 
   def getItems(query: BSONDocument)(implicit reader: BSONDocumentReader[T]): Future[List[T]] = {
-    getCollection.find(query).cursor[T].collect[List]()
+    getCollection.find(query).cursor[T]().collect[List]()
   }
 
   def getItem(query: BSONDocument)(implicit reader: BSONDocumentReader[T]): Future[Option[T]] = {

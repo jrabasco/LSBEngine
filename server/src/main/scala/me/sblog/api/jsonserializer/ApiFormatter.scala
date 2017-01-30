@@ -1,4 +1,4 @@
-package api.jsonserializer
+package me.sblog.api.jsonserializer
 
 import org.json4s.ext.JodaTimeSerializers
 import org.json4s.{DefaultFormats, Formats}

@@ -48,7 +48,7 @@ libraryDependencies ++= {
 }
 
 lazy val `sblog` = project.in(file(".")).
-  enablePlugins(BuildInfoPlugin).
+  enablePlugins(BuildInfoPlugin, SbtTwirl).
   settings(
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
     buildInfoPackage := "me.sblog.server"
@@ -63,6 +63,13 @@ buildInfoKeys ++= Seq[BuildInfoKey](
     Process("git rev-parse HEAD").lines.head
   }
 )
+
+lazy val sass = taskKey[Unit]("Compiles the css")
+
+sass := {
+  println("Compiling css...")
+  "sass src/main/resources/scss/styles.scss src/main/resources/css/styles.css" !
+}
 
 resolvers ++= Seq("spray" at "http://repo.spray.io/")
 
@@ -83,3 +90,5 @@ test in assembly := {}
 
 parallelExecution in Test := false
 Revolver.settings
+
+compile in Compile := ((compile in Compile) dependsOn sass).value

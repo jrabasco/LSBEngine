@@ -3,7 +3,7 @@ package me.sblog.api
 import akka.actor.Props
 import me.sblog.api.PostsWorker.{FetchDocument, FetchPostResponse, ListAction, ListActionResponse}
 import me.sblog.database.DatabaseAccessor
-import me.sblog.database.MongoDBEntities.Post
+import me.sblog.database.model.Post
 import reactivemongo.api.DefaultDB
 import reactivemongo.bson.BSONDocument
 import spray.routing.RequestContext

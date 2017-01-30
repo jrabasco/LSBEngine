@@ -47,18 +47,18 @@ abstract class ServerService(dbConnection: MongoConnection, dbName: String) exte
       }
     }
 
-  def listDocuments(ctx: RequestContext): Unit = {
+  def listDocuments(reqContext: RequestContext): Unit = {
     log.info(s"[$apiScope] Listing posts.")
-    handleWithDb(ctx) {
+    handleWithDb(reqContext) {
       (db, ctx) =>
         val documentsWorker = context.actorOf(PostsWorker.props(ctx, db))
         documentsWorker ! ListAction()
     }
   }
 
-  def fetchDocument(ctx: RequestContext, id: Int): Unit = {
+  def fetchDocument(reqContext: RequestContext, id: Int): Unit = {
     log.info(s"[$apiScope] Fetching post $id.")
-    handleWithDb(ctx) {
+    handleWithDb(reqContext) {
       (db, ctx) =>
         val documentsWorker = context.actorOf(PostsWorker.props(ctx, db))
         documentsWorker ! FetchDocument(id)
@@ -72,7 +72,7 @@ abstract class ServerService(dbConnection: MongoConnection, dbName: String) exte
     BuildInfo.toMap + ("repositoryLink" -> ApplicationConfiguration.repositoryLink) + ("apiScope" -> apiScope)
   }
 
-  private def handleWithDb(ctx: RequestContext)(handler: (DefaultDB, RequestContext) => Unit): Unit = {
+  protected def handleWithDb(ctx: RequestContext)(handler: (DefaultDB, RequestContext) => Unit): Unit = {
     withDb(dbConnection, dbName) {
       db =>
         handler(db, ctx)

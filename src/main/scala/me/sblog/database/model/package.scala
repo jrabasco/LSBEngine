@@ -2,7 +2,7 @@ package me.sblog.database
 
 import reactivemongo.bson.{BSONDocument, BSONDocumentReader, BSONDocumentWriter, BSONHandler, Macros}
 
-object MongoDBEntities {
+package object model {
 
   case class Post(id: Int, title: String, summary: String)
 

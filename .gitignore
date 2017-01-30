@@ -51,3 +51,8 @@ Session.vim
 *~
 # auto-generated tag files
 tags
+
+# Sass
+*.sass-cache*
+# generated css
+src/main/resources/css/*

@@ -1,0 +1,20 @@
+@import me.sblog.database.model.Post
+@(posts: List[Post])
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="css/styles.css">
+  <title>Jrabasco's Blog</title>
+</head>
+<body>
+<h1>
+  This is the beginning...
+</h1>
+  <ul>
+    @for(p <- posts) {
+      <li><h3>@p.title</h3> @p.summary</li>
+    }
+  </ul>
+</body>
+</html>

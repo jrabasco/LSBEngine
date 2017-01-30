@@ -1,0 +1,50 @@
+<configuration>
+    <appender name="errorLog" class="ch.qos.logback.core.FileAppender">
+        <append>false</append>
+        <file>logs/errorLog.log</file>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <encoder>
+            <pattern>%date{ISO8601} %level %logger [%file:%line] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="errorInfoLog" class="ch.qos.logback.core.FileAppender">
+        <append>false</append>
+        <file>logs/errorInfo.log</file>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <encoder>
+            <pattern>%date{ISO8601} %level %logger [%file:%line] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="completeLog" class="ch.qos.logback.core.FileAppender">
+        <append>false</append>
+        <file>logs/completeLog.log</file>
+        <encoder>
+            <pattern>%date{ISO8601} %level %logger [%file:%line] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+
+    <!-- AsyncAppender logs ILoggingEvents asynchronously. It acts solely as an event dispatcher and must therefore
+         reference another appender in order to do anything useful. It uses a queue, parameters can be set. Look at the doc -->
+    <appender name="asyncErrors" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="errorLog"/>
+    </appender>
+    <appender name="asyncErrorsInfo" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="errorInfoLog"/>
+    </appender>
+    <appender name="asyncErrorsInfoDebug" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="completeLog"/>
+    </appender>
+
+    <root level="debug">
+        <appender-ref ref="errorLog"/>
+        <appender-ref ref="errorInfoLog"/>
+        <appender-ref ref="completeLog"/>
+    </root>
+</configuration>

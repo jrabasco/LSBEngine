@@ -19,6 +19,7 @@ libraryDependencies ++= {
   val sprayJsonV = "1.3.2"
   val nscalaTimeV = "2.14.0"
   val slf4jV = "1.7.21"
+  val logbackV = "1.1.7"
 
   Seq(
     "org.reactivemongo" %% "reactivemongo" % reactiveMongoV,
@@ -39,7 +40,10 @@ libraryDependencies ++= {
     "org.json4s" %% "json4s-jackson" % json4sV,
     "org.json4s" %% "json4s-ext" % json4sV,
     "org.slf4j" % "slf4j-api" % slf4jV,
-    "org.scala-lang" % "scala-reflect" % scalaVersion.value
+    "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+    "ch.qos.logback" % "logback-core" % logbackV,
+    "ch.qos.logback" % "logback-classic" % logbackV,
+    "net.logstash.logback" % "logstash-logback-encoder" % "4.7"
   )
 }
 
@@ -69,6 +73,9 @@ resolvers ++= Seq("Sonatype Snapshots" at "https://oss.sonatype.org/content/repo
 resolvers ++= Seq("Typesafe repository releases" at "http://repo.typesafe.com/typesafe/releases/")
 
 resolvers ++= Seq("slf4j on Maven" at "https://mvnrepository.com/artifact/org.slf4j/slf4j-api")
+resolvers ++= Seq("logback-core on Maven" at "https://mvnrepository.com/artifact/ch.qos.logback/logback-core")
+resolvers ++= Seq("logback-classic on Maven" at "https://mvnrepository.com/artifact/ch.qos.logback/logback-classic")
+resolvers ++= Seq("Logback logstash interface" at "https://mvnrepository.com/artifact/net.logstash.logback/logstash-logback-encoder")
 
 assemblyJarName in assembly := "sblog.jar"
 

@@ -1,8 +1,8 @@
 package me.sblog.server
 
 import akka.actor.{Actor, ActorLogging, ActorRefFactory}
-import me.sblog.api.DocumentsWorker
-import me.sblog.api.DocumentsWorker.{FetchDocument, ListAction}
+import me.sblog.api.PostsWorker
+import me.sblog.api.PostsWorker.{FetchDocument, ListAction}
 import me.sblog.database.withDb
 import org.json4s.{DefaultFormats, Formats}
 import reactivemongo.api.{DefaultDB, MongoConnection}
@@ -34,50 +34,51 @@ abstract class ServerService(dbConnection: MongoConnection, dbName: String) exte
       get {
         complete(getInfo)
       }
-    } ~ pathPrefix("documents") {
+    } ~ pathPrefix("posts") {
       path("list") {
         get {
           ctx => listDocuments(ctx)
         }
-      } ~
-        path(IntNumber) {
-          id =>
-            get {
-              ctx => fetchDocument(ctx, id)
-            }
-        }
+      } ~ path(IntNumber) {
+        id =>
+          get {
+            ctx => fetchDocument(ctx, id)
+          }
+      }
     }
 
   def listDocuments(ctx: RequestContext): Unit = {
-    handleWithDb {
+    log.info(s"[$apiScope] Listing posts.")
+    handleWithDb(ctx) {
       (db, ctx) =>
-        val documentsWorker = context.actorOf(DocumentsWorker.props(ctx, db))
+        val documentsWorker = context.actorOf(PostsWorker.props(ctx, db))
         documentsWorker ! ListAction()
     }
   }
 
   def fetchDocument(ctx: RequestContext, id: Int): Unit = {
-    handleWithDb {
+    log.info(s"[$apiScope] Fetching post $id.")
+    handleWithDb(ctx) {
       (db, ctx) =>
-        val documentsWorker = context.actorOf(DocumentsWorker.props(ctx, db))
+        val documentsWorker = context.actorOf(PostsWorker.props(ctx, db))
         documentsWorker ! FetchDocument(id)
     }
   }
 
   val routes: Route
+  val apiScope: String
 
   def getInfo: Map[String, Any] = {
-    BuildInfo.toMap + ("repositoryLink" -> ApplicationConfiguration.repositoryLink)
+    BuildInfo.toMap + ("repositoryLink" -> ApplicationConfiguration.repositoryLink) + ("apiScope" -> apiScope)
   }
 
-  private def handleWithDb(handler: (DefaultDB, RequestContext) => Unit): Route = {
-    ctx =>
-      withDb(dbConnection, dbName) {
-        db =>
-          handler(db, ctx)
-      } {
-        e =>
-          complete(InternalServerError, s"${e.getMessage}")
-      }
+  private def handleWithDb(ctx: RequestContext)(handler: (DefaultDB, RequestContext) => Unit): Unit = {
+    withDb(dbConnection, dbName) {
+      db =>
+        handler(db, ctx)
+    } {
+      e =>
+        complete(InternalServerError, s"${e.getMessage}")
+    }
   }
 }

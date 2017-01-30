@@ -4,12 +4,12 @@ import reactivemongo.bson.{BSONDocument, BSONDocumentReader, BSONDocumentWriter,
 
 object MongoDBEntities {
 
-  case class Document(id: Int, title: String, summary: String)
+  case class Post(id: Int, title: String, summary: String)
 
-  object Document {
+  object Post {
     type Formatter[T] = BSONDocumentReader[T] with BSONDocumentWriter[T] with BSONHandler[BSONDocument, T]
 
-    implicit val documentFormat: Formatter[Document] = Macros.handler[Document]
+    implicit val documentFormat: Formatter[Post] = Macros.handler[Post]
   }
 
 }

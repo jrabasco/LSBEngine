@@ -23,7 +23,7 @@ object Application extends App {
   val mongodbName = ApplicationConfiguration.mongoDBName
   val connection: MongoConnection = driver.connection(List(mongoHost))
   val hostName = ApplicationConfiguration.hostName
-  val frontendPort = ApplicationConfiguration.frontendPort
+  val frontendPort = ApplicationConfiguration.publicPort
   val adminPort = ApplicationConfiguration.adminPort
 
   val frontendService = system.actorOf(PublicService.props(connection, mongodbName), "public-service")

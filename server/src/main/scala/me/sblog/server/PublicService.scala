@@ -19,8 +19,6 @@ class PublicService(dbConnection: MongoConnection, dbName: String) extends Serve
       }
     }
 
-  override def getInfo: Map[String, Any] = {
-    super.getInfo + ("apiScope" -> "public")
-  }
+  override val apiScope: String = "public"
 
 }

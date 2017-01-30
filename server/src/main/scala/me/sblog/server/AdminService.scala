@@ -19,8 +19,6 @@ class AdminService(dbConnection: MongoConnection, dbName: String) extends Server
       }
     }
 
-  override def getInfo: Map[String, Any] = {
-    super.getInfo + ("apiScope" -> "admin")
-  }
+  override val apiScope: String = "admin"
 
 }

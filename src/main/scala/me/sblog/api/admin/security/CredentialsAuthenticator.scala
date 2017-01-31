@@ -43,9 +43,8 @@ trait CredentialsAuthenticator {
               usersAccessor.getItem(selector).map {
                 maybeUser =>
                   maybeUser.fold {
-                    //Does not give away that the username is invalid, update with appropriate time once number of
-                    // iterations is decided on
-                    Thread.sleep(1000)
+                    //Does not give away that the username is invalid because of timing
+                    isPasswordValid(userPass.pass, userPass.pass, userPass.pass)
                     noneUser
                   } {
                     user =>

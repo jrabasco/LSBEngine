@@ -7,7 +7,8 @@ import me.sblog.database.model.Token
 
 object TokenGenerator {
   def generateToken(userName: String): Token = {
-    val random = new SecureRandom()
+    val random = SecureRandom.getInstance("SHA1PRNG", "SUN")
+    random.nextBytes(new Array[Byte](32))
     val tokenIdBytes = new Array[Byte](64)
     val csrfBytes = new Array[Byte](64)
     random.nextBytes(tokenIdBytes)

@@ -20,10 +20,6 @@ class PublicService(dbConnection: MongoConnection, dbName: String) extends Serve
   override val routes: Route =
     pathSingleSlash {
       ctx => index(ctx)
-    } ~ pathPrefix("css") {
-      get {
-        getFromResourceDirectory("css")
-      }
     }
 
   override val apiScope: String = "public"

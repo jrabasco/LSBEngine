@@ -6,10 +6,12 @@ import me.sblog.api.admin.security._
 import me.sblog.api.public.PostsWorker
 import me.sblog.api.public.PostsWorker.UpsertPost
 import me.sblog.database.model.{Post, PostForm, Token}
+import me.sblog.api.admin.security.cookieName
+import spray.httpx.PlayTwirlSupport._
 import reactivemongo.api.MongoConnection
 import spray.http.HttpCookie
 import spray.http.StatusCodes._
-import spray.routing.{RequestContext, Route}
+import spray.routing._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
@@ -27,6 +29,13 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String)
   override val apiScope: String = "admin"
 
   override val routes: Route =
+    pathSingleSlash {
+      handleRejections(loginRejectionHandler) {
+        authenticate(cookieAuthenticator) {
+          token => complete(html.adminhome.render(token))
+        }
+      }
+    } ~
     pathPrefix("api") {
       path("token") {
         authenticate(basicUserAuthenticator) { user =>
@@ -51,7 +60,7 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String)
                       content = newToken.tokenId,
                       expires = expires,
                       maxAge = maxAge,
-                      path = Some("/api"),
+                      path = Some("/"),
                       secure = secure,
                       httpOnly = true)
                     setCookie(cookie) {
@@ -112,6 +121,15 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String)
         }
       }
     }
+
+  def loginRejectionHandler: RejectionHandler = RejectionHandler {
+    case MissingCookieRejection(providedName) :: _ if providedName == cookieName =>
+      complete(html.adminlogin.render())
+    case ValidationRejection(reason, _) :: _ if reason == "No token." || reason == "Invalid token." =>
+      deleteCookie(cookieName) {
+        complete(html.adminlogin.render())
+      }
+  } orElse RejectionHandler.Default
 
   def tokenRefresh(token: Token): Token = {
     val now = DateTime.now

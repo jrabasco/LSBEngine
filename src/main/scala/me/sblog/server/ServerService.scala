@@ -45,6 +45,10 @@ abstract class ServerService(dbConnection: MongoConnection, dbName: String) exte
             ctx => fetchPost(ctx, id)
           }
       }
+    } ~ pathPrefix("css") {
+      get {
+        getFromResourceDirectory("css")
+      }
     }
 
   def listPosts(reqContext: RequestContext): Unit = {

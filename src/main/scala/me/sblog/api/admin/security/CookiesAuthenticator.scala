@@ -4,9 +4,8 @@ import com.github.nscala_time.time.Imports._
 import me.sblog.database.model.Token
 import reactivemongo.api.MongoConnection
 import spray.http.HttpCookie
-import spray.routing.AuthenticationFailedRejection
-import spray.routing.AuthenticationFailedRejection.{CredentialsMissing, CredentialsRejected}
 import spray.routing.authentication.{Authentication, ContextAuthenticator}
+import spray.routing.{MissingCookieRejection, ValidationRejection}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -22,7 +21,7 @@ trait CookiesAuthenticator {
   def cookieAuthenticator(implicit ec: ExecutionContext): ContextAuthenticator[Token] = ctx => {
     val cookies = ctx.request.cookies
     val maybeAuthCookie = cookies.find(_.name == cookieName)
-    val futureCredMissingRejection: Future[Authentication[Token]] = Future(Left(AuthenticationFailedRejection(CredentialsMissing, List())))
+    val futureCredMissingRejection: Future[Authentication[Token]] = Future(Left(MissingCookieRejection(cookieName)))
     maybeAuthCookie.fold(futureCredMissingRejection) {
       authCookie: HttpCookie =>
         val tokenId = authCookie.content
@@ -31,13 +30,12 @@ trait CookiesAuthenticator {
             val tokensAccessor = new TokensAccessor(db)
             tokensAccessor.getTokenWithId(tokenId).map {
               maybeToken =>
-                val rejection = Left(AuthenticationFailedRejection(CredentialsRejected, List()))
-                maybeToken.fold[Authentication[Token]](rejection) {
+                maybeToken.fold[Authentication[Token]](Left(ValidationRejection("No token."))) {
                   token =>
                     if (isTokenValid(token)) {
                       Right(token)
                     } else {
-                      rejection
+                      Left(ValidationRejection("Invalid token."))
                     }
                 }
             }

@@ -1,0 +1,15 @@
+@import me.sblog.database.model.Token
+@(token: Token)
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="css/styles.css">
+        <title>Jrabasco's Blog</title>
+    </head>
+    <body>
+        <h1>
+            You are logged in, @token.userName.
+        </h1>
+    </body>
+</html>

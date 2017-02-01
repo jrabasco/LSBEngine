@@ -3,18 +3,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <link rel="stylesheet" href="css/styles.css">
-  <title>Jrabasco's Blog</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/styles.css">
+    <title>Jrabasco's Blog</title>
 </head>
-<body>
-<h1>
-  This is the beginning...
-</h1>
-  <ul class="posts">
-    @for(p <- posts) {
-      <li><h3>@p.title</h3> @p.summary</li>
-    }
-  </ul>
-</body>
+    <body><div class="page-wrap">
+    @html.header.render()
+        <h2>
+          This is the beginning...
+        </h2>
+        <ul class="posts">
+            @for(p <- posts) {
+                <li><h3>@p.title</h3> @p.summary</li>
+            }
+        </ul>
+    </div></body>
+    @html.footer.render()
 </html>

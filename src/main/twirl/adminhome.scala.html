@@ -1,15 +1,21 @@
 @import me.sblog.database.model.Token
+@import me.sblog.server.ApplicationConfiguration
 @(token: Token)
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8">
         <link rel="stylesheet" href="css/styles.css">
+        <script src="js/@if(ApplicationConfiguration.appContext == "DEV") {jquery-3.1.1.js} else {jquery-3.1.1.min.js}"></script>
+        <script src="js/logout.js"></script>
         <title>Jrabasco's Blog</title>
     </head>
-    <body>
-        <h1>
+    <body><div class="page-wrap">
+    @html.header.render()
+        <h2>
             You are logged in, @token.userName.
-        </h1>
-    </body>
+        </h2>
+        <input type="button" onclick="doLogout()" value="Logout"/>
+    </div></body>
+    @html.footer.render()
 </html>

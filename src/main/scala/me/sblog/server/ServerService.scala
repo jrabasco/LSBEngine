@@ -49,6 +49,10 @@ abstract class ServerService(dbConnection: MongoConnection, dbName: String) exte
       get {
         getFromResourceDirectory("css")
       }
+    } ~ pathPrefix("js") {
+      get {
+        getFromResourceDirectory("js")
+      }
     }
 
   def listPosts(reqContext: RequestContext): Unit = {

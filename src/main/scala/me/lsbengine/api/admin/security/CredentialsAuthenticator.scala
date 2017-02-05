@@ -6,7 +6,7 @@ import me.lsbengine.database.model.{MongoCollections, User}
 import org.json4s.jackson.JsonMethods._
 import org.json4s.{DefaultFormats, Formats}
 import reactivemongo.api.MongoConnection
-import reactivemongo.bson.BSONDocument
+import reactivemongo.bson.{BSONDocument, BSONRegex}
 import spray.routing.AuthenticationFailedRejection
 import spray.routing.AuthenticationFailedRejection.{CredentialsMissing, CredentialsRejected}
 import spray.routing.authentication.{Authentication, ContextAuthenticator}
@@ -47,7 +47,7 @@ trait CredentialsAuthenticator {
         dbConnection.database(dbName).flatMap {
           db =>
             val usersAccessor = new DatabaseAccessor[User](db, MongoCollections.usersCollectionName)
-            val selector = BSONDocument("userName" -> creds.username)
+            val selector = BSONDocument("userName" -> BSONRegex(s"^${creds.username}$$", "i"))
             usersAccessor.getItem(selector).map {
               maybeUser =>
                 maybeUser.fold[Authentication[User]] {

@@ -92,3 +92,4 @@ parallelExecution in Test := false
 Revolver.settings
 
 compile in Compile := ((compile in Compile) dependsOn sass).value
+mainClass in (Compile, run) := Some("me.lsbengine.server.Blog")

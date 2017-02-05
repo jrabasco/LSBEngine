@@ -33,13 +33,25 @@ h2 {
 }
 
 form {
-  border: 1px solid darkcyan;
+  border: 1px solid dodgerblue;
   background-color: lightcyan;
   width: 200px;
   text-align: center;
   display: inline-block;
   padding-bottom: 10px;
   padding-top: 10px;
+  input {
+    margin-bottom: 5px;
+  }
+}
+
+input[type=button] {
+  background-color: dodgerblue;
+  color: lightcyan;
+  border: 0;
+  border-radius: 5px;
+  font-size: 16px;
+  padding: 5px 10px;
 }
 
 .page-wrap {
@@ -58,9 +70,33 @@ form {
 
 .site-footer {
   background: lightcyan;
+  hr {
+    border: 1px solid dodgerblue;
+  }
 }
 
 .posts {
   list-style-type: none;
   padding: 0;
+}
+
+.loader {
+  border: 8px solid lightgray;
+  border-top: 8px solid dodgerblue;
+  border-bottom: 8px solid cornflowerblue;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  margin: 0 auto;
+  animation: spin 0.5s linear infinite;
+  display: none;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }

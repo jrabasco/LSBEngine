@@ -4,10 +4,12 @@ import java.security.SecureRandom
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 
+import me.lsbengine.server.BlogConfiguration
+
 object PasswordHasher {
   private val keyLength = 512
   // Needs to be tested on the final hardware
-  private val defaultIterations = 300000
+  private val defaultIterations = BlogConfiguration.hashIterations
 
   def hashPassword(password: Array[Char], salt: Array[Byte], iterations: Int): Array[Byte] = {
     val skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512")

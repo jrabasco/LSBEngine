@@ -1,11 +1,12 @@
 @import me.lsbengine.database.model.Post
+@import me.lsbengine.server.BlogConfiguration
 @(posts: List[Post])
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="css/styles.css">
-    <title>Jrabasco's Blog</title>
+    <title>@Html(BlogConfiguration.blogOwner)'s Blog</title>
 </head>
     <body><div class="page-wrap">
     @html.header.render()

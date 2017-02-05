@@ -21,6 +21,25 @@ The server is configured with environment variables:
 - `MONGO_HOST`: host for the mongo database (default `localhost`)
 - `MONGO_PORT`: port of the mongo database (default `27017`)
 - `MONGO_NAME`: name of the database (default `lsbengine`)
+- `HASH_ITERATIONS`: number of iterations when hashing the password (default `300000`, should be high enough so that it 
+takes around 1 second to perform a hash)
+- `BLOG_OWNER`: name of the owner of the blog (default `Jérémy Rabasco`)
+- `CONTACT_ADDRESS`: email for the footer (default `rabasco.jeremy@gmail.com`)
+
+## Adding/Removing users
+
+To add a user run:
+
+```
+$ sbt run-main me.lsbengine.bin.UserManager add <username> <password>
+```
+
+To remove a user run:
+```
+$ sbt run-main me.lsbengine.bin.UserManager remove <username>
+```
+
+The usernames are case insensitive.
 
 ## Running
 

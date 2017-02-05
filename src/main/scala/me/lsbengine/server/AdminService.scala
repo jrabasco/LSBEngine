@@ -53,7 +53,7 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String)
                           TokenGenerator.generateToken(user.userName)
                       }
                       tokensAccessor.storeToken(newToken)
-                      val secure = ApplicationConfiguration.appContext == "PROD"
+                      val secure = BlogConfiguration.appContext == "PROD"
                       val expires = Some(spray.http.DateTime(newToken.expiry.getMillis))
                       val maxAge = Some(2L * 7 * 24 * 60 * 60 * 1000)
                       val cookie = HttpCookie(cookieName,

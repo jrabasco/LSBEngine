@@ -31,4 +31,9 @@ class TokensAccessor(db: DefaultDB) {
     val selector = BSONDocument("tokenId" -> tokenId)
     tokensCollection.remove(selector, WriteConcern.Acknowledged)
   }
+
+  def removeTokenWithUserName(userName: String): Future[WriteResult] = {
+    val selector = BSONDocument("userName" -> userName)
+    tokensCollection.remove(selector, WriteConcern.Acknowledged)
+  }
 }

@@ -13,25 +13,25 @@ import sun.misc.{Signal, SignalHandler}
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.Duration
 
-object Application extends App {
+object Blog extends App {
   implicit val system = ActorSystem("server")
   implicit val context = ExecutionContext.Implicits.global
   val conf = ConfigFactory.load()
 
   val driver = new MongoDriver
-  val mongoHost = ApplicationConfiguration.mongoDBHost
-  val mongodbName = ApplicationConfiguration.mongoDBName
+  val mongoHost = BlogConfiguration.mongoDBHost
+  val mongodbName = BlogConfiguration.mongoDBName
   val connection: MongoConnection = driver.connection(List(mongoHost))
-  val hostName = ApplicationConfiguration.hostName
-  val frontendPort = ApplicationConfiguration.publicPort
-  val adminPort = ApplicationConfiguration.adminPort
+  val hostName = BlogConfiguration.hostName
+  val publicPort = BlogConfiguration.publicPort
+  val adminPort = BlogConfiguration.adminPort
 
   val frontendService = system.actorOf(PublicService.props(connection, mongodbName), "public-service")
   val adminService = system.actorOf(AdminService.props(connection, mongodbName), "admin-service")
 
   DateTimeZone.setDefault(DateTimeZone.forID("UTC"))
 
-  IO(Http) ! Http.Bind(frontendService, interface = hostName, port = frontendPort)
+  IO(Http) ! Http.Bind(frontendService, interface = hostName, port = publicPort)
   IO(Http) ! Http.Bind(adminService, interface = hostName, port = adminPort)
 
   Signal.handle(new Signal("INT"), new SignalHandler() {

@@ -1,13 +1,13 @@
-@import me.lsbengine.server.ApplicationConfiguration
+@import me.lsbengine.server.BlogConfiguration
 @()
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8">
         <link rel="stylesheet" href="css/styles.css">
-        <script src="js/@if(ApplicationConfiguration.appContext == "DEV") {jquery-3.1.1.js} else {jquery-3.1.1.min.js}"></script>
+        <script src="js/@if(BlogConfiguration.appContext == "DEV") {jquery-3.1.1.js} else {jquery-3.1.1.min.js}"></script>
         <script src="js/login.js"></script>
-        <title>Jrabasco's Blog</title>
+        <title>@Html(BlogConfiguration.blogOwner)'s Blog</title>
     </head>
     <body><div class="page-wrap">
     @html.header.render()
@@ -15,9 +15,10 @@
         <form name="login">
             Username:&nbsp;<input type="text" name="username"/><br>
             Password:&nbsp;<input type="password" name="password"/><br>
-            <input type="button" onclick="doLogin(this.form)" value="Login"/>
-            <input type="reset" value="Cancel"/>
+            <input type="button" onclick="doLogin()" value="Login"/>
+            <input type="button" value="Reset"/>
         </form>
+        <div class="loader"></div>
     </div></body>
     @html.footer.render()
 </html>

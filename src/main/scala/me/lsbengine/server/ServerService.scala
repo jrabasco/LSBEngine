@@ -86,6 +86,6 @@ abstract class ServerService(dbConnection: MongoConnection, dbName: String) exte
   val apiScope: String
 
   def getInfo: Map[String, Any] = {
-    BuildInfo.toMap + ("repositoryLink" -> ApplicationConfiguration.repositoryLink) + ("apiScope" -> apiScope)
+    BuildInfo.toMap + ("repositoryLink" -> BlogConfiguration.repositoryLink) + ("apiScope" -> apiScope)
   }
 }

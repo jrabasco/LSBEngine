@@ -1,9 +1,9 @@
-package me.sblog.api.admin.security
+package me.lsbengine.api.admin.security
 
 import java.security.SecureRandom
 
 import com.github.nscala_time.time.Imports._
-import me.sblog.database.model.Token
+import me.lsbengine.database.model.Token
 
 object TokenGenerator {
   def generateToken(userName: String): Token = {

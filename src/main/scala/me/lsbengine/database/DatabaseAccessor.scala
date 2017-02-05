@@ -1,4 +1,4 @@
-package me.sblog.database
+package me.lsbengine.database
 
 import reactivemongo.api.DefaultDB
 import reactivemongo.api.collections.bson.BSONCollection

@@ -20,7 +20,7 @@ The server is configured with environment variables:
 - `REPOSITORY_LINK`: link given in the `server/info` route (default `https://github.com/jrabasco/SBlog`)
 - `MONGO_HOST`: host for the mongo database (default `localhost`)
 - `MONGO_PORT`: port of the mongo database (default `27017`)
-- `MONGO_NAME`: name of the database (default `sblog`)
+- `MONGO_NAME`: name of the database (default `lsbengine`)
 
 ## Running
 

@@ -1,4 +1,4 @@
-package me.sblog.api.admin
+package me.lsbengine.api.admin
 
 import java.util.Base64
 

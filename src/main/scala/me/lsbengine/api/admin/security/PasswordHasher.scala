@@ -1,4 +1,4 @@
-package me.sblog.api.admin.security
+package me.lsbengine.api.admin.security
 
 import java.security.SecureRandom
 import javax.crypto.SecretKeyFactory

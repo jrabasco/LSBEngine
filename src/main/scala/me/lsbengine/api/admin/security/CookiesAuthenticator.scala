@@ -1,7 +1,7 @@
-package me.sblog.api.admin.security
+package me.lsbengine.api.admin.security
 
 import com.github.nscala_time.time.Imports._
-import me.sblog.database.model.Token
+import me.lsbengine.database.model.Token
 import reactivemongo.api.MongoConnection
 import spray.http.HttpCookie
 import spray.routing.authentication.{Authentication, ContextAuthenticator}

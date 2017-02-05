@@ -1,8 +1,8 @@
-package me.sblog.api.admin.security
+package me.lsbengine.api.admin.security
 
-import me.sblog.api.admin.security.CredentialsAuthenticator.Credentials
-import me.sblog.database.DatabaseAccessor
-import me.sblog.database.model.{MongoCollections, User}
+import me.lsbengine.api.admin.security.CredentialsAuthenticator.Credentials
+import me.lsbengine.database.DatabaseAccessor
+import me.lsbengine.database.model.{MongoCollections, User}
 import org.json4s.jackson.JsonMethods._
 import org.json4s.{DefaultFormats, Formats}
 import reactivemongo.api.MongoConnection

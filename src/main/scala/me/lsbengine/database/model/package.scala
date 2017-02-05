@@ -1,4 +1,4 @@
-package me.sblog.database
+package me.lsbengine.database
 
 import org.joda.time.DateTime
 import reactivemongo.bson.{BSONDateTime, BSONDocument, BSONDocumentReader, BSONDocumentWriter, BSONHandler, Macros}

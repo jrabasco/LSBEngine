@@ -1,8 +1,8 @@
-package me.sblog.server
+package me.lsbengine.server
 
 import akka.actor.{Actor, ActorLogging, ActorRefFactory}
-import me.sblog.api.public.PostsWorker
-import me.sblog.api.public.PostsWorker.{FetchDocument, ListAction}
+import me.lsbengine.api.public.PostsWorker
+import me.lsbengine.api.public.PostsWorker.{FetchDocument, ListAction}
 import org.json4s.{DefaultFormats, Formats}
 import reactivemongo.api.{DefaultDB, MongoConnection}
 import spray.client.pipelining._

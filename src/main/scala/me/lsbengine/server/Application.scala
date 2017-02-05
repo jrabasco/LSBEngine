@@ -1,4 +1,4 @@
-package me.sblog.server
+package me.lsbengine.server
 
 import java.util.concurrent.TimeUnit
 

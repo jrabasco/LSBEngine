@@ -1,11 +1,11 @@
-package me.sblog.server
+package me.lsbengine.server
 
 import akka.actor.Props
 import com.github.nscala_time.time.Imports._
-import me.sblog.api.admin.security.{cookieName, _}
-import me.sblog.api.public.PostsWorker
-import me.sblog.api.public.PostsWorker.UpsertPost
-import me.sblog.database.model.{Post, PostForm, Token}
+import me.lsbengine.api.admin.security.{cookieName, _}
+import me.lsbengine.api.public.PostsWorker
+import me.lsbengine.api.public.PostsWorker.UpsertPost
+import me.lsbengine.database.model.{Post, PostForm, Token}
 import reactivemongo.api.MongoConnection
 import spray.http.HttpCookie
 import spray.http.HttpHeaders._

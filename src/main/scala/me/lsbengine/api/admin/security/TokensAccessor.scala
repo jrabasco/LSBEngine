@@ -1,6 +1,6 @@
-package me.sblog.api.admin.security
+package me.lsbengine.api.admin.security
 
-import me.sblog.database.model.{MongoCollections, Token}
+import me.lsbengine.database.model.{MongoCollections, Token}
 import reactivemongo.api.DefaultDB
 import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.bson.BSONDocument

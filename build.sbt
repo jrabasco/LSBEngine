@@ -1,4 +1,4 @@
-name := "SBlog"
+name := "LSBEngine"
 
 version := "0.0"
 
@@ -47,11 +47,11 @@ libraryDependencies ++= {
   )
 }
 
-lazy val `sblog` = project.in(file(".")).
+lazy val `lsbengine` = project.in(file(".")).
   enablePlugins(BuildInfoPlugin, SbtTwirl).
   settings(
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
-    buildInfoPackage := "me.sblog.server"
+    buildInfoPackage := "me.lsbengine.server"
   )
 
 
@@ -84,7 +84,7 @@ resolvers ++= Seq("logback-core on Maven" at "https://mvnrepository.com/artifact
 resolvers ++= Seq("logback-classic on Maven" at "https://mvnrepository.com/artifact/ch.qos.logback/logback-classic")
 resolvers ++= Seq("Logback logstash interface" at "https://mvnrepository.com/artifact/net.logstash.logback/logstash-logback-encoder")
 
-assemblyJarName in assembly := "sblog.jar"
+assemblyJarName in assembly := "lsbengine.jar"
 
 test in assembly := {}
 

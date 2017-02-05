@@ -1,10 +1,10 @@
-package me.sblog.api.public
+package me.lsbengine.api.public
 
 import akka.actor.Props
-import me.sblog.api.ApiWorker
-import me.sblog.api.public.PostsWorker._
-import me.sblog.database.DatabaseAccessor
-import me.sblog.database.model.{MongoCollections, Post}
+import me.lsbengine.api.ApiWorker
+import me.lsbengine.api.public.PostsWorker._
+import me.lsbengine.database.DatabaseAccessor
+import me.lsbengine.database.model.{MongoCollections, Post}
 import reactivemongo.api.DefaultDB
 import reactivemongo.bson.BSONDocument
 import spray.routing.RequestContext

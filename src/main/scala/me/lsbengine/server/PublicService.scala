@@ -1,8 +1,8 @@
-package me.sblog.server
+package me.lsbengine.server
 
 import akka.actor.Props
-import me.sblog.database.DatabaseAccessor
-import me.sblog.database.model.{MongoCollections, Post}
+import me.lsbengine.database.DatabaseAccessor
+import me.lsbengine.database.model.{MongoCollections, Post}
 import reactivemongo.api.MongoConnection
 import spray.httpx.PlayTwirlSupport._
 import spray.routing.{RequestContext, Route}

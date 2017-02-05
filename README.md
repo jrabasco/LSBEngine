@@ -1,5 +1,5 @@
-# SBlog
-My personal blog code.
+# LSBEngine
+Lovely Scala Blogging Engine provides a basic bloc CMS, all written with love and Scala!
 
 # Usage
 

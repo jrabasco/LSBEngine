@@ -68,7 +68,7 @@ lazy val sass = taskKey[Unit]("Compiles the css")
 
 sass := {
   println("Compiling css...")
-  "sass src/main/resources/scss/styles.scss src/main/resources/css/styles.css" !
+  "./build-sass.sh" !
 }
 
 resolvers ++= Seq("spray" at "http://repo.spray.io/")

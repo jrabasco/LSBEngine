@@ -2,7 +2,7 @@ package me.lsbengine.api.admin.security
 
 import com.github.nscala_time.time.Imports._
 import me.lsbengine.database.model.Token
-import reactivemongo.api.MongoConnection
+import reactivemongo.api.{DefaultDB, MongoConnection}
 import spray.http.HttpCookie
 import spray.routing.authentication.{Authentication, ContextAuthenticator}
 import spray.routing.{MissingCookieRejection, ValidationRejection}
@@ -33,6 +33,7 @@ trait CookiesAuthenticator {
                 maybeToken.fold[Authentication[Token]](Left(ValidationRejection("No token."))) {
                   token =>
                     if (isTokenValid(token)) {
+                      tokenRefresh(token, db)
                       Right(token)
                     } else {
                       Left(ValidationRejection("Invalid token."))
@@ -40,6 +41,15 @@ trait CookiesAuthenticator {
                 }
             }
         }
+    }
+  }
+
+  def tokenRefresh(token: Token, db: DefaultDB): Unit = {
+    val now = DateTime.now
+    if (now + 2.days > token.expiry) {
+      val newToken = TokenGenerator.renewToken(token)
+      val tokensAccessor = new TokensAccessor(db)
+      tokensAccessor.storeToken(newToken)
     }
   }
 }

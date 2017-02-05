@@ -1,0 +1,20 @@
+@import me.lsbengine.server.BlogConfiguration
+@(errorType: String, reason: String)
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="/css/styles.css">
+        <title>@Html(BlogConfiguration.blogOwner)'s Blog</title>
+    </head>
+    <body><div class="page-wrap">
+        @html.header.render()
+        <div class="error">
+            <h2>
+                @errorType
+            </h2>
+            <h3>@reason</h3>
+        </div>
+    </div></body>
+    @html.footer.render()
+</html>

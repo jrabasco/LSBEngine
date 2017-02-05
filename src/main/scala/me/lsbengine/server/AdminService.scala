@@ -35,6 +35,15 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String)
             ctx => index(ctx, token)
         }
       }
+    } ~ pathPrefix("edit") {
+      authenticate(cookieAuthenticator) { token =>
+        path(IntNumber) {
+          id =>
+            get {
+              ctx => edit(ctx, token, id)
+            }
+        }
+      }
     } ~
       pathPrefix("api") {
         path("token") {
@@ -141,15 +150,34 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String)
     context.actorOf(AdminPostsWorker.props(requestContext, database))
   }
 
-  def index(reqContext: RequestContext, token: Token): Unit = {
-    handleWithDb(reqContext) {
+  def index(requestContext: RequestContext, token: Token): Unit = {
+    handleWithDb(requestContext) {
       db =>
         val postsAccessor = new AdminPostsAccessor(db)
         postsAccessor.listPosts.onComplete {
           case Success(list) =>
-            reqContext.complete(html.adminhome.render(token, list))
+            requestContext.complete(html.adminhome.render(token, list))
           case Failure(_) =>
-            reqContext.complete(html.adminhome.render(token, List()))
+            requestContext.complete(html.adminhome.render(token, List()))
+        }
+    }
+  }
+
+  def edit(requestContext: RequestContext, token: Token, id: Int): Unit = {
+    handleWithDb(requestContext) {
+      db =>
+        val postsAccessor = new AdminPostsAccessor(db)
+        postsAccessor.getPost(id).onComplete {
+          case Success(maybePost) =>
+            maybePost match {
+              case Some(post) =>
+                requestContext.complete(html.editpost.render(token, post))
+              case None =>
+                requestContext.complete(NotFound, html.notfound.render(s"Post $id does not exist."))
+            }
+            requestContext.complete(html.adminhome.render(token, List()))
+          case Failure(e) =>
+            requestContext.complete(InternalServerError, html.internalerror.render(s"Failed to retrieve post $id : $e"))
         }
     }
   }

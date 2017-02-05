@@ -1,0 +1,31 @@
+@import me.lsbengine.server.BlogConfiguration
+@import me.lsbengine.database.model.Post
+@import me.lsbengine.database.model.Token
+@import com.github.nscala_time.time.Imports._
+@(token: Token, post: Post)
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="/css/styles.css">
+        <script src="/js/@if(BlogConfiguration.appContext == "DEV") {jquery-3.1.1.js} else {jquery-3.1.1.min.js}"></script>
+        <script src="/js/adminhome.js"></script>
+        <title>@Html(BlogConfiguration.blogOwner)'s Blog</title>
+    </head>
+    <body><div class="page-wrap">
+        @html.header.render()
+    <h3>
+            Logged in as @token.userName.
+    </h3>
+        @defining(DateTimeFormat.forPattern("dd-MM-yyyy' at 'HH:mm:ss' (UTC)'")) { formatter =>
+            <div class="post-summary">
+                <h4>@post.title</h4>
+                @post.summary
+                <div class="date">@post.published.toString(formatter)</div>
+                CSRF: @token.csrf
+            </div>
+        }
+    <input type="button" onclick="doLogout()" value="Logout"/>
+    </div></body>
+    @html.footer.render()
+</html>

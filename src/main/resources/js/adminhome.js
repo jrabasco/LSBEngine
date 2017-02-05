@@ -16,3 +16,8 @@ function doLogout()
         }
     });
 }
+
+function edit(id)
+{
+    console.log("Editing post " + id + ".")
+}

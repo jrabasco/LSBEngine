@@ -1,9 +1,8 @@
 package me.lsbengine.server
 
-import akka.actor.Props
-import me.lsbengine.database.DatabaseAccessor
-import me.lsbengine.database.model.{MongoCollections, Post}
-import reactivemongo.api.MongoConnection
+import akka.actor.{ActorRef, Props}
+import me.lsbengine.api.public.{PublicPostsAccessor, PublicPostsWorker}
+import reactivemongo.api.{DefaultDB, MongoConnection}
 import spray.httpx.PlayTwirlSupport._
 import spray.routing.{RequestContext, Route}
 
@@ -27,14 +26,18 @@ class PublicService(dbConnection: MongoConnection, dbName: String) extends Serve
   def index(reqContext: RequestContext): Unit = {
     handleWithDb(reqContext) {
       db =>
-        val postsAccessor = new DatabaseAccessor[Post](db, MongoCollections.postsCollectionName)
-        postsAccessor.listItems.onComplete {
+        val postsAccessor = new PublicPostsAccessor(db)
+        postsAccessor.listPosts.onComplete {
           case Success(list) =>
             reqContext.complete(html.index.render(list))
-          case Failure(e) =>
+          case Failure(_) =>
             reqContext.complete(html.index.render(List()))
         }
     }
+  }
+
+  override def getPostsWorker(requestContext: RequestContext, database: DefaultDB): ActorRef = {
+    context.actorOf(PublicPostsWorker.props(requestContext, database))
   }
 
 }

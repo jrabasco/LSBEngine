@@ -1,12 +1,11 @@
 package me.lsbengine.server
 
-import akka.actor.Props
-import com.github.nscala_time.time.Imports._
+import akka.actor.{ActorRef, Props}
+import me.lsbengine.api.admin.{AdminPostsAccessor, AdminPostsWorker}
+import me.lsbengine.api.admin.AdminPostsWorker.UpsertPost
 import me.lsbengine.api.admin.security.{cookieName, _}
-import me.lsbengine.api.public.PostsWorker
-import me.lsbengine.api.public.PostsWorker.UpsertPost
 import me.lsbengine.database.model.{Post, PostForm, Token}
-import reactivemongo.api.MongoConnection
+import reactivemongo.api.{DefaultDB, MongoConnection}
 import spray.http.HttpCookie
 import spray.http.HttpHeaders._
 import spray.http.StatusCodes._
@@ -32,7 +31,8 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String)
     pathSingleSlash {
       handleRejections(loginRejectionHandler) {
         authenticate(cookieAuthenticator) {
-          token => complete(html.adminhome.render(token))
+          token =>
+            ctx => index(ctx, token)
         }
       }
     } ~
@@ -48,21 +48,12 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String)
                     case Success(maybeToken) =>
                       val newToken = maybeToken match {
                         case Some(oldToken) =>
-                          tokenRefresh(oldToken)
+                          TokenGenerator.renewToken(oldToken)
                         case None =>
                           TokenGenerator.generateToken(user.userName)
                       }
                       tokensAccessor.storeToken(newToken)
-                      val secure = BlogConfiguration.appContext == "PROD"
-                      val expires = Some(spray.http.DateTime(newToken.expiry.getMillis))
-                      val maxAge = Some(2L * 7 * 24 * 60 * 60 * 1000)
-                      val cookie = HttpCookie(cookieName,
-                        content = newToken.tokenId,
-                        expires = expires,
-                        maxAge = maxAge,
-                        path = Some("/"),
-                        secure = secure,
-                        httpOnly = true)
+                      val cookie = generateCookie(newToken)
                       respondWithHeader(`Access-Control-Allow-Credentials`(true)) {
                         setCookie(cookie) {
                           complete(s"Welcome ${user.userName}.")
@@ -80,15 +71,6 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String)
           authenticate(cookieAuthenticator) { token =>
             log.info(s"[$apiScope] Checking token for user ${token.userName}.")
             get {
-              val now = DateTime.now
-              if (now + 2.days > token.expiry) {
-                val newToken = TokenGenerator.renewToken(token)
-                dbConnection.database(dbName).map {
-                  db =>
-                    val tokensAccessor = new TokensAccessor(db)
-                    tokensAccessor.storeToken(newToken)
-                }
-              }
               complete(s"User ${token.userName} is logged in.")
             }
           }
@@ -112,8 +94,7 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String)
                   entity(as[PostForm]) {
                     postForm =>
                       if (postForm.csrf == token.csrf) {
-                        val post = Post(id = postForm.id, title = postForm.title, summary = postForm.summary)
-                        ctx => upsertPost(ctx, token, id, post)
+                        ctx => upsertPost(ctx, token, id, postForm.post)
                       } else {
                         complete(Forbidden, "CSRF Prevented")
                       }
@@ -124,7 +105,7 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String)
         }
       }
 
-  def loginRejectionHandler: RejectionHandler = RejectionHandler {
+  private def loginRejectionHandler: RejectionHandler = RejectionHandler {
     case MissingCookieRejection(providedName) :: _ if providedName == cookieName =>
       complete(html.adminlogin.render())
     case ValidationRejection(reason, _) :: _ if reason == "No token." || reason == "Invalid token." =>
@@ -133,21 +114,43 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String)
       }
   } orElse RejectionHandler.Default
 
-  def tokenRefresh(token: Token): Token = {
-    val now = DateTime.now
-    if (now + 2.days > token.expiry) {
-      TokenGenerator.renewToken(token)
-    } else {
-      token
-    }
-  }
-
-  def upsertPost(reqContext: RequestContext, token: Token, id: Int, post: Post): Unit = {
+  private def upsertPost(reqContext: RequestContext, token: Token, id: Int, post: Post): Unit = {
     log.info(s"[$apiScope] Upserting post with id $id: $post.")
     handleWithDb(reqContext) {
       db =>
-        val postsWorker = context.actorOf(PostsWorker.props(reqContext, db))
+        val postsWorker = getPostsWorker(reqContext, db)
         postsWorker ! UpsertPost(id, post)
+    }
+  }
+
+  private def generateCookie(newToken: Token): HttpCookie = {
+    val secure = BlogConfiguration.appContext == "PROD"
+    val expires = Some(spray.http.DateTime(newToken.expiry.getMillis))
+    // 2 weeks
+    val maxAge = Some(2L * 7 * 24 * 60 * 60 * 1000)
+    HttpCookie(cookieName,
+      content = newToken.tokenId,
+      expires = expires,
+      maxAge = maxAge,
+      path = Some("/"),
+      secure = secure,
+      httpOnly = true)
+  }
+
+  override def getPostsWorker(requestContext: RequestContext, database: DefaultDB): ActorRef = {
+    context.actorOf(AdminPostsWorker.props(requestContext, database))
+  }
+
+  def index(reqContext: RequestContext, token: Token): Unit = {
+    handleWithDb(reqContext) {
+      db =>
+        val postsAccessor = new AdminPostsAccessor(db)
+        postsAccessor.listPosts.onComplete {
+          case Success(list) =>
+            reqContext.complete(html.adminhome.render(token, list))
+          case Failure(_) =>
+            reqContext.complete(html.adminhome.render(token, List()))
+        }
     }
   }
 

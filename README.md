@@ -39,7 +39,7 @@ To remove a user run:
 $ sbt run-main me.lsbengine.bin.UserManager remove <username>
 ```
 
-The usernames are case insensitive.
+The usernames are case insensitive. Remember that all the users are considered _admin_ users.
 
 ## Running
 

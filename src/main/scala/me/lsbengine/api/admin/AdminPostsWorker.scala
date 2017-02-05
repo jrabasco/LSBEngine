@@ -1,10 +1,9 @@
-package me.lsbengine.api.public
+package me.lsbengine.api.admin
 
 import akka.actor.Props
-import me.lsbengine.api.ApiWorker
-import me.lsbengine.api.public.PostsWorker._
-import me.lsbengine.database.DatabaseAccessor
-import me.lsbengine.database.model.{MongoCollections, Post}
+import me.lsbengine.api._
+import me.lsbengine.api.admin.AdminPostsWorker._
+import me.lsbengine.database.model.Post
 import reactivemongo.api.DefaultDB
 import reactivemongo.bson.BSONDocument
 import spray.routing.RequestContext
@@ -12,39 +11,30 @@ import spray.routing.RequestContext
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
 
-object PostsWorker {
-
-  case class ListAction()
-
-  case class FetchDocument(id: Int)
-
-  case class ListActionResponse(list: List[Post])
-
-  case class FetchPostResponse(post: Post)
+object AdminPostsWorker {
 
   case class UpsertPost(id: Int, post: Post)
 
   def props(ctx: RequestContext, db: DefaultDB): Props = {
-    Props(new PostsWorker(ctx, db))
+    Props(new AdminPostsWorker(ctx, db))
   }
 
 }
 
-class PostsWorker(ctx: RequestContext, db: DefaultDB) extends ApiWorker(ctx) {
-  val postsAccessor = new DatabaseAccessor[Post](db, MongoCollections.postsCollectionName)
+class AdminPostsWorker(ctx: RequestContext, db: DefaultDB) extends ApiWorker(ctx) {
+  val postsAccessor = new AdminPostsAccessor(db)
 
   def receive: Receive = {
     case ListAction() =>
-      postsAccessor.listItems.onComplete {
+      postsAccessor.listPosts.onComplete {
         case Success(list) =>
           ok(ListActionResponse(list))
         case Failure(e) =>
           internalError(e)
       }
 
-    case FetchDocument(id) =>
-      val query = BSONDocument("id" -> id)
-      postsAccessor.getItem(query).onComplete {
+    case FetchPost(id) =>
+      postsAccessor.getPost(id).onComplete {
         case Success(maybeDocument) =>
           maybeDocument match {
             case Some(document) => ok(FetchPostResponse(document))
@@ -65,7 +55,8 @@ class PostsWorker(ctx: RequestContext, db: DefaultDB) extends ApiWorker(ctx) {
           }
         case Failure(e) => internalError(e)
       }
+
     case _ =>
-      badRequest("Unknown request sent to PostsWorker.")
+      badRequest("Unknown request sent to AdminPostsWorker.")
   }
 }

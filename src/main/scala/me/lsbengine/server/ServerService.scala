@@ -1,8 +1,8 @@
 package me.lsbengine.server
 
-import akka.actor.{Actor, ActorLogging, ActorRefFactory}
-import me.lsbengine.api.public.PostsWorker
-import me.lsbengine.api.public.PostsWorker.{FetchDocument, ListAction}
+import akka.actor.{Actor, ActorLogging, ActorRef, ActorRefFactory}
+import me.lsbengine.api.{FetchPost, ListAction}
+import org.json4s.ext.JodaTimeSerializers
 import org.json4s.{DefaultFormats, Formats}
 import reactivemongo.api.{DefaultDB, MongoConnection}
 import spray.client.pipelining._
@@ -22,7 +22,7 @@ abstract class ServerService(dbConnection: MongoConnection, dbName: String) exte
 
   override def receive: Receive = runRoute(commonRoutes ~ routes)
 
-  implicit def json4sFormats: Formats = DefaultFormats
+  implicit def json4sFormats: Formats = DefaultFormats ++ JodaTimeSerializers.all
 
   implicit val pipelineRawJson: HttpRequest => Future[HttpResponse] = (
     addHeader(Accept(`application/json`))
@@ -55,21 +55,21 @@ abstract class ServerService(dbConnection: MongoConnection, dbName: String) exte
       }
     }
 
-  def listPosts(reqContext: RequestContext): Unit = {
+  def listPosts(requestContext: RequestContext): Unit = {
     log.info(s"[$apiScope] Listing posts.")
-    handleWithDb(reqContext) {
+    handleWithDb(requestContext) {
       db =>
-        val postsWorker = context.actorOf(PostsWorker.props(reqContext, db))
+        val postsWorker = getPostsWorker(requestContext, db)
         postsWorker ! ListAction()
     }
   }
 
-  def fetchPost(reqContext: RequestContext, id: Int): Unit = {
+  def fetchPost(requestContext: RequestContext, id: Int): Unit = {
     log.info(s"[$apiScope] Fetching post $id.")
-    handleWithDb(reqContext) {
+    handleWithDb(requestContext) {
       db =>
-        val postsWorker = context.actorOf(PostsWorker.props(reqContext, db))
-        postsWorker ! FetchDocument(id)
+        val postsWorker = getPostsWorker(requestContext, db)
+        postsWorker ! FetchPost(id)
     }
   }
 
@@ -88,4 +88,6 @@ abstract class ServerService(dbConnection: MongoConnection, dbName: String) exte
   def getInfo: Map[String, Any] = {
     BuildInfo.toMap + ("repositoryLink" -> BlogConfiguration.repositoryLink) + ("apiScope" -> apiScope)
   }
+
+  def getPostsWorker(requestContext: RequestContext, database: DefaultDB): ActorRef
 }

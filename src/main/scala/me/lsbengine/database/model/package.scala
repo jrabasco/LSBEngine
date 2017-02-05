@@ -1,6 +1,6 @@
 package me.lsbengine.database
 
-import org.joda.time.DateTime
+import com.github.nscala_time.time.Imports._
 import reactivemongo.bson.{BSONDateTime, BSONDocument, BSONDocumentReader, BSONDocumentWriter, BSONHandler, Macros}
 
 package object model {
@@ -20,13 +20,13 @@ package object model {
   }
 
 
-  case class Post(id: Int, title: String, summary: String)
+  case class Post(id: Int, title: String, summary: String, content: String, published: DateTime)
 
   object Post {
     implicit val postFormat: Formatter[Post] = Macros.handler[Post]
   }
 
-  case class PostForm(id: Int, title: String, summary: String, csrf: String)
+  case class PostForm(post: Post, csrf: String)
 
   case class User(userName: String, password: String, salt: String)
 

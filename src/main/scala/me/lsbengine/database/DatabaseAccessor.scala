@@ -13,16 +13,12 @@ class DatabaseAccessor[T](db: DefaultDB, collectionName: String) {
 
   def getCollection: BSONCollection = db[BSONCollection](collectionName)
 
-  def getItems(query: BSONDocument)(implicit reader: BSONDocumentReader[T]): Future[List[T]] = {
-    getCollection.find(query).cursor[T]().collect[List]()
+  def getItems(query: BSONDocument = BSONDocument(), sort: BSONDocument = BSONDocument())(implicit reader: BSONDocumentReader[T]): Future[List[T]] = {
+    getCollection.find(query).sort(sort).cursor[T]().collect[List]()
   }
 
   def getItem(query: BSONDocument)(implicit reader: BSONDocumentReader[T]): Future[Option[T]] = {
     getCollection.find(query).one[T]
-  }
-
-  def listItems(implicit reader: BSONDocumentReader[T]): Future[List[T]] = {
-    getItems(BSONDocument())
   }
 
   def upsertItem(selector: BSONDocument, item: T)(implicit writer: BSONDocumentWriter[T]): Future[UpdateWriteResult] = {

@@ -14,4 +14,5 @@ object BlogConfiguration {
   val hashIterations: Int = envOrElse("HASH_ITERATIONS", "300000").toInt
   val blogOwner: String = envOrElse("BLOG_OWNER", "J&eacute;r&eacute;my Rabasco")
   val contactAddress: String = envOrElse("CONTACT_ADDRESS", "rabasco.jeremy@gmail.com")
+  val headerTitle: String = envOrElse("HEADER_TITLE", "LSBEngine")
 }

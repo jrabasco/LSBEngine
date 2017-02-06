@@ -2,6 +2,7 @@
 @import me.lsbengine.database.model.Post
 @import me.lsbengine.server.BlogConfiguration
 @import com.github.nscala_time.time.Imports._
+@import me.lsbengine.components.html.{header, footer}
 @(token: Token, posts: List[Post])
 <!DOCTYPE html>
 <html lang="en">
@@ -9,11 +10,11 @@
         <meta charset="UTF-8">
         <link rel="stylesheet" href="/css/styles.css">
         <script src="/js/@if(BlogConfiguration.appContext == "DEV") {jquery-3.1.1.js} else {jquery-3.1.1.min.js}"></script>
-        <script src="/js/adminhome.js"></script>
+        <script src="/js/admin.js"></script>
         <title>@Html(BlogConfiguration.blogOwner)'s Blog</title>
     </head>
     <body><div class="page-wrap">
-    @html.header.render()
+    @header.render()
         <h3>
             Logged in as @token.userName.
         </h3>
@@ -29,5 +30,5 @@
         }
         <input type="button" onclick="doLogout()" value="Logout"/>
     </div></body>
-    @html.footer.render()
+    @footer.render()
 </html>

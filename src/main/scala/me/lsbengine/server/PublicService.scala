@@ -4,6 +4,7 @@ import akka.actor.{ActorRef, Props}
 import me.lsbengine.api.public.{PublicPostsAccessor, PublicPostsWorker}
 import reactivemongo.api.{DefaultDB, MongoConnection}
 import spray.httpx.PlayTwirlSupport._
+import me.lsbengine.pages.public.html
 import spray.routing.{RequestContext, Route}
 
 import scala.concurrent.ExecutionContext.Implicits.global

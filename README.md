@@ -25,6 +25,7 @@ The server is configured with environment variables:
 takes around 1 second to perform a hash)
 - `BLOG_OWNER`: name of the owner of the blog (default `Jérémy Rabasco`)
 - `CONTACT_ADDRESS`: email for the footer (default `rabasco.jeremy@gmail.com`)
+- `HEADER_TITLE`: title in the header (default `LSBEngine`)
 
 ## Adding/Removing users
 

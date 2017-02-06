@@ -5,6 +5,8 @@ import me.lsbengine.api.admin.{AdminPostsAccessor, AdminPostsWorker}
 import me.lsbengine.api.admin.AdminPostsWorker.UpsertPost
 import me.lsbengine.api.admin.security.{cookieName, _}
 import me.lsbengine.database.model.{Post, PostForm, Token}
+import me.lsbengine.pages.admin
+import me.lsbengine.errors
 import reactivemongo.api.{DefaultDB, MongoConnection}
 import spray.http.HttpCookie
 import spray.http.HttpHeaders._
@@ -116,10 +118,10 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String)
 
   private def loginRejectionHandler: RejectionHandler = RejectionHandler {
     case MissingCookieRejection(providedName) :: _ if providedName == cookieName =>
-      complete(html.adminlogin.render())
+      complete(admin.html.login.render())
     case ValidationRejection(reason, _) :: _ if reason == "No token." || reason == "Invalid token." =>
       deleteCookie(cookieName) {
-        complete(html.adminlogin.render())
+        complete(admin.html.login.render())
       }
   } orElse RejectionHandler.Default
 
@@ -156,9 +158,9 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String)
         val postsAccessor = new AdminPostsAccessor(db)
         postsAccessor.listPosts.onComplete {
           case Success(list) =>
-            requestContext.complete(html.adminhome.render(token, list))
+            requestContext.complete(admin.html.index.render(token, list))
           case Failure(_) =>
-            requestContext.complete(html.adminhome.render(token, List()))
+            requestContext.complete(admin.html.index.render(token, List()))
         }
     }
   }
@@ -171,13 +173,12 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String)
           case Success(maybePost) =>
             maybePost match {
               case Some(post) =>
-                requestContext.complete(html.editpost.render(token, post))
+                requestContext.complete(admin.html.edit.render(token, post))
               case None =>
-                requestContext.complete(NotFound, html.notfound.render(s"Post $id does not exist."))
+                requestContext.complete(NotFound, errors.html.notfound.render(s"Post $id does not exist."))
             }
-            requestContext.complete(html.adminhome.render(token, List()))
           case Failure(e) =>
-            requestContext.complete(InternalServerError, html.internalerror.render(s"Failed to retrieve post $id : $e"))
+            requestContext.complete(InternalServerError, errors.html.internalerror.render(s"Failed to retrieve post $id : $e"))
         }
     }
   }

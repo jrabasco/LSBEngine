@@ -9,7 +9,7 @@ function doLogout()
             withCredentials: true
         },
         success: function (){
-            window.location.reload();
+            goHome();
         },
         error: function (){
             alert("Failed logout: retry or contact an administrator.");
@@ -19,5 +19,10 @@ function doLogout()
 
 function edit(id)
 {
-    console.log("Editing post " + id + ".")
+    window.location.href = "/edit/" + id;
+}
+
+function goHome()
+{
+    window.location.href = "/";
 }

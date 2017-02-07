@@ -1,44 +1,42 @@
 package me.lsbengine.server
 
-import akka.actor.{ActorRef, Props}
-import me.lsbengine.api.public.{PublicPostsAccessor, PublicPostsWorker}
-import reactivemongo.api.{DefaultDB, MongoConnection}
-import spray.httpx.PlayTwirlSupport._
+import akka.event.LoggingAdapter
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.{RequestContext, Route, RouteResult}
+import me.lsbengine.api.PostsAccessor
+import me.lsbengine.api.public.PublicPostsAccessor
 import me.lsbengine.pages.public.html
-import spray.routing.{RequestContext, Route}
+import reactivemongo.api.{DefaultDB, MongoConnection}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.{Failure, Success}
+import scala.concurrent.Future
 
-object PublicService {
-  def props(dbConnection: MongoConnection, dbName: String): Props =
-    Props(new PublicService(dbConnection, dbName))
-}
+class PublicService(dbConnection: MongoConnection, dbName: String, log: LoggingAdapter)
+  extends ServerService(dbConnection, dbName, log) {
 
-class PublicService(dbConnection: MongoConnection, dbName: String) extends ServerService(dbConnection, dbName) {
-
-  override val routes: Route =
+  override val ownRoutes: Route =
     pathSingleSlash {
       ctx => index(ctx)
     }
 
   override val apiScope: String = "public"
 
-  def index(reqContext: RequestContext): Unit = {
+  def index(reqContext: RequestContext): Future[RouteResult] = {
     handleWithDb(reqContext) {
       db =>
-        val postsAccessor = new PublicPostsAccessor(db)
-        postsAccessor.listPosts.onComplete {
-          case Success(list) =>
+        val postsAccessor = getPostsAccessor(db)
+        postsAccessor.listPosts.flatMap {
+          list =>
             reqContext.complete(html.index.render(list))
-          case Failure(_) =>
+        }.recoverWith {
+          case _ =>
             reqContext.complete(html.index.render(List()))
         }
     }
   }
 
-  override def getPostsWorker(requestContext: RequestContext, database: DefaultDB): ActorRef = {
-    context.actorOf(PublicPostsWorker.props(requestContext, database))
+  override def getPostsAccessor(database: DefaultDB): PostsAccessor = {
+    new PublicPostsAccessor(database)
   }
 
 }

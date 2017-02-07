@@ -2,14 +2,14 @@ package me.lsbengine
 
 import me.lsbengine.database.model.Post
 
+import scala.concurrent.Future
+
 package object api {
 
-  case class ListAction()
+  trait PostsAccessor {
+    def getPost(id: Int): Future[Option[Post]]
 
-  case class FetchPost(id: Int)
-
-  case class ListActionResponse(list: List[Post])
-
-  case class FetchPostResponse(post: Post)
+    def listPosts: Future[List[Post]]
+  }
 
 }

@@ -1,6 +1,7 @@
 package me.lsbengine.bin
 
 import me.lsbengine.api.admin.security.{PasswordHasher, _}
+import me.lsbengine.database.model.MongoFormats.userFormat
 import me.lsbengine.database.model.{MongoCollections, User}
 import me.lsbengine.server.BlogConfiguration
 import reactivemongo.api.collections.bson.BSONCollection
@@ -94,8 +95,7 @@ object UserManager extends App {
               usersCollection.findAndRemove(removeSelector).onComplete {
                 case Success(result) =>
                   result.result match {
-                    case Some(userDoc) =>
-                      val user = userDoc.as[User]
+                    case Some(user) =>
                       val tokensAccessor = new TokensAccessor(db)
                       tokensAccessor.removeTokenWithUserName(user.userName).onComplete {
                         case Success(_) =>

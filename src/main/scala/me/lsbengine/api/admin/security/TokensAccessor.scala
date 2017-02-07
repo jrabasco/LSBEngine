@@ -1,6 +1,7 @@
 package me.lsbengine.api.admin.security
 
 import me.lsbengine.database.model.{MongoCollections, Token}
+import me.lsbengine.database.model.MongoFormats._
 import reactivemongo.api.DefaultDB
 import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.bson.BSONDocument

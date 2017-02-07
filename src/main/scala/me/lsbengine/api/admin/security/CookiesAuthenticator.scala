@@ -1,15 +1,13 @@
 package me.lsbengine.api.admin.security
 
+import akka.http.scaladsl.server.{Directive1, Directives, MissingCookieRejection, ValidationRejection}
 import com.github.nscala_time.time.Imports._
 import me.lsbengine.database.model.Token
 import reactivemongo.api.{DefaultDB, MongoConnection}
-import spray.http.HttpCookie
-import spray.routing.authentication.{Authentication, ContextAuthenticator}
-import spray.routing.{MissingCookieRejection, ValidationRejection}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
 
-trait CookiesAuthenticator {
+trait CookiesAuthenticator extends Directives {
   val dbConnection: MongoConnection
   val dbName: String
 
@@ -18,29 +16,27 @@ trait CookiesAuthenticator {
     token.expiry > now
   }
 
-  def cookieAuthenticator(implicit ec: ExecutionContext): ContextAuthenticator[Token] = ctx => {
-    val cookies = ctx.request.cookies
-    val maybeAuthCookie = cookies.find(_.name == cookieName)
-    val futureCredMissingRejection: Future[Authentication[Token]] = Future(Left(MissingCookieRejection(cookieName)))
-    maybeAuthCookie.fold(futureCredMissingRejection) {
-      authCookie: HttpCookie =>
-        val tokenId = authCookie.content
-        dbConnection.database(dbName).flatMap {
+  def cookieAuthenticator: Directive1[Token] = {
+    optionalCookie(cookieName).flatMap {
+      case Some(cookiePair) =>
+        val tokenId = cookiePair.value
+        onSuccess(dbConnection.database(dbName)).flatMap {
           db =>
             val tokensAccessor = new TokensAccessor(db)
-            tokensAccessor.getTokenWithId(tokenId).map {
-              maybeToken =>
-                maybeToken.fold[Authentication[Token]](Left(ValidationRejection("No token."))) {
-                  token =>
-                    if (isTokenValid(token)) {
-                      tokenRefresh(token, db)
-                      Right(token)
-                    } else {
-                      Left(ValidationRejection("Invalid token."))
-                    }
+            onSuccess(tokensAccessor.getTokenWithId(tokenId)).flatMap {
+              case Some(token) =>
+                if (isTokenValid(token)) {
+                  tokenRefresh(token, db)
+                  provide(token)
+                } else {
+                  reject(ValidationRejection("Invalid token."))
                 }
+              case None =>
+                reject(ValidationRejection("No token."))
             }
         }
+      case None =>
+        reject(MissingCookieRejection(cookieName))
     }
   }
 

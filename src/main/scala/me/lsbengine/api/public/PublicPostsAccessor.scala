@@ -1,16 +1,20 @@
 package me.lsbengine.api.public
 
 import com.github.nscala_time.time.Imports.DateTime
+import me.lsbengine.api.PostsAccessor
 import me.lsbengine.database.DatabaseAccessor
 import me.lsbengine.database.model.{MongoCollections, Post}
+import me.lsbengine.database.model.MongoFormats._
 import reactivemongo.api.DefaultDB
-import reactivemongo.bson.{BSONDateTime, BSONDocument, BSONDocumentReader}
+import reactivemongo.bson.{BSONDateTime, BSONDocument}
 
 import scala.concurrent.Future
 
-class PublicPostsAccessor(db: DefaultDB) extends DatabaseAccessor[Post](db, MongoCollections.postsCollectionName) {
+class PublicPostsAccessor(db: DefaultDB)
+  extends DatabaseAccessor[Post](db, MongoCollections.postsCollectionName)
+    with PostsAccessor {
 
-  def getPost(id: Int)(implicit reader: BSONDocumentReader[Post]): Future[Option[Post]] = {
+  def getPost(id: Int): Future[Option[Post]] = {
     val now = DateTime.now
     val query = BSONDocument("id" -> id,
       "published" -> BSONDocument(
@@ -19,7 +23,7 @@ class PublicPostsAccessor(db: DefaultDB) extends DatabaseAccessor[Post](db, Mong
     super.getItem(query)
   }
 
-  def listPosts()(implicit reader: BSONDocumentReader[Post]): Future[List[Post]] = {
+  def listPosts: Future[List[Post]] = {
     val now = DateTime.now
     val sort = BSONDocument("published" -> -1)
     val query = BSONDocument("published" -> BSONDocument(

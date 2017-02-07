@@ -1,23 +1,25 @@
 package me.lsbengine.server
 
-import akka.actor.{Actor, ActorLogging, ActorRef, ActorRefFactory}
-import me.lsbengine.api.{FetchPost, ListAction}
-import org.json4s.ext.JodaTimeSerializers
-import org.json4s.{DefaultFormats, Formats}
+import akka.event.LoggingAdapter
+import akka.http.scaladsl.marshalling.{Marshaller, ToEntityMarshaller}
+import akka.http.scaladsl.model.StatusCodes._
+import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.{RequestContext, Route, RouteResult}
+import me.lsbengine.api.PostsAccessor
+import me.lsbengine.api.model.{FetchPostResponse, ListActionResponse}
+import me.lsbengine.json.JSONSupport
 import reactivemongo.api.{DefaultDB, MongoConnection}
-import spray.http.StatusCodes.InternalServerError
-import spray.httpx.Json4sSupport
-import spray.routing.{HttpService, RequestContext, Route}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.{Failure, Success}
+import scala.concurrent.Future
 
-abstract class ServerService(dbConnection: MongoConnection, dbName: String) extends HttpService with Actor with ActorLogging with Json4sSupport {
-  override def actorRefFactory: ActorRefFactory = context
+abstract class ServerService(dbConnection: MongoConnection, dbName: String, log: LoggingAdapter)
+  extends JSONSupport {
 
-  override def receive: Receive = runRoute(commonRoutes ~ routes)
-
-  implicit def json4sFormats: Formats = DefaultFormats ++ JodaTimeSerializers.all
+  implicit val twirlMarshaller: ToEntityMarshaller[play.twirl.api.HtmlFormat.Appendable] = Marshaller.opaque { html =>
+    HttpEntity(ContentTypes.`text/html(UTF-8)`, html.toString)
+  }
 
   val commonRoutes: Route =
     path("info") {
@@ -45,39 +47,45 @@ abstract class ServerService(dbConnection: MongoConnection, dbName: String) exte
       }
     }
 
-  def listPosts(requestContext: RequestContext): Unit = {
+  def listPosts(requestContext: RequestContext): Future[RouteResult] = {
     log.info(s"[$apiScope] Listing posts.")
     handleWithDb(requestContext) {
       db =>
-        val postsWorker = getPostsWorker(requestContext, db)
-        postsWorker ! ListAction()
+        val postsAccessor = getPostsAccessor(db)
+        postsAccessor.listPosts.flatMap {
+          list =>
+            requestContext.complete(ListActionResponse(list))
+        }
     }
   }
 
-  def fetchPost(requestContext: RequestContext, id: Int): Unit = {
+  def fetchPost(requestContext: RequestContext, id: Int): Future[RouteResult] = {
     log.info(s"[$apiScope] Fetching post $id.")
     handleWithDb(requestContext) {
       db =>
-        val postsWorker = getPostsWorker(requestContext, db)
-        postsWorker ! FetchPost(id)
+        val postsAccessor = getPostsAccessor(db)
+        postsAccessor.getPost(id).flatMap {
+          case Some(document) => requestContext.complete(FetchPostResponse(document))
+          case None => requestContext.complete(NotFound, s"No post found with id: $id.")
+        }
     }
   }
 
-  def handleWithDb(reqContext: RequestContext)(handler: DefaultDB => Unit): Unit = {
-    dbConnection.database(dbName).onComplete {
-      case Success(db) =>
+  def handleWithDb(requestContext: RequestContext)(handler: DefaultDB => Future[RouteResult]): Future[RouteResult] = {
+    dbConnection.database(dbName).flatMap {
+      db =>
         handler(db)
-      case Failure(e) =>
-        reqContext.complete(InternalServerError, s"Could not connect to database: $e")
     }
   }
 
-  val routes: Route
+  val ownRoutes: Route
   val apiScope: String
+
+  def routes: Route = commonRoutes ~ ownRoutes
 
   def getInfo: Map[String, Any] = {
     BuildInfo.toMap + ("repositoryLink" -> BlogConfiguration.repositoryLink) + ("apiScope" -> apiScope)
   }
 
-  def getPostsWorker(requestContext: RequestContext, database: DefaultDB): ActorRef
+  def getPostsAccessor(database: DefaultDB): PostsAccessor
 }

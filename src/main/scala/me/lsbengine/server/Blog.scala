@@ -1,21 +1,19 @@
 package me.lsbengine.server
 
-import java.util.concurrent.TimeUnit
-
 import akka.actor.ActorSystem
-import akka.io.IO
+import akka.http.scaladsl.Http
+import akka.stream.ActorMaterializer
 import com.github.nscala_time.time.Imports._
 import com.typesafe.config.ConfigFactory
-import reactivemongo.api.{DefaultDB, MongoConnection, MongoDriver}
-import spray.can.Http
-import sun.misc.{Signal, SignalHandler}
+import reactivemongo.api.{MongoConnection, MongoDriver}
+import sun.misc.Signal
 
 import scala.concurrent.ExecutionContext
-import scala.concurrent.duration.Duration
 
 object Blog extends App {
   implicit val system = ActorSystem("server")
   implicit val context = ExecutionContext.Implicits.global
+  implicit val materializer = ActorMaterializer()
   val conf = ConfigFactory.load()
 
   val driver = new MongoDriver
@@ -26,29 +24,25 @@ object Blog extends App {
   val publicPort = BlogConfiguration.publicPort
   val adminPort = BlogConfiguration.adminPort
 
-  val frontendService = system.actorOf(PublicService.props(connection, mongodbName), "public-service")
-  val adminService = system.actorOf(AdminService.props(connection, mongodbName), "admin-service")
+  val publicService = new PublicService(connection, mongodbName, Http().system.log)
+  val adminService = new AdminService(connection, mongodbName, Http().system.log)
 
   DateTimeZone.setDefault(DateTimeZone.forID("UTC"))
 
-  IO(Http) ! Http.Bind(frontendService, interface = hostName, port = publicPort)
-  IO(Http) ! Http.Bind(adminService, interface = hostName, port = adminPort)
+  Http().bindAndHandle(publicService.routes , hostName, publicPort)
+  Http().bindAndHandle(adminService.routes, hostName, adminPort)
 
-  Signal.handle(new Signal("INT"), new SignalHandler() {
-    def handle(sig: Signal) {
-      shutdown()
-    }
+  Signal.handle(new Signal("INT"), (_: Signal) => {
+    shutdown()
   })
 
-  Signal.handle(new Signal("TERM"), new SignalHandler() {
-    def handle(sig: Signal) {
-      shutdown()
-    }
+  Signal.handle(new Signal("TERM"), (_: Signal) => {
+    shutdown()
   })
 
   private def shutdown(): Unit = {
     println("System is shutting down...")
-    IO(Http) ! Http.Unbind(Duration(10, TimeUnit.SECONDS))
+    Http().shutdownAllConnectionPools()
     connection.close()
     driver.system.terminate()
     driver.close()

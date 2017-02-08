@@ -7,6 +7,8 @@ import org.joda.time.DateTime
 import org.joda.time.format.{DateTimeFormatter, ISODateTimeFormat}
 import spray.json._
 
+import scala.util.Try
+
 trait JSONSupport extends SprayJsonSupport with DefaultJsonProtocol with CollectionFormats {
 
   implicit object DateTimeFormat extends RootJsonFormat[DateTime] {
@@ -14,11 +16,7 @@ trait JSONSupport extends SprayJsonSupport with DefaultJsonProtocol with Collect
     val formatter: DateTimeFormatter = ISODateTimeFormat.dateTime
 
     override def read(json: JsValue): DateTime = json match {
-      case JsString(s) => try {
-        formatter.parseDateTime(s)
-      } catch {
-        case _: Throwable => error(s)
-      }
+      case JsString(s) => Try(formatter.parseDateTime(s)).fold(_ => error(s), identity)
       case _ =>
         error(json.toString())
     }

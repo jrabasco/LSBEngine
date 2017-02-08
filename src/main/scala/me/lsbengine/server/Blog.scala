@@ -11,10 +11,10 @@ import sun.misc.Signal
 import scala.concurrent.ExecutionContext
 
 object Blog extends App {
-  implicit val system = ActorSystem("server")
+  val conf = ConfigFactory.load()
+  implicit val system = ActorSystem("server", conf)
   implicit val context = ExecutionContext.Implicits.global
   implicit val materializer = ActorMaterializer()
-  val conf = ConfigFactory.load()
 
   val driver = new MongoDriver
   val mongoHost = BlogConfiguration.mongoDBHost
@@ -29,7 +29,7 @@ object Blog extends App {
 
   DateTimeZone.setDefault(DateTimeZone.forID("UTC"))
 
-  Http().bindAndHandle(publicService.routes , hostName, publicPort)
+  Http().bindAndHandle(publicService.routes, hostName, publicPort)
   Http().bindAndHandle(adminService.routes, hostName, adminPort)
 
   Signal.handle(new Signal("INT"), (_: Signal) => {
@@ -43,6 +43,7 @@ object Blog extends App {
   private def shutdown(): Unit = {
     println("System is shutting down...")
     Http().shutdownAllConnectionPools()
+    Http().system.terminate()
     connection.close()
     driver.system.terminate()
     driver.close()

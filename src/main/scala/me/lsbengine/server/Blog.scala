@@ -14,7 +14,7 @@ object Blog extends App {
   val conf = ConfigFactory.load()
   implicit val system = ActorSystem("server", conf)
   implicit val context = ExecutionContext.Implicits.global
-  implicit val materializer = ActorMaterializer()
+  implicit val materializer = ActorMaterializer()(system)
 
   val driver = new MongoDriver
   val mongoHost = BlogConfiguration.mongoDBHost

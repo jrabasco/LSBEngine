@@ -19,7 +19,7 @@ function doLogout()
 
 function edit(id)
 {
-    window.location.href = "/edit/" + id;
+    window.location.href = "/editform/" + id;
 }
 
 function goHome()

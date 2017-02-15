@@ -21,23 +21,28 @@ abstract class ServerService(dbConnection: MongoConnection, dbName: String, log:
     HttpEntity(ContentTypes.`text/html(UTF-8)`, html.toString)
   }
 
-  val commonRoutes: Route =
+  def commonRoutes: Route =
     path("info") {
       get {
         complete(getInfo)
       }
-    } ~ pathPrefix("posts") {
-      path("list") {
-        get {
-          ctx => listPosts(ctx)
-        }
-      } ~ path(IntNumber) {
-        id =>
+    } ~ pathPrefix("api") {
+      pathPrefix("posts") {
+        path("list") {
           get {
-            ctx => fetchPost(ctx, id)
+            ctx => listPosts(ctx)
           }
+        } ~ path(IntNumber) {
+          id =>
+            get {
+              ctx => fetchPost(ctx, id)
+            }
+        }
       }
-    } ~ pathPrefix("css") {
+    }
+
+  val assetsRoutes: Route =
+    pathPrefix("css") {
       get {
         getFromResourceDirectory("css")
       }
@@ -81,7 +86,7 @@ abstract class ServerService(dbConnection: MongoConnection, dbName: String, log:
   val ownRoutes: Route
   val apiScope: String
 
-  def routes: Route = commonRoutes ~ ownRoutes
+  def routes: Route = assetsRoutes ~ commonRoutes ~ ownRoutes
 
   def getInfo: Map[String, Any] = {
     BuildInfo.toMap + ("repositoryLink" -> BlogConfiguration.repositoryLink) + ("apiScope" -> apiScope)

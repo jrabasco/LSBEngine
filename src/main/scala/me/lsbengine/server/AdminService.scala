@@ -25,6 +25,11 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
 
   override val apiScope: String = "admin"
 
+  override val commonRoutes: Route =
+    cookieAuthenticator { _ =>
+      super.commonRoutes
+    }
+
   override val ownRoutes: Route =
     pathSingleSlash {
       handleRejections(loginRejectionHandler) {
@@ -33,13 +38,19 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
             ctx => index(ctx, token)
         }
       }
-    } ~ pathPrefix("edit") {
+    } ~ pathPrefix("editform") {
       cookieAuthenticator { token =>
         path(IntNumber) {
           id =>
             get {
               ctx => edit(ctx, token, id)
             }
+        }
+      }
+    } ~ pathPrefix("addform") {
+      cookieAuthenticator { token =>
+        get {
+          ctx => edit(ctx, token, -1)
         }
       }
     } ~
@@ -185,7 +196,13 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
     handleWithDb(requestContext) {
       db =>
         val postsAccessor = new AdminPostsAccessor(db)
-        postsAccessor.getPost(id).flatMap {
+        val futureMaybePost =
+          if (id >= 0) {
+            postsAccessor.getPost(id)
+          } else {
+            postsAccessor.getNewEmptyPost
+          }
+        futureMaybePost.flatMap {
           case Some(post) =>
             requestContext.complete(admin.html.edit.render(token, post))
           case None =>

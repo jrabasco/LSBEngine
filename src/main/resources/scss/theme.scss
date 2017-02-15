@@ -1,15 +1,24 @@
+$primary-color: dodgerblue;
+$secondary-color: lightcyan;
+$tertiary-color: cornflowerblue;
+
+$error-primary-color: darkred;
+$error-secondary-color: palevioletred;
+
+$ok-primary-color: green;
+
 $font-stack: Helvetica, sans-serif;
 $font-color: #333;
 
-$border-color: dodgerblue;
-$box-background-color: lightcyan;
+$border-color: $primary-color;
+$box-background-color: $secondary-color;
 
 $spinner-background-color: lightgray;
-$spinner-color1: $border-color;
-$spinner-color2: cornflowerblue;
+$spinner-color1: $primary-color;
+$spinner-color2: $tertiary-color;
 
-$ok-border-color: green;
+$ok-border-color: $ok-primary-color;
 
-$error-border-color: darkred;
-$error-text-color: $error-border-color;
-$error-box-background-color: palevioletred;
+$error-border-color: $error-primary-color;
+$error-text-color: $error-primary-color;
+$error-box-background-color: $error-secondary-color;

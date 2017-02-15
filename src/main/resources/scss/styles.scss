@@ -1,4 +1,6 @@
 @import "theme.scss";
+@import "forms.scss";
+@import "posts.scss";
 
 * {
   margin: 0;
@@ -31,45 +33,6 @@ h2 {
   margin-bottom: 10px;
 }
 
-.login-form {
-  border: 2px solid $border-color;
-  background-color: $box-background-color;
-  color: $border-color;
-  border-radius: 10px;
-  width: 400px;
-  text-align: center;
-  display: inline-block;
-  padding-bottom: 10px;
-  padding-top: 10px;
-  input {
-    margin-bottom: 5px;
-  }
-
-  input[type=text], input[type=password] {
-    border: 1px solid $border-color;
-    border-radius: 5px;
-    font-size: 16px;
-    padding: 5px 10px;
-  }
-
-  input[type=text].not-ok, input[type=password].not-ok {
-    border-left: 3px solid $error-border-color;
-  }
-
-  input[type=text].ok, input[type=password].ok {
-    border-left: 3px solid $ok-border-color;
-  }
-}
-
-input[type=button] {
-  background-color: $border-color;
-  color: $box-background-color;
-  border: 0;
-  border-radius: 5px;
-  font-size: 16px;
-  padding: 5px 10px;
-}
-
 .page-wrap {
   min-height: 100%;
   margin-bottom: -20px;
@@ -89,11 +52,6 @@ input[type=button] {
   hr {
     border: 1px solid $border-color;
   }
-}
-
-.posts {
-  list-style-type: none;
-  padding: 0;
 }
 
 .loader {
@@ -117,16 +75,6 @@ input[type=button] {
   }
 }
 
-.post-summary {
-  padding: 10px;
-  margin: 10px auto;
-  border: 2px solid $border-color;
-  background: $box-background-color;
-  width: 50%;
-  text-align: center;
-  border-radius: 10px;
-}
-
 .error {
   padding: 10px;
   margin: 10px auto;
@@ -136,4 +84,33 @@ input[type=button] {
   width: 75%;
   text-align: center;
   border-radius: 10px;
+}
+
+.navbar {
+  ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: $primary-color;
+  }
+
+  li {
+    float: left;
+  }
+
+  li a {
+    display: block;
+    color: $secondary-color;
+    text-align: center;
+    padding: 8px 16px;
+    text-decoration: none;
+  }
+
+  li a:hover {
+    background-color: $tertiary-color;
+    color: $secondary-color;
+  }
+
+  margin-bottom: 10px;
 }

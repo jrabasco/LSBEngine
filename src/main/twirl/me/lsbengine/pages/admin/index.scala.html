@@ -3,6 +3,7 @@
 @import me.lsbengine.server.BlogConfiguration
 @import com.github.nscala_time.time.Imports._
 @import me.lsbengine.components.html.{header, footer}
+@import me.lsbengine.components.admin.html.navbar
 @(token: Token, posts: List[Post])
 <!DOCTYPE html>
 <html lang="en">
@@ -14,6 +15,7 @@
         <title>@Html(BlogConfiguration.blogOwner)'s Blog</title>
     </head>
     <body><div class="page-wrap">
+    @navbar.render()
     @header.render()
         <h3>
             Logged in as @token.userName.
@@ -28,7 +30,6 @@
                 </div>
             }
         }
-        <input type="button" onclick="doLogout()" value="Logout"/>
     </div>
      @footer.render()
     </body>

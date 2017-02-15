@@ -15,8 +15,8 @@
     @header.render()
         <h2>Admin Login Page</h2>
         <form class="login-form" name="login">
-            Username:&nbsp;<input class="not-ok" type="text" name="username"/><br>
-            Password:&nbsp;<input class="not-ok" type="password" name="password"/><br>
+            <label for="username">Username:</label><input class="not-ok" type="text" id="username" name="username"/><br/>
+            <label for="password">Password:</label><input class="not-ok" type="password" id="password" name="password"/><br/>
             <div id="login-error" class="error" style="display: none"></div>
             <input type="button" onclick="doLogin()" value="Login"/>
             <input type="button" value="Reset"/>

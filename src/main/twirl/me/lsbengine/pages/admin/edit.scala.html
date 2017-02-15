@@ -3,6 +3,7 @@
 @import me.lsbengine.database.model.Token
 @import com.github.nscala_time.time.Imports._
 @import me.lsbengine.components.html.{header, footer}
+@import me.lsbengine.components.admin.html.navbar
 @(token: Token, post: Post)
 <!DOCTYPE html>
 <html lang="en">
@@ -14,20 +15,24 @@
         <title>@Html(BlogConfiguration.blogOwner)'s Blog</title>
     </head>
     <body><div class="page-wrap">
+        @navbar.render()
         @header.render()
     <h3>
             Logged in as @token.userName.
     </h3>
-        @defining(DateTimeFormat.forPattern("dd-MM-yyyy' at 'HH:mm:ss' (UTC)'")) { formatter =>
-            <div class="post-summary">
-                <h4>@post.title</h4>
-                @post.summary
-                <div class="date">@post.published.toString(formatter)</div>
-                CSRF: @token.csrf
+        <form class="post-edit-form">
+            <div class="label-field"> <label for="title">Title:</label><input type="text" id="title" name="title" value="@post.title"/></div>
+            <div class="label-field">
+                <label for="summary">Summary:</label><textarea id="summary" name="summary">@post.summary</textarea>
             </div>
-        }
-    <input type="button" onclick="doLogout()" value="Logout"/>
-    <input type="button" onclick="goHome()" value="Home"/>
+            <div class="label-field">
+                <label for="content">Content:</label><textarea id="content" name="content">@post.content</textarea>
+            </div>
+            <div class="label-field">
+                <label for="date">Publication:</label><input type="text" id="date" name="date" value="@post.published"/>
+            </div>
+            <input type="hidden" name="csrf" value="@token.csrf">
+        </form>
     </div>
     @footer.render()
     </body>

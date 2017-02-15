@@ -17,6 +17,10 @@ footer {
 
 .header {
   margin-bottom: 10px;
+  a {
+    color: $font-color;
+    text-decoration: inherit;
+  }
 }
 
 body {
@@ -110,6 +114,11 @@ h2 {
   li a:hover {
     background-color: $tertiary-color;
     color: $secondary-color;
+  }
+
+  .active {
+    background-color: $secondary-color;
+    color: $primary-color;
   }
 
   margin-bottom: 10px;

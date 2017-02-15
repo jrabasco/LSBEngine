@@ -1,6 +1,7 @@
+@(whichActive: String)
 <div class="navbar">
     <ul>
-        <li><a href="/">Home</a></li>
+        <li><a href="/" @if(whichActive == "Home"){class="active"}>Home</a></li>
         <li style="float: right"><a href="javascript:void(0);" onclick="doLogout()">Logout</a></li>
     </ul>
 </div>

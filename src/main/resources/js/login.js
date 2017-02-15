@@ -1,6 +1,6 @@
 var waiting = false;
-function doLogin()
-{
+function doLogin() {
+    hideError("login-error");
     var form = $('form[name="login"]');
     var loader = $('.loader');
     if (!waiting) {
@@ -26,7 +26,7 @@ function doLogin()
                 waiting = false;
                 loader.hide();
                 form.show();
-                alert("Password/username combination is wrong!");
+                showError("login-error", "Password/username combination is incorrect.");
             }
         });
     }
@@ -35,4 +35,19 @@ $(document).keypress(function (event) {
     if (event.which == 13) {
         doLogin();
     }
+});
+
+$(function () {
+    $(":text, :password").keyup(function () {
+        var enteredText = $(this).val();
+        if ((typeof enteredText != "undefined") &&
+            (typeof enteredText.valueOf() == "string") &&
+            (enteredText.length > 0)) {
+            $(this).removeClass("not-ok");
+            $(this).addClass("ok")
+        } else {
+            $(this).removeClass("ok");
+            $(this).addClass("not-ok")
+        }
+    });
 });

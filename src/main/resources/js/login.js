@@ -1,9 +1,9 @@
 var waiting = false;
 function doLogin() {
-    hideError("login-error");
     var form = $('form[name="login"]');
     var loader = $('.loader');
     if (!waiting) {
+        hideMessage("login-error");
         waiting = true;
         form.hide();
         loader.show();
@@ -26,11 +26,19 @@ function doLogin() {
                 waiting = false;
                 loader.hide();
                 form.show();
-                showError("login-error", "Password/username combination is incorrect.");
+                showMessage("login-error", "Password/username combination is incorrect.");
             }
         });
     }
 }
+
+function resetLogin() {
+    hideMessage("login-error");
+    var form = $('form[name="login"]');
+    form[0].username.value = "";
+    form[0].password.value = "";
+}
+
 $(document).keypress(function (event) {
     if (event.which == 13) {
         doLogin();

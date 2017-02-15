@@ -7,7 +7,7 @@
         <meta charset="UTF-8">
         <link rel="stylesheet" href="/css/styles.css">
         <script src="/js/@if(BlogConfiguration.appContext == "DEV") {jquery-3.1.1.js} else {jquery-3.1.1.min.js}"></script>
-        <script src="/js/libs.js"></script>
+        <script src="/js/admin.js"></script>
         <script src="/js/login.js"></script>
         <title>@Html(BlogConfiguration.blogOwner)'s Blog</title>
     </head>
@@ -19,7 +19,7 @@
             <label for="password">Password:</label><input class="not-ok" type="password" id="password" name="password"/><br/>
             <div id="login-error" class="error" style="display: none"></div>
             <input type="button" onclick="doLogin()" value="Login"/>
-            <input type="button" value="Reset"/>
+            <input type="button" onclick="resetLogin()" value="Reset"/>
         </form>
         <div class="loader"></div>
     </div>

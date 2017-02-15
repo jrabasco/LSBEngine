@@ -9,6 +9,7 @@ package object model {
     val postsCollectionName = "posts"
     val usersCollectionName = "users"
     val tokensCollectionName = "tokens"
+    val trashCollectionName = "trash"
   }
 
 

@@ -7,12 +7,11 @@ import akka.http.scaladsl.server._
 import me.lsbengine.api.PostsAccessor
 import me.lsbengine.api.admin.AdminPostsAccessor
 import me.lsbengine.api.admin.security.{cookieName, _}
-import me.lsbengine.api.model.{PostForm, TokenResponse}
+import me.lsbengine.api.model.TokenResponse
 import me.lsbengine.database.model.{Post, Token}
 import me.lsbengine.errors
 import me.lsbengine.pages.admin
 import reactivemongo.api.{DefaultDB, MongoConnection}
-import reactivemongo.bson.BSONDocument
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -114,16 +113,34 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
           cookieAuthenticator { token =>
             path(IntNumber) {
               id =>
-                post {
-                  entity(as[PostForm]) {
-                    postForm =>
-                      if (postForm.csrf == token.csrf) {
-                        ctx => upsertPost(ctx, token, id, postForm.post)
-                      } else {
-                        complete(Forbidden, "CSRF Prevented")
+                optionalHeaderValueByName(csrfHeaderName) { csrf =>
+                  if (csrf.getOrElse("Invalid") == token.csrf) {
+                    post {
+                      entity(as[Post]) {
+                        postData =>
+                          ctx => upsertPost(ctx, id, postData)
                       }
+                    } ~ delete {
+                      ctx => deletePost(ctx, id)
+                    }
+                  } else {
+                    complete(Forbidden, "CSRF Prevented")
                   }
                 }
+            }
+          }
+        } ~ pathPrefix("trash") {
+          cookieAuthenticator { token =>
+            get {
+              ctx => downloadTrash(ctx)
+            } ~ optionalHeaderValueByName(csrfHeaderName) { csrf =>
+              if (csrf.getOrElse("Invalid") == token.csrf) {
+                delete {
+                  ctx => purgeTrash(ctx)
+                }
+              } else {
+                complete(Forbidden, "CSRF Prevented")
+              }
             }
           }
         }
@@ -172,14 +189,13 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
     }
   }
 
-  private def upsertPost(requestContext: RequestContext, token: Token, id: Int, post: Post): Future[RouteResult] = {
+  private def upsertPost(requestContext: RequestContext, id: Int, post: Post): Future[RouteResult] = {
     log.info(s"[$apiScope] Upserting post with id $id: $post.")
     handleWithDb(requestContext) {
       db =>
         //to be able to call the upsert
         val postsAccessor = new AdminPostsAccessor(db)
-        val selector = BSONDocument("id" -> id)
-        postsAccessor.upsertPost(selector, post).flatMap {
+        postsAccessor.upsertPost(id, post).flatMap {
           updateWriteResult =>
             if (updateWriteResult.ok) {
               requestContext.complete("Updated.")
@@ -192,7 +208,47 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
     }
   }
 
-  def edit(requestContext: RequestContext, token: Token, id: Int): Future[RouteResult] = {
+  private def deletePost(requestContext: RequestContext, id: Int): Future[RouteResult] = {
+    log.info(s"[$apiScope] Deleting post with id $id: $post.")
+    handleWithDb(requestContext) {
+      db =>
+        //to be able to call the upsert
+        val postsAccessor = new AdminPostsAccessor(db)
+        postsAccessor.deletePost(id).flatMap {
+          writeResult =>
+            if (writeResult.ok) {
+              requestContext.complete("Deleted.")
+            } else {
+              requestContext.complete(InternalServerError, "Write result is not ok.")
+            }
+        }.recoverWith {
+          case e => requestContext.complete(InternalServerError, s"$e")
+        }
+    }
+  }
+
+  private def downloadTrash(requestContext: RequestContext): Future[RouteResult] = {
+    handleWithDb(requestContext) {
+      db =>
+        val trashAccessor = new AdminPostsAccessor(db)
+        trashAccessor.getTrash.flatMap {
+          posts =>
+            requestContext.complete(posts)
+        }
+    }
+  }
+
+  private def purgeTrash(requestContext: RequestContext): Future[RouteResult] = {
+    handleWithDb(requestContext) {
+      db =>
+        val postsAccessor = new AdminPostsAccessor(db)
+        postsAccessor.purgeTrash.flatMap {
+          _ => requestContext.complete("Done.")
+        }
+    }
+  }
+
+  private def edit(requestContext: RequestContext, token: Token, id: Int): Future[RouteResult] = {
     handleWithDb(requestContext) {
       db =>
         val postsAccessor = new AdminPostsAccessor(db)

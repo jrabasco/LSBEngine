@@ -8,8 +8,6 @@ package object model {
 
   case class FetchPostResponse(post: Post)
 
-  case class PostForm(post: Post, csrf: String)
-
   case class TokenResponse(message: String)
 
 }

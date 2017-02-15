@@ -5,7 +5,8 @@ $tertiary-color: cornflowerblue;
 $error-primary-color: darkred;
 $error-secondary-color: palevioletred;
 
-$ok-primary-color: green;
+$success-primary-color: green;
+$success-secondary-color: greenyellow;
 
 $font-stack: Helvetica, sans-serif;
 $font-color: #333;
@@ -17,7 +18,9 @@ $spinner-background-color: lightgray;
 $spinner-color1: $primary-color;
 $spinner-color2: $tertiary-color;
 
-$ok-border-color: $ok-primary-color;
+$success-border-color: $success-primary-color;
+$success-text-color: $success-primary-color;
+$success-box-background-color: $success-secondary-color;
 
 $error-border-color: $error-primary-color;
 $error-text-color: $error-primary-color;

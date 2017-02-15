@@ -1,7 +1,7 @@
 package me.lsbengine.json
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import me.lsbengine.api.model.{FetchPostResponse, ListActionResponse, PostForm, TokenResponse}
+import me.lsbengine.api.model.{FetchPostResponse, ListActionResponse, TokenResponse}
 import me.lsbengine.database.model.Post
 import org.joda.time.DateTime
 import org.joda.time.format.{DateTimeFormatter, ISODateTimeFormat}
@@ -27,7 +27,7 @@ trait JSONSupport extends SprayJsonSupport with DefaultJsonProtocol with Collect
 
     def error(v: Any): DateTime = {
       val example = formatter.print(0)
-      deserializationError(s"$v is not a valid date. Dates must be in ISO format : $example")
+      deserializationError(s"$v is not a valid date. Dates must be in ISO formatForForm : $example")
     }
   }
 
@@ -43,7 +43,6 @@ trait JSONSupport extends SprayJsonSupport with DefaultJsonProtocol with Collect
   }
 
   implicit val postFormat: RootJsonFormat[Post] = jsonFormat5(Post)
-  implicit val postFormFormat: RootJsonFormat[PostForm] = jsonFormat2(PostForm)
   implicit val tokenResponseFormat: RootJsonFormat[TokenResponse] = jsonFormat1(TokenResponse)
   implicit val listActionResponseFormat: RootJsonFormat[ListActionResponse] = jsonFormat1(ListActionResponse)
   implicit val fetchPostResponseFormat: RootJsonFormat[FetchPostResponse] = jsonFormat1(FetchPostResponse)

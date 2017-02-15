@@ -30,7 +30,7 @@ form {
   }
 
   input[type=text].ok, input[type=password].ok {
-    border-left: 3px solid $ok-border-color;
+    border-left: 3px solid $success-border-color;
   }
 }
 
@@ -40,10 +40,56 @@ form {
 
 .post-edit-form {
   width: 90%;
-  text-align: left;
+  height: 800px;
+  text-align: right;
+
   .label-field {
     vertical-align: text-top;
     display: flex;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    label {
+      width: 10%;
+    }
+
+    input, textarea {
+      width: 80%;
+      margin-left: 5%;
+    }
+  }
+
+  .label-field-date {
+    vertical-align: text-top;
+    display: flex;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    label {
+      width: 10%;
+    }
+
+    input[type=datetime-local] {
+      margin-left: 5%;
+    }
+  }
+
+  .title, .publication {
+    height: 30px;
+  }
+
+  .content {
+    height: 600px;
+  }
+
+  .summary {
+    height: 60px;
+  }
+
+  .buttons {
+    text-align: center;
+  }
+  input[type=button] {
+    display: inline-block;
+    margin: 0 auto;
   }
 }
 

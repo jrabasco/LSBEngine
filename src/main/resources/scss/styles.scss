@@ -4,6 +4,7 @@
 
 * {
   margin: 0;
+  padding: 0;
 }
 
 footer {
@@ -85,6 +86,17 @@ h2 {
   border: 2px solid $error-border-color;
   background: $error-box-background-color;
   color: $error-text-color;
+  width: 75%;
+  text-align: center;
+  border-radius: 10px;
+}
+
+.success {
+  padding: 10px;
+  margin: 10px auto;
+  border: 2px solid $success-border-color;
+  background: $success-box-background-color;
+  color: $success-text-color;
   width: 75%;
   text-align: center;
   border-radius: 10px;

@@ -1,7 +1,6 @@
 @import me.lsbengine.server.BlogConfiguration
 @import me.lsbengine.database.model.Post
 @import me.lsbengine.database.model.Token
-@import com.github.nscala_time.time.Imports._
 @import me.lsbengine.components.html.{header, footer}
 @import me.lsbengine.components.admin.html.navbar
 @(token: Token, post: Post)
@@ -12,6 +11,7 @@
         <link rel="stylesheet" href="/css/styles.css">
         <script src="/js/@if(BlogConfiguration.appContext == "DEV") {jquery-3.1.1.js} else {jquery-3.1.1.min.js}"></script>
         <script src="/js/admin.js"></script>
+        <script src="/js/editpost.js"></script>
         <title>@Html(BlogConfiguration.blogOwner)'s Blog</title>
     </head>
     <body><div class="page-wrap">
@@ -20,19 +20,35 @@
     <h3>
             Logged in as @token.userName.
     </h3>
-        <form class="post-edit-form">
-            <div class="label-field"> <label for="title">Title:</label><input type="text" id="title" name="title" value="@post.title"/></div>
-            <div class="label-field">
-                <label for="summary">Summary:</label><textarea id="summary" name="summary">@post.summary</textarea>
+        <div id="form-error" class="error" style="display: none"></div>
+        <div id="form-success" class="success" style="display: none"></div>
+        <form class="post-edit-form" name="post-edit">
+            <div class="label-field title">
+                <label for="title">Title:</label>
+                <input type="text" id="title" name="title" value="@post.title"/>
             </div>
-            <div class="label-field">
-                <label for="content">Content:</label><textarea id="content" name="content">@post.content</textarea>
+            <div class="label-field summary">
+                <label for="summary">Summary:</label>
+                <textarea id="summary" name="summary" rows="2" cols="100">@post.summary</textarea>
             </div>
-            <div class="label-field">
-                <label for="date">Publication:</label><input type="text" id="date" name="date" value="@post.published"/>
+            <div class="label-field content">
+                <label for="content">Content:</label>
+                <textarea id="content" name="content">@post.content</textarea>
             </div>
+            <div class="label-field-date publication">
+                <label for="publication">Publication:</label>
+                <input type="datetime-local" id="publication" name="publication" value="1970-01-01T00:00"/>
+            </div>
+            <input type="hidden" name="id" value="@post.id">
             <input type="hidden" name="csrf" value="@token.csrf">
+            <input type="hidden" name="actualdate" id="actualdate" value="@post.published.getMillis">
+            <div class="buttons">
+                <input type="button" onclick="updatePost()" value="Update Post"/>
+                <input type="button" onclick="publish()" value="Publish">
+                <input type="button" onclick="backHome()" value="Quit Editing" />
+            </div>
         </form>
+        <div class="loader"></div>
     </div>
     @footer.render()
     </body>

@@ -5,6 +5,7 @@ import java.util.Base64
 package object security {
 
   val cookieName = "admin-access"
+  val csrfHeaderName = "X-Csrf-Protection"
 
   def base64Encode(bytes: Array[Byte]): String = {
     new String(Base64.getEncoder.encode(bytes))

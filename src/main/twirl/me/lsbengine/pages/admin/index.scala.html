@@ -20,6 +20,9 @@
         <h3>
             Logged in as @token.userName.
         </h3>
+        <div id="index-error" class="error" style="display: none"></div>
+        <div id="index-success" class="success" style="display: none"></div>
+        <div id="posts-list">
         @for(post <- posts) {
             @defining(DateTimeFormat.forPattern("dd-MM-yyyy' at 'HH:mm:ss' (UTC)'")) { formatter =>
                 <div class="post-summary">
@@ -27,9 +30,17 @@
                     @post.summary
                     <div class="date">@post.published.toString(formatter)</div>
                     <input type="button" onclick="edit(@post.id)" value="Edit"/>
+                    <input type="button" onclick="deletePost(@post.id)" value="Remove"/>
                 </div>
             }
         }
+        <input type="button" onclick="addPost()" value="Add Post"/>
+        <input type="button" onclick="downloadTrash()" value="Download Deleted Posts"/>
+        <input type="button" onclick="purgeTrash()" value="Purge Deleted Posts"/>
+        </div>
+        <div class="loader"></div>
+        <input type="hidden" name="csrf" id="csrf" value="@token.csrf"/>
+        <a id="downloadAnchorElem" style="display:none"></a>
     </div>
      @footer.render()
     </body>

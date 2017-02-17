@@ -10,4 +10,6 @@ package object model {
 
   case class TokenResponse(message: String)
 
+  case class PostCreationResponse(id: Int)
+
 }

@@ -1,6 +1,5 @@
 package me.lsbengine.api.admin
 
-import com.github.nscala_time.time.Imports._
 import me.lsbengine.api.PostsAccessor
 import me.lsbengine.database.DatabaseAccessor
 import me.lsbengine.database.model.MongoFormats._
@@ -30,9 +29,9 @@ class AdminPostsAccessor(db: DefaultDB)
     super.getItems(sort = sort)
   }
 
-  def upsertPost(id: Int, post: Post): Future[UpdateWriteResult] = {
+  def updatePost(id: Int, post: Post): Future[UpdateWriteResult] = {
     val selector = BSONDocument("id" -> id)
-    super.upsertItem(selector, post)
+    super.updateItem(selector, post)
   }
 
   def deletePost(id: Int): Future[UpdateWriteResult] = {
@@ -48,16 +47,26 @@ class AdminPostsAccessor(db: DefaultDB)
     }
   }
 
-  // Option to have a compatibility with the getPost method
-  def getNewEmptyPost: Future[Option[Post]] = {
+  def createPost(post: Post): Future[Option[Post]] = {
     val sort = BSONDocument("id" -> -1)
-    super.getItems(sort = sort, maxItems = 1).map {
+    super.getItems(sort = sort, maxItems = 1).flatMap {
       list =>
-        list.headOption match {
-          case Some(post) =>
-            Some(Post(post.id + 1, "New Post", "Summary", "Content", DateTime.now + 10.years))
+        val newId = list.headOption match {
+          case Some(lastPost) =>
+            lastPost.id + 1
           case None =>
-            Some(Post(0, "New Post", "Summary", "Content", DateTime.now + 10.years))
+            0
+        }
+
+        val newPost = post.copy(id = newId)
+        val selector = BSONDocument("id" -> newId)
+        super.upsertItem(selector, newPost).map {
+          res =>
+            if (res.ok) {
+              Some(newPost)
+            } else {
+              None
+            }
         }
     }
   }

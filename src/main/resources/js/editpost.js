@@ -24,7 +24,7 @@ function toISOString(date) {
     return resDate.toISOString();
 }
 
-function updatePost() {
+function updatePost(add) {
     var form = $('form[name="post-edit"]');
     var loader = $('.loader');
     if (!waiting) {
@@ -48,21 +48,25 @@ function updatePost() {
             published: publishedDateStr
         };
 
+        var reqType = add ? "POST" : "PUT";
+        var urlEnd = add ? "" : "/" + id;
+
         $.ajax({
-            type: "POST",
-            url: "/api/posts/" + id,
+            type: reqType,
+            url: "/api/posts" + urlEnd,
             data: JSON.stringify(post),
             cache: false,
             contentType: "application/json",
             headers: {
                 'X-Csrf-Protection': form[0].csrf.value
             },
-            success: function () {
+            success: function (resp) {
                 waiting = false;
                 loader.hide();
                 showMessage("form-success", "Update successful.");
+                var editId = add ? resp.id : id;
                 setTimeout(function () {
-                    edit(id);
+                    edit(editId);
                 }, 500);
             },
             error: function (resp) {
@@ -76,11 +80,11 @@ function updatePost() {
     }
 }
 
-function publish() {
+function publish(add) {
     if (!waiting && confirm("This will publish the post on the blog.")) {
         var publishDate = new Date();
         $("input[type='datetime-local']").val(formatForForm(publishDate));
-        updatePost()
+        updatePost(add)
     }
 }
 

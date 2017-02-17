@@ -24,4 +24,8 @@ class DatabaseAccessor[T](db: DefaultDB, collectionName: String) {
   def upsertItem(selector: BSONDocument, item: T)(implicit writer: BSONDocumentWriter[T]): Future[UpdateWriteResult] = {
     getCollection.update(selector, item, WriteConcern.Acknowledged, upsert = true)
   }
+
+  def updateItem(selector: BSONDocument, item: T)(implicit writer: BSONDocumentWriter[T]): Future[UpdateWriteResult] = {
+    getCollection.update(selector, item, WriteConcern.Acknowledged, upsert = false)
+  }
 }

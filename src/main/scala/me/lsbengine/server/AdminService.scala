@@ -4,10 +4,11 @@ import akka.event.LoggingAdapter
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model.headers.{HttpCookie, HttpCookiePair, `Access-Control-Allow-Credentials`}
 import akka.http.scaladsl.server._
+import com.github.nscala_time.time.Imports._
 import me.lsbengine.api.PostsAccessor
 import me.lsbengine.api.admin.AdminPostsAccessor
 import me.lsbengine.api.admin.security.{cookieName, _}
-import me.lsbengine.api.model.TokenResponse
+import me.lsbengine.api.model.{PostCreationResponse, TokenResponse}
 import me.lsbengine.database.model.{Post, Token}
 import me.lsbengine.errors
 import me.lsbengine.pages.admin
@@ -42,14 +43,14 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
         path(IntNumber) {
           id =>
             get {
-              ctx => edit(ctx, token, id)
+              ctx => editForm(ctx, token, id)
             }
         }
       }
     } ~ pathPrefix("addform") {
       cookieAuthenticator { token =>
         get {
-          ctx => edit(ctx, token, -1)
+          ctx => addForm(ctx, token)
         }
       }
     } ~
@@ -111,22 +112,29 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
           }
         } ~ pathPrefix("posts") {
           cookieAuthenticator { token =>
-            path(IntNumber) {
-              id =>
-                optionalHeaderValueByName(csrfHeaderName) { csrf =>
-                  if (csrf.getOrElse("Invalid") == token.csrf) {
-                    post {
+            optionalHeaderValueByName(csrfHeaderName) { csrf =>
+              if (csrf.getOrElse("Invalid") == token.csrf) {
+                pathEndOrSingleSlash {
+                  post {
+                    entity(as[Post]) {
+                      postData =>
+                        ctx => createPost(ctx, postData)
+                    }
+                  }
+                } ~ path(IntNumber) {
+                  id =>
+                    put {
                       entity(as[Post]) {
                         postData =>
-                          ctx => upsertPost(ctx, id, postData)
+                          ctx => updatePost(ctx, id, postData)
                       }
                     } ~ delete {
                       ctx => deletePost(ctx, id)
                     }
-                  } else {
-                    complete(Forbidden, "CSRF Prevented")
-                  }
                 }
+              } else {
+                complete(Forbidden, "CSRF Prevented")
+              }
             }
           }
         } ~ pathPrefix("trash") {
@@ -189,19 +197,37 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
     }
   }
 
-  private def upsertPost(requestContext: RequestContext, id: Int, post: Post): Future[RouteResult] = {
-    log.info(s"[$apiScope] Upserting post with id $id: $post.")
+  private def updatePost(requestContext: RequestContext, id: Int, post: Post): Future[RouteResult] = {
+    log.info(s"[$apiScope] Updating post with id $id: $post.")
     handleWithDb(requestContext) {
       db =>
         //to be able to call the upsert
         val postsAccessor = new AdminPostsAccessor(db)
-        postsAccessor.upsertPost(id, post).flatMap {
+        postsAccessor.updatePost(id, post).flatMap {
           updateWriteResult =>
-            if (updateWriteResult.ok) {
+            if (updateWriteResult.ok && updateWriteResult.n > 0) {
               requestContext.complete("Updated.")
-            } else {
+            } else if (!updateWriteResult.ok){
               requestContext.complete(InternalServerError, "Write result is not ok.")
+            } else {
+              requestContext.complete(NotFound, s"Post $id not found.")
             }
+        }.recoverWith {
+          case e => requestContext.complete(InternalServerError, s"$e")
+        }
+    }
+  }
+
+  private def createPost(requestContext: RequestContext, post: Post): Future[RouteResult] = {
+    log.info(s"[$apiScope] Creating post : $post")
+    handleWithDb(requestContext) {
+      db =>
+        val postsAccessor = new AdminPostsAccessor(db)
+        postsAccessor.createPost(post).flatMap {
+          case Some(createdPost) =>
+            requestContext.complete(PostCreationResponse(createdPost.id))
+          case None =>
+            requestContext.complete(InternalServerError, "Could not create post.")
         }.recoverWith {
           case e => requestContext.complete(InternalServerError, s"$e")
         }
@@ -228,6 +254,7 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
   }
 
   private def downloadTrash(requestContext: RequestContext): Future[RouteResult] = {
+    log.info(s"[$apiScope] Downloading trash.")
     handleWithDb(requestContext) {
       db =>
         val trashAccessor = new AdminPostsAccessor(db)
@@ -239,6 +266,7 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
   }
 
   private def purgeTrash(requestContext: RequestContext): Future[RouteResult] = {
+    log.info(s"[$apiScope] Purging trash.")
     handleWithDb(requestContext) {
       db =>
         val postsAccessor = new AdminPostsAccessor(db)
@@ -248,19 +276,18 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
     }
   }
 
-  private def edit(requestContext: RequestContext, token: Token, id: Int): Future[RouteResult] = {
+  private def addForm(requestContext: RequestContext, token: Token): Future[RouteResult] = {
+    requestContext.complete(admin.html.addedit.render(token, Post(-1, "", "", "", DateTime.now + 10.years), add = true))
+  }
+
+  private def editForm(requestContext: RequestContext, token: Token, id: Int): Future[RouteResult] = {
     handleWithDb(requestContext) {
       db =>
         val postsAccessor = new AdminPostsAccessor(db)
-        val futureMaybePost =
-          if (id >= 0) {
-            postsAccessor.getPost(id)
-          } else {
-            postsAccessor.getNewEmptyPost
-          }
-        futureMaybePost.flatMap {
+
+        postsAccessor.getPost(id).flatMap {
           case Some(post) =>
-            requestContext.complete(admin.html.edit.render(token, post))
+            requestContext.complete(admin.html.addedit.render(token, post, add = false))
           case None =>
             requestContext.complete(NotFound, errors.html.notfound.render(s"Post $id does not exist."))
         }.recoverWith {

@@ -42,7 +42,7 @@ trait JSONSupport extends SprayJsonSupport with DefaultJsonProtocol with Collect
     }
   }
 
-  implicit val postFormat: RootJsonFormat[Post] = jsonFormat5(Post)
+  implicit val postFormat: RootJsonFormat[Post] = jsonFormat6(Post)
   implicit val tokenResponseFormat: RootJsonFormat[TokenResponse] = jsonFormat1(TokenResponse)
   implicit val listActionResponseFormat: RootJsonFormat[ListActionResponse] = jsonFormat1(ListActionResponse)
   implicit val fetchPostResponseFormat: RootJsonFormat[FetchPostResponse] = jsonFormat1(FetchPostResponse)

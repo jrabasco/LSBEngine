@@ -9,10 +9,16 @@
     <head>
         <meta charset="UTF-8">
         <link rel="stylesheet" href="/css/styles.css">
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/default.min.css">
+        <script src="https://cdn.rawgit.com/showdownjs/showdown/1.6.3/dist/showdown.min.js"></script>
         <script src="/js/@if(BlogConfiguration.appContext == "DEV") {jquery-3.1.1.js} else {jquery-3.1.1.min.js}"></script>
         <script src="/js/admin.js"></script>
         <script src="/js/editpost.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js"></script>
         <title>@Html(BlogConfiguration.blogOwner)'s Blog</title>
+        <script>
+            hljs.configure({languages: []});
+        </script>
     </head>
     <body><div class="page-wrap">
         @navbar.render("")
@@ -32,8 +38,8 @@
                 <textarea id="summary" name="summary" rows="2" cols="100">@post.summary</textarea>
             </div>
             <div class="label-field content">
-                <label for="content">Content:</label>
-                <textarea id="content" name="content">@post.content</textarea>
+                <label for="contentmarkdown">Content:</label>
+                <textarea id="contentmarkdown" name="contentmarkdown">@post.contentMarkdown</textarea>
             </div>
             <div class="label-field-date publication">
                 <label for="publication">Publication:</label>
@@ -43,12 +49,19 @@
             <input type="hidden" name="csrf" value="@token.csrf">
             <input type="hidden" name="actualdate" id="actualdate" value="@post.published.getMillis">
             <div class="buttons">
-                <input type="button" onclick="updatePost(@add)" value="@if(add){Create} else {Update} Post"/>
+                <input type="button" onclick="showPreview()" value="Preview"/>
+                <input type="button" onclick="updatePost(@add)" value="@if(add){Create} else {Update}"/>
                 <input type="button" onclick="publish(@add)" value="Publish">
                 <input type="button" onclick="backHome()" value="Quit Editing" />
             </div>
         </form>
         <div class="loader"></div>
+        <div class="preview posts">
+            <hr/>
+            <div class="post"></div>
+            <hr/>
+            <input type="button" onclick="hidePreview()" value="Hide Preview"/>
+        </div>
     </div>
     @footer.render()
     </body>

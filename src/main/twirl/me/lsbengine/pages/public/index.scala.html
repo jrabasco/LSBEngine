@@ -7,18 +7,26 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/default.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js"></script>
+    <script src="/js/@if(BlogConfiguration.appContext == "DEV") {jquery-3.1.1.js} else {jquery-3.1.1.min.js}"></script>
+    <script>
+        hljs.configure({languages: []});
+        $(document).ready(function() {
+            $('pre code').each(function(i, block) {
+                hljs.highlightBlock(block);
+            });
+        });
+    </script>
     <title>@Html(BlogConfiguration.blogOwner)'s Blog</title>
 </head>
     <body><div class="page-wrap">
     @header.render()
-        <h2>
-          This is the beginning...
-        </h2>
-        <ul class="posts">
+        <div class="posts">
             @for(p <- posts) {
-                <li><h3>@p.title</h3> @p.content</li>
+                <div class="post"><h2>@p.title</h2> @Html(p.contentHtml)</div>
             }
-        </ul>
+        </div>
     </div>
     @footer.render()
     </body>

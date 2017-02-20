@@ -35,7 +35,10 @@ function updatePost(add) {
         var id = parseInt(form[0].id.value);
         var title = form[0].title.value;
         var summary = form[0].summary.value;
-        var content = form[0].content.value;
+
+        var converter = new showdown.Converter();
+        var contentMarkdown = form[0].contentmarkdown.value;
+        var contentHtml = converter.makeHtml(contentMarkdown);
         //Assures consistency between firefox and chrome
         var publishedDate = new Date(form[0].publication.value + ":00Z");
         var publishedDateStr = toISOString(publishedDate);
@@ -44,7 +47,8 @@ function updatePost(add) {
             id: id,
             title: title,
             summary: summary,
-            content: content,
+            contentMarkdown: contentMarkdown,
+            contentHtml: contentHtml,
             published: publishedDateStr
         };
 
@@ -88,8 +92,35 @@ function publish(add) {
     }
 }
 
+function showPreview() {
+    var form = $('form[name="post-edit"]');
+    var preview = $('.preview');
+    var previewPost = $('.preview > .post');
+    var loader = $('.loader');
+    form.hide();
+    loader.show();
+    var title = form[0].title.value;
+
+    var converter = new showdown.Converter();
+    var contentMarkdown = form[0].contentmarkdown.value;
+    var contentHtml = converter.makeHtml(contentMarkdown);
+
+    previewPost.html("<h2>" + title + "</h2>" + contentHtml);
+    loader.hide();
+    preview.show();
+}
+
+function hidePreview() {
+    var form = $('form[name="post-edit"]');
+    var preview = $('.preview');
+    preview.hide();
+    form.show();
+}
+
 $(function () {
     var dateStr = $("#actualdate").val();
     var date = new Date(parseInt(dateStr));
     $("input[type='datetime-local']").val(formatForForm(date));
+
+    showdown.setFlavor("github");
 });

@@ -277,7 +277,7 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
   }
 
   private def addForm(requestContext: RequestContext, token: Token): Future[RouteResult] = {
-    requestContext.complete(admin.html.addedit.render(token, Post(-1, "", "", "", DateTime.now + 10.years), add = true))
+    requestContext.complete(admin.html.addedit.render(token, Post(-1, "", "", "", "", DateTime.now + 10.years), add = true))
   }
 
   private def editForm(requestContext: RequestContext, token: Token, id: Int): Future[RouteResult] = {

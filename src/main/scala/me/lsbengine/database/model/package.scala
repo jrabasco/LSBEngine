@@ -13,7 +13,7 @@ package object model {
   }
 
 
-  case class Post(id: Int, title: String, summary: String, content: String, published: DateTime)
+  case class Post(id: Int, title: String, summary: String, contentMarkdown: String, contentHtml: String, published: DateTime)
 
   case class User(userName: String, password: String, salt: String)
 

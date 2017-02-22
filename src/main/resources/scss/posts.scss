@@ -1,7 +1,9 @@
 @import "theme.scss";
 
 .posts {
-  text-align: justify;
+  text-align: left;
+  max-width: 950px;
+  margin: auto;
 
   blockquote {
     display: block;

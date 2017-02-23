@@ -24,7 +24,7 @@
     @header.render()
         <div class="posts">
             @for(p <- posts) {
-                <div class="post"><h2>@p.title</h2> @Html(p.contentHtml)</div>
+                <div class="post"><h1>@p.title</h1> @Html(p.contentHtml)</div>
             }
         </div>
     </div>

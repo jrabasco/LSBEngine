@@ -17,7 +17,6 @@ footer {
 }
 
 .header {
-  margin-bottom: 10px;
   a {
     color: $font-color;
     text-decoration: inherit;
@@ -34,8 +33,14 @@ html, body {
   height: 100%;
 }
 
+h1 {
+  font-size: 40px;
+  margin: 40px 0;
+}
+
 h2 {
-  margin-bottom: 10px;
+  margin: 30px 0;
+  font-size: 30px;
 }
 
 .page-wrap {

@@ -31,121 +31,134 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
       super.commonRoutes
     }
 
-  override val ownRoutes: Route =
-    pathSingleSlash {
+  val frontendRoutes: Route =
+    pathEndOrSingleSlash {
       handleRejections(loginRejectionHandler) {
-        cookieAuthenticator {
-          token =>
-            ctx => index(ctx, token)
-        }
-      }
-    } ~ pathPrefix("editform") {
-      cookieAuthenticator { token =>
-        path(IntNumber) { id =>
+        cookieAuthenticator { token =>
           get {
-            ctx => editForm(ctx, token, id)
+            ctx => index(ctx, token)
           }
         }
       }
-    } ~ pathPrefix("addform") {
-      cookieAuthenticator { token =>
-        get {
-          ctx => addForm(ctx, token)
-        }
-      }
-    } ~
-      pathPrefix("api") {
-        path("token") {
-          credentialsAuthenticator { user =>
-            log.info(s"[$apiScope] Getting token for user ${user.userName}.")
-            post {
-              onComplete(dbConnection.database(dbName)) {
-                case Success(db) =>
-                  val tokensAccessor = new TokensAccessor(db)
-                  onComplete(tokensAccessor.getTokenWithUserName(user.userName)) {
-                    case Success(maybeToken) =>
-                      val newToken = maybeToken match {
-                        case Some(oldToken) =>
-                          TokenGenerator.renewToken(oldToken)
-                        case None =>
-                          TokenGenerator.generateToken(user.userName)
-                      }
-                      tokensAccessor.storeToken(newToken)
-                      val cookie = generateCookie(newToken)
-                      respondWithHeader(`Access-Control-Allow-Credentials`(true)) {
-                        setCookie(cookie) {
-                          complete(TokenResponse(s"Welcome ${user.userName}."))
-                        }
-                      }
-                    case Failure(e) =>
-                      complete(InternalServerError, s"Could not generate token: $e")
-                  }
-                case Failure(e) =>
-                  complete(InternalServerError, s"Could not generate token: $e")
-              }
-            }
-          }
-        } ~ path("check") {
-          cookieAuthenticator { token =>
-            log.info(s"[$apiScope] Checking token for user ${token.userName}.")
+    } ~ cookieAuthenticator { token =>
+      pathPrefix("posts") {
+        pathEndOrSingleSlash {
+          ctx => postsIndex(ctx, token)
+        } ~ pathPrefix("edit") {
+          path(IntNumber) { id =>
             get {
-              complete(s"User ${token.userName} is logged in.")
+              ctx => editPostForm(ctx, token, id)
             }
           }
-        } ~ path("new_password") {
-          cookieWithCsrfCheck {
-            post {
-              entity(as[NewCredentials]) { newCreds =>
-                ctx => updatePassword(ctx, newCreds)
-              }
-            }
+        } ~ pathPrefix("add") {
+          get {
+            ctx => addPostForm(ctx, token)
           }
-        } ~ path("logout") {
-          cookieAuthenticator { token =>
-            log.info(s"[$apiScope] Logging out user ${token.userName}.")
-            onSuccess(dbConnection.database(dbName)) { db =>
-              val tokensAccessor = new TokensAccessor(db)
-              onSuccess(tokensAccessor.removeToken(token.tokenId)) { res =>
-                if (res.ok) {
-                  deleteCookie(cookieName) {
-                    complete("Successfully logged out.")
-                  }
-                } else {
-                  complete(InternalServerError, s"Something wrong happened.")
+        }
+      } ~ pathPrefix("password") {
+        path("edit") {
+          get {
+            ctx => passwordForm(ctx, token)
+          }
+        }
+      }
+    }
+
+  val apiRoutes: Route =
+    pathPrefix("api") {
+      path("token") {
+        credentialsAuthenticator { user =>
+          log.info(s"[$apiScope] Getting token for user ${user.userName}.")
+          post {
+            onComplete(dbConnection.database(dbName)) {
+              case Success(db) =>
+                val tokensAccessor = new TokensAccessor(db)
+                onComplete(tokensAccessor.getTokenWithUserName(user.userName)) {
+                  case Success(maybeToken) =>
+                    val newToken = maybeToken match {
+                      case Some(oldToken) =>
+                        TokenGenerator.renewToken(oldToken)
+                      case None =>
+                        TokenGenerator.generateToken(user.userName)
+                    }
+                    tokensAccessor.storeToken(newToken)
+                    val cookie = generateCookie(newToken)
+                    respondWithHeader(`Access-Control-Allow-Credentials`(true)) {
+                      setCookie(cookie) {
+                        complete(TokenResponse(s"Welcome ${user.userName}."))
+                      }
+                    }
+                  case Failure(e) =>
+                    complete(InternalServerError, s"Could not generate token: $e")
                 }
-              }
+              case Failure(e) =>
+                complete(InternalServerError, s"Could not generate token: $e")
             }
           }
-        } ~ pathPrefix("posts") {
-          cookieWithCsrfCheck {
-            pathEndOrSingleSlash {
-              post {
-                entity(as[Post]) { postData =>
-                  ctx => createPost(ctx, postData)
-                }
-              }
-            } ~ path(IntNumber) { id =>
-              put {
-                entity(as[Post]) { postData =>
-                  ctx => updatePost(ctx, id, postData)
-                }
-              } ~ delete {
-                ctx => deletePost(ctx, id)
-              }
+        }
+      } ~ path("check") {
+        cookieAuthenticator { token =>
+          log.info(s"[$apiScope] Checking token for user ${token.userName}.")
+          get {
+            complete(s"User ${token.userName} is logged in.")
+          }
+        }
+      } ~ path("new_password") {
+        cookieWithCsrfCheck {
+          post {
+            entity(as[NewCredentials]) { newCreds =>
+              ctx => updatePassword(ctx, newCreds)
             }
           }
-        } ~ pathPrefix("trash") {
-          cookieAuthenticator { token =>
-            get {
-              ctx => downloadTrash(ctx)
-            } ~ csrfCheck(token) {
-              delete {
-                ctx => purgeTrash(ctx)
+        }
+      } ~ path("logout") {
+        cookieAuthenticator { token =>
+          log.info(s"[$apiScope] Logging out user ${token.userName}.")
+          onSuccess(dbConnection.database(dbName)) { db =>
+            val tokensAccessor = new TokensAccessor(db)
+            onSuccess(tokensAccessor.removeToken(token.tokenId)) { res =>
+              if (res.ok) {
+                deleteCookie(cookieName) {
+                  complete("Successfully logged out.")
+                }
+              } else {
+                complete(InternalServerError, s"Something wrong happened.")
               }
             }
           }
         }
+      } ~ pathPrefix("posts") {
+        cookieWithCsrfCheck {
+          pathEndOrSingleSlash {
+            post {
+              entity(as[Post]) { postData =>
+                ctx => createPost(ctx, postData)
+              }
+            }
+          } ~ path(IntNumber) { id =>
+            put {
+              entity(as[Post]) { postData =>
+                ctx => updatePost(ctx, id, postData)
+              }
+            } ~ delete {
+              ctx => deletePost(ctx, id)
+            }
+          }
+        }
+      } ~ pathPrefix("trash") {
+        cookieAuthenticator { token =>
+          get {
+            ctx => downloadTrash(ctx)
+          } ~ csrfCheck(token) {
+            delete {
+              ctx => purgeTrash(ctx)
+            }
+          }
+        }
       }
+    }
+
+  override val ownRoutes: Route = frontendRoutes ~ apiRoutes
 
   private def loginRejectionHandler: RejectionHandler =
     RejectionHandler.newBuilder().handle {
@@ -193,15 +206,19 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
     new AdminPostsAccessor(database)
   }
 
-  def index(requestContext: RequestContext, token: Token): Future[RouteResult] = {
+  private def index(requestContext: RequestContext, token: Token): Future[RouteResult] = {
+    requestContext.complete(OK, admin.html.index.render(token))
+  }
+
+  private def postsIndex(requestContext: RequestContext, token: Token): Future[RouteResult] = {
     handleWithDb(requestContext) { db =>
       val postsAccessor = new AdminPostsAccessor(db)
       postsAccessor.listPosts.flatMap {
         list =>
-          requestContext.complete(admin.html.index.render(token, list))
+          requestContext.complete(admin.html.postsindex.render(token, list))
       }.recoverWith {
         case _ =>
-          requestContext.complete(admin.html.index.render(token, List()))
+          requestContext.complete(admin.html.postsindex.render(token, List()))
       }
     }
   }
@@ -275,17 +292,17 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
     }
   }
 
-  private def addForm(requestContext: RequestContext, token: Token): Future[RouteResult] = {
-    requestContext.complete(admin.html.addedit.render(token, Post(-1, "", "", "", "", DateTime.now + 10.years), add = true))
+  private def addPostForm(requestContext: RequestContext, token: Token): Future[RouteResult] = {
+    requestContext.complete(admin.html.addeditpost.render(token, Post(-1, "", "", "", "", DateTime.now + 10.years), add = true))
   }
 
-  private def editForm(requestContext: RequestContext, token: Token, id: Int): Future[RouteResult] = {
+  private def editPostForm(requestContext: RequestContext, token: Token, id: Int): Future[RouteResult] = {
     handleWithDb(requestContext) { db =>
       val postsAccessor = new AdminPostsAccessor(db)
 
       postsAccessor.getPost(id).flatMap {
         case Some(post) =>
-          requestContext.complete(admin.html.addedit.render(token, post, add = false))
+          requestContext.complete(admin.html.addeditpost.render(token, post, add = false))
         case None =>
           requestContext.complete(NotFound, errors.html.notfound.render(s"Post $id does not exist."))
       }.recoverWith {
@@ -293,6 +310,10 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
           requestContext.complete(InternalServerError, errors.html.internalerror.render(s"Failed to retrieve post $id : $e"))
       }
     }
+  }
+
+  private def passwordForm(requestContext: RequestContext, token: Token): Future[RouteResult] = {
+    requestContext.complete(admin.html.editpassword.render(token))
   }
 
 }

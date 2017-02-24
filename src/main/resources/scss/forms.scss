@@ -34,8 +34,23 @@ form {
   }
 }
 
-.login-form {
-  width: 400px;
+.login-form, .edit-password-form {
+  max-width: 450px;
+
+  .label-field {
+    vertical-align: text-top;
+    display: flex;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    label {
+      width: 45%;
+    }
+
+    input {
+      width: 45%;
+      margin-right: 5%;
+    }
+  }
 }
 
 .post-edit-form {

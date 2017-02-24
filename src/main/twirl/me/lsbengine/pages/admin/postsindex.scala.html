@@ -1,0 +1,48 @@
+@import me.lsbengine.database.model.Token
+@import me.lsbengine.database.model.Post
+@import me.lsbengine.server.BlogConfiguration
+@import com.github.nscala_time.time.Imports._
+@import me.lsbengine.components.html.{header, footer}
+@import me.lsbengine.components.admin.html.navbar
+@(token: Token, posts: List[Post])
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="/css/styles.css">
+        <script src="/js/@if(BlogConfiguration.appContext == "DEV") {jquery-3.1.1.js} else {jquery-3.1.1.min.js}"></script>
+        <script src="/js/admin.js"></script>
+        <title>@Html(BlogConfiguration.blogOwner)'s Blog</title>
+    </head>
+    <body><div class="page-wrap">
+    @navbar.render("Posts")
+    @header.render()
+        <h3>
+            Logged in as @token.userName.
+        </h3>
+        <div id="posts-index-error" class="error" style="display: none"></div>
+        <div id="posts-index-success" class="success" style="display: none"></div>
+        <div id="posts-list">
+        @for(post <- posts) {
+            @defining(DateTimeFormat.forPattern("dd-MM-yyyy' at 'HH:mm:ss' (UTC)'")) { formatter =>
+                <div class="post-summary">
+                    <h4>@post.title</h4>
+                    @post.summary
+                    <div class="date">@post.published.toString(formatter)</div>
+                    <input type="button" onclick="edit(@post.id)" value="Edit"/>
+                    <input type="button" onclick="deletePost(@post.id, 'index', '#posts-list')" value="Remove"/>
+                </div>
+            }
+        }
+        <input type="button" onclick="addPost()" value="Add Post"/>
+        <input type="button" onclick="downloadTrash()" value="Download Deleted Posts"/>
+        <input type="button" onclick="purgeTrash()" value="Purge Deleted Posts"/>
+        <input type="button" onclick="backHome()" value="Back Home">
+        </div>
+        <div class="loader"></div>
+        <input type="hidden" name="csrf" id="csrf" value="@token.csrf"/>
+        <a id="downloadAnchorElem" style="display:none"></a>
+    </div>
+     @footer.render()
+    </body>
+</html>

@@ -17,14 +17,14 @@ function doLogout() {
     });
 }
 
-function deletePost(id) {
+function deletePost(id, statusId, toHide) {
     var csrfInput = $('input[name="csrf"]');
-    var postsList = $("#posts-list");
+    var toHideObject = $(toHide);
     var loader = $('.loader');
     if (!waiting && confirm("This will delete the post, are you sure you want to continue?")) {
-        hideMessage("index-error");
+        hideMessage(statusId+"-error");
         waiting = true;
-        postsList.hide();
+        toHideObject.hide();
         loader.show();
         $.ajax({
             type: "DELETE",
@@ -37,16 +37,16 @@ function deletePost(id) {
             success: function () {
                 waiting = false;
                 loader.hide();
-                showMessage("index-success", "Deletion successful.");
+                showMessage(statusId+"-success", "Deletion successful.");
                 setTimeout(function () {
-                    window.location.reload();
+                    postsHome()
                 }, 500);
             },
             error: function (resp) {
                 waiting = false;
                 loader.hide();
-                postsList.show();
-                showMessage("index-error", "Could not delete post for the following reason: " + resp.responseText);
+                toHideObject.show();
+                showMessage(statusId+"-error", "Could not delete post for the following reason: " + resp.responseText);
             }
         });
     }
@@ -94,38 +94,48 @@ function purgeTrash() {
             },
             success: function () {
                 waiting = false;
-                showMessage("index-success", "Deleted posts purged.");
+                showMessage("posts-index-success", "Deleted posts purged.");
                 setTimeout(function () {
-                    hideMessage("index-success");
+                    hideMessage("posts-index-success");
                 }, 1000);
             },
             error: function (resp) {
                 waiting = false;
-                showMessage("index-error", "Could not purge deleted posts for the following reason: " + resp.responseText);
+                showMessage("posts-index-error", "Could not purge deleted posts for the following reason: " + resp.responseText);
             }
         });
     }
 }
 
 function edit(id) {
-    window.location.href = "/editform/" + id;
+    window.location.href = "/posts/edit/" + id;
 }
 
 function addPost() {
-    window.location.href = "/addform";
+    window.location.href = "/posts/add";
 }
 
 function backHome() {
     window.location.href = "/";
 }
 
-function showMessage(errDivId, message) {
-    var errDiv = $("#" + errDivId);
+function postsHome() {
+    window.location.href = "/posts"
+}
+
+function showMessage(divId, message) {
+    var errDiv = $("#" + divId);
     errDiv.empty();
     errDiv.text(message);
     errDiv.show();
 }
 
-function hideMessage(errDivId) {
-    $("#" + errDivId).hide();
+function hideMessage(divId) {
+    $("#" + divId).hide();
+}
+
+function checkStr(text, minLength) {
+    return ((typeof text != "undefined") &&
+        (typeof text.valueOf() == "string") &&
+        (text.length >= minLength));
 }

@@ -21,7 +21,7 @@
         </script>
     </head>
     <body><div class="page-wrap">
-        @navbar.render("")
+        @navbar.render("Posts")
         @header.render()
     <h3>
             Logged in as @token.userName.
@@ -52,7 +52,8 @@
                 <input type="button" onclick="showPreview()" value="Preview"/>
                 <input type="button" onclick="updatePost(@add)" value="@if(add){Create} else {Update}"/>
                 <input type="button" onclick="publish(@add)" value="Publish">
-                <input type="button" onclick="backHome()" value="Quit Editing" />
+                @if(!add){<input type="button" onclick="deletePost(@post.id, 'form', 'form[name=&#34;post-edit&#34;]')" value="Remove Post">}
+                <input type="button" onclick="postsHome()" value="Quit @if(add){Adding} else {Editing}" />
             </div>
         </form>
         <div class="loader"></div>

@@ -36,7 +36,11 @@ function resetLogin() {
     hideMessage("login-error");
     var form = $('form[name="login"]');
     form[0].username.value = "";
+    $(form[0].username).removeClass("ok");
+    $(form[0].username).addClass("not-ok");
     form[0].password.value = "";
+    $(form[0].password).removeClass("ok");
+    $(form[0].password).addClass("not-ok");
 }
 
 $(document).keypress(function (event) {
@@ -48,14 +52,13 @@ $(document).keypress(function (event) {
 $(function () {
     $(":text, :password").keyup(function () {
         var enteredText = $(this).val();
-        if ((typeof enteredText != "undefined") &&
-            (typeof enteredText.valueOf() == "string") &&
-            (enteredText.length > 0)) {
+        if (checkStr(enteredText, 1)) {
             $(this).removeClass("not-ok");
-            $(this).addClass("ok")
+            $(this).addClass("ok");
+            hideMessage("login-error");
         } else {
             $(this).removeClass("ok");
-            $(this).addClass("not-ok")
+            $(this).addClass("not-ok");
         }
     });
 });

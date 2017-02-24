@@ -2,6 +2,8 @@
 <div class="navbar">
     <ul>
         <li><a href="/" @if(whichActive == "Home"){class="active"}>Home</a></li>
+        <li><a href="/posts" @if(whichActive == "Posts"){class="active"}>Edit Posts</a></li>
         <li style="float: right"><a href="javascript:void(0);" onclick="doLogout()">Logout</a></li>
+        <li style="float: right"><a href="/password/edit" @if(whichActive == "Password"){class="active"}>Change password</a></li>
     </ul>
 </div>

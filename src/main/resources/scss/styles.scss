@@ -87,7 +87,7 @@ h2 {
 
 .error {
   padding: 10px;
-  margin: 10px auto;
+  margin: 10px;
   border: 2px solid $error-border-color;
   background: $error-box-background-color;
   color: $error-text-color;
@@ -102,7 +102,7 @@ h2 {
 
 .success {
   padding: 10px;
-  margin: 10px auto;
+  margin: 10px;
   border: 2px solid $success-border-color;
   background: $success-box-background-color;
   color: $success-text-color;
@@ -156,4 +156,31 @@ h2 {
   }
 
   margin-bottom: 10px;
+}
+
+.menu {
+  max-width: 200px;
+  margin: 30px auto;
+  ul {
+    border-radius: 10px;
+    text-align: center;
+    list-style-type: none;
+    display: block;
+    margin: 0;
+    overflow: hidden;
+    background-color: $primary-color;
+  }
+
+  li a {
+    display: block;
+    color: $secondary-color;
+    text-align: center;
+    padding: 8px 16px;
+    text-decoration: none;
+  }
+
+  li a:hover {
+    background-color: $tertiary-color;
+    color: $secondary-color;
+  }
 }

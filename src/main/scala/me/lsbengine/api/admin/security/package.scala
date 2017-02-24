@@ -7,6 +7,8 @@ package object security {
   val cookieName = "admin-access"
   val csrfHeaderName = "X-Csrf-Protection"
 
+  case class NewCredentials(username: String, oldPassword: String, newPassword: String)
+
   def base64Encode(bytes: Array[Byte]): String = {
     new String(Base64.getEncoder.encode(bytes))
   }

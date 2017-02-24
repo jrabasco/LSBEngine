@@ -5,14 +5,12 @@ import akka.http.scaladsl.model.headers.HttpChallenge
 import akka.http.scaladsl.server.AuthenticationFailedRejection.CredentialsRejected
 import akka.http.scaladsl.server.{AuthenticationFailedRejection, Directive1, Directives}
 import me.lsbengine.api.admin.security.CredentialsAuthenticator.Credentials
-import me.lsbengine.database.DatabaseAccessor
-import me.lsbengine.database.model.{MongoCollections, User}
-import me.lsbengine.database.model.MongoFormats.userFormat
-import reactivemongo.api.MongoConnection
-import reactivemongo.bson.{BSONDocument, BSONRegex}
+import me.lsbengine.database.model.User
+import reactivemongo.api.{DefaultDB, MongoConnection}
 import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 object CredentialsAuthenticator {
 
@@ -38,24 +36,32 @@ trait CredentialsAuthenticator extends Directives with SprayJsonSupport with Def
     sameLength && sameContent
   }
 
+  def getUserAndValidatePassword(db: DefaultDB, creds: Credentials): Future[Option[User]] = {
+    val usersAccessor = new UsersAccessor(db)
+    usersAccessor.getUser(creds.username).map {
+      case Some(user) =>
+        if (isPasswordValid(user.password, user.salt, creds.password)) {
+          Some(user)
+        } else {
+          None
+        }
+      case None =>
+        //Does not give away that the username is invalid because of timing
+        val dummy = base64Encode(Array[Byte](22, 22, 22))
+        isPasswordValid(dummy, dummy, dummy)
+        None
+    }
+  }
+
   def credentialsAuthenticator: Directive1[User] = {
     entity(as[Credentials]).flatMap {
       creds =>
         onSuccess(dbConnection.database(dbName)).flatMap {
           db =>
-            val usersAccessor = new DatabaseAccessor[User](db, MongoCollections.usersCollectionName)
-            val selector = BSONDocument("userName" -> BSONRegex(s"^${creds.username}$$", "i"))
-            onSuccess(usersAccessor.getItem(selector)).flatMap {
+            onSuccess(getUserAndValidatePassword(db, creds)).flatMap {
               case Some(user) =>
-                if (isPasswordValid(user.password, user.salt, creds.password)) {
-                  provide(user)
-                } else {
-                  reject(AuthenticationFailedRejection(CredentialsRejected, HttpChallenge("Nope", "admin access")))
-                }
+                provide(user)
               case None =>
-                //Does not give away that the username is invalid because of timing
-                val dummy = base64Encode(Array[Byte](22, 22, 22))
-                isPasswordValid(dummy, dummy, dummy)
                 reject(AuthenticationFailedRejection(CredentialsRejected, HttpChallenge("Nope", "admin access")))
             }
         }

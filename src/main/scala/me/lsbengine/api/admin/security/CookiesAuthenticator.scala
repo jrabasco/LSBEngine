@@ -1,8 +1,11 @@
 package me.lsbengine.api.admin.security
 
-import akka.http.scaladsl.server.{Directive1, Directives, MissingCookieRejection, ValidationRejection}
+import akka.http.scaladsl.model.StatusCodes.Forbidden
+import akka.http.scaladsl.model.headers.{HttpCookie, HttpCookiePair}
+import akka.http.scaladsl.server._
 import com.github.nscala_time.time.Imports._
 import me.lsbengine.database.model.Token
+import me.lsbengine.server.BlogConfiguration
 import reactivemongo.api.{DefaultDB, MongoConnection}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -40,7 +43,7 @@ trait CookiesAuthenticator extends Directives {
     }
   }
 
-  def tokenRefresh(token: Token, db: DefaultDB): Unit = {
+  protected def tokenRefresh(token: Token, db: DefaultDB): Unit = {
     val now = DateTime.now
     if (now + 2.days > token.expiry) {
       val newToken = TokenGenerator.renewToken(token)
@@ -48,4 +51,36 @@ trait CookiesAuthenticator extends Directives {
       tokensAccessor.storeToken(newToken)
     }
   }
+
+  protected def generateCookie(newToken: Token): HttpCookie = {
+    val secure = BlogConfiguration.appContext == "PROD"
+    val expires = Some(akka.http.scaladsl.model.DateTime(newToken.expiry.getMillis))
+    // 2 weeks
+    val maxAge = Some(2L * 7 * 24 * 60 * 60 * 1000)
+    HttpCookie.fromPair(
+      pair = HttpCookiePair(cookieName, newToken.tokenId),
+      expires = expires,
+      maxAge = maxAge,
+      path = Some("/"),
+      secure = secure,
+      httpOnly = true)
+  }
+
+  protected def csrfCheck(token: Token)
+                       (onSuccess: Route): Route = {
+    optionalHeaderValueByName(csrfHeaderName) { csrfHeader =>
+      if (csrfHeader.getOrElse("Invalid") == token.csrf) {
+        onSuccess
+      } else {
+        complete(Forbidden, "CSRF Prevented")
+      }
+    }
+  }
+
+  protected def cookieWithCsrfCheck(onSuccess: Route): Route = {
+    cookieAuthenticator { token =>
+      csrfCheck(token)(onSuccess)
+    }
+  }
+
 }

@@ -1,7 +1,8 @@
 package me.lsbengine.json
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import me.lsbengine.api.model.{FetchPostResponse, ListActionResponse, TokenResponse, PostCreationResponse}
+import me.lsbengine.api.admin.security.NewCredentials
+import me.lsbengine.api.model.{FetchPostResponse, ListActionResponse, PostCreationResponse, TokenResponse}
 import me.lsbengine.database.model.Post
 import org.joda.time.DateTime
 import org.joda.time.format.{DateTimeFormatter, ISODateTimeFormat}
@@ -47,4 +48,6 @@ trait JSONSupport extends SprayJsonSupport with DefaultJsonProtocol with Collect
   implicit val listActionResponseFormat: RootJsonFormat[ListActionResponse] = jsonFormat1(ListActionResponse)
   implicit val fetchPostResponseFormat: RootJsonFormat[FetchPostResponse] = jsonFormat1(FetchPostResponse)
   implicit val postCreationResponseFormat: RootJsonFormat[PostCreationResponse] = jsonFormat1(PostCreationResponse)
+
+  implicit val newCredentialsFormat: RootJsonFormat[NewCredentials] = jsonFormat3(NewCredentials)
 }

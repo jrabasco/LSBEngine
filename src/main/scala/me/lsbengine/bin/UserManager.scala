@@ -39,16 +39,15 @@ object UserManager extends App {
 
           connection.database(mongodbName).onComplete {
             case Success(db) =>
-              val usersCollection = db[BSONCollection](MongoCollections.usersCollectionName)
-              val selector = BSONDocument("userName" -> BSONRegex(s"^$username$$", "i"))
-              usersCollection.find(selector).one[User].onComplete {
+              val usersAccessor = new UsersAccessor(db)
+             usersAccessor.getUser(username).onComplete {
                 case Success(maybeUser) =>
                   maybeUser match {
                     case Some(_) =>
                       println(s"User $username already in database. Replace [y/N] ?")
                       val answer = scala.io.StdIn.readLine()
                       if (answer == "y" || answer == "Y") {
-                        usersCollection.update(selector, user, upsert = true, writeConcern = WriteConcern.Acknowledged).onComplete {
+                        usersAccessor.updateUser(user).onComplete {
                           case Success(w) =>
                             if (w.ok) {
                               printAndExit(s"User created.")
@@ -62,7 +61,7 @@ object UserManager extends App {
                         printAndExit("OK.")
                       }
                     case None =>
-                      usersCollection.update(selector, user, upsert = true, writeConcern = WriteConcern.Acknowledged).onComplete {
+                      usersAccessor.updateUser(user).onComplete {
                         case Success(w) =>
                           if (w.ok) {
                             printAndExit(s"User created.")

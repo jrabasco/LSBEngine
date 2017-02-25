@@ -55,7 +55,8 @@ tags
 # Sass
 *.sass-cache*
 # generated css
-src/main/resources/css/*
+src/main/resources/css/styles.css
+src/main/resources/css/styles.css.map
 # generated js
 src/main/resources/js/admin.min.js
 # resume folder

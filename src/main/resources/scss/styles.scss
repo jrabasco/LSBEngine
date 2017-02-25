@@ -44,8 +44,9 @@ h2 {
 }
 
 .page-wrap {
+  max-width: $page-max-width;
+  margin: 0 auto -20px auto;
   min-height: 100%;
-  margin-bottom: -20px;
 }
 
 .page-wrap:after {
@@ -58,10 +59,10 @@ h2 {
 }
 
 .site-footer {
-  background: $box-background-color;
-  hr {
-    border: 1px solid $border-color;
-  }
+  max-width: $page-max-width;
+  margin: 0 auto;
+  font-weight: bold;
+  opacity: 0.5;
 }
 
 .loader {
@@ -131,10 +132,13 @@ h2 {
     padding: 0;
     overflow: hidden;
     background-color: $primary-color;
+    display: flex;
   }
 
   li {
-    float: left;
+    flex: 1;
+    border: 0;
+    width: auto;
   }
 
   li a {

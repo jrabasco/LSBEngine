@@ -1,0 +1,16 @@
+@import me.lsbengine.database.model.NavBarConf
+@import me.lsbengine.components.html.footer
+@import me.lsbengine.components.public.html.{head, navbar}
+@(navBarConf: NavBarConf)
+<!DOCTYPE html>
+<html lang="en">
+    @head.render()
+    <body><div class="page-wrap">
+        @if(navBarConf.projects || navBarConf.about) {
+            @navbar.render("About", navBarConf)
+        }
+        <p>About page under construction...</p>
+    </div>
+    @footer.render()
+    </body>
+</html>

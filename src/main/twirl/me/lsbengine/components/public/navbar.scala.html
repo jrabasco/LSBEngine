@@ -1,0 +1,10 @@
+@import me.lsbengine.database.model.NavBarConf
+
+@(whichActive: String, conf: NavBarConf)
+<div class="navbar">
+    <ul>
+        <li><a href="/" @if(whichActive == "Home"){class="active"}>Home</a></li>
+        @if(conf.projects){<li><a href="/projects" @if(whichActive == "Projects"){class="active"}>Projects</a></li>}
+        @if(conf.about){<li><a href="/about" @if(whichActive == "About"){class="active"}>About Me</a></li>}
+    </ul>
+</div>

@@ -15,6 +15,8 @@ package object model {
 
   case class Post(id: Int, title: String, summary: String, contentMarkdown: String, contentHtml: String, published: DateTime)
 
+  case class NavBarConf(projects: Boolean, about: Boolean)
+
   case class User(userName: String, password: String, salt: String)
 
   case class Token(tokenId: String, userName: String, csrf: String, expiry: DateTime)
@@ -29,6 +31,7 @@ package object model {
     }
 
     implicit val postFormat: Formatter[Post] = Macros.handler[Post]
+    implicit val navBarFormat: Formatter[NavBarConf] = Macros.handler[NavBarConf]
     implicit val userFormat: Formatter[User] = Macros.handler[User]
     implicit val tokenFormat: Formatter[Token] = Macros.handler[Token]
   }

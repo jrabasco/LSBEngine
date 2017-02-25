@@ -1,4 +1,4 @@
-@import me.lsbengine.components.html.{footer, header}
+@import me.lsbengine.components.html.footer
 @import me.lsbengine.database.model.Token
 @import me.lsbengine.components.admin.html.{navbar, head}
 @(token: Token)
@@ -7,7 +7,6 @@
     @head.render("")
     <body><div class="page-wrap">
         @navbar.render("Home")
-        @header.render()
         <h2>
             Logged in as @token.userName.
         </h2>
@@ -18,6 +17,6 @@
             </ul>
         </div>
     </div>
-        @footer.render()
+    @footer.render()
     </body>
 </html>

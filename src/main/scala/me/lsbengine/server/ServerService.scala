@@ -50,6 +50,10 @@ abstract class ServerService(dbConnection: MongoConnection, dbName: String, log:
       get {
         getFromResourceDirectory("js")
       }
+    } ~ pathPrefix("images") {
+      get {
+        getFromResourceDirectory("images")
+      }
     }
 
   def listPosts(requestContext: RequestContext): Future[RouteResult] = {

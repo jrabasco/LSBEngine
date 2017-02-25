@@ -50,9 +50,9 @@ abstract class ServerService(dbConnection: MongoConnection, dbName: String, log:
       get {
         getFromResourceDirectory("js")
       }
-    } ~ pathPrefix("images") {
+    } ~ pathPrefix("assets") {
       get {
-        getFromResourceDirectory("images")
+        getFromResourceDirectory("assets")
       }
     }
 

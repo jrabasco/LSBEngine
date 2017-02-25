@@ -71,6 +71,13 @@ minifyjs := {
   "./minify-js.sh" !
 }
 
+lazy val resume = taskKey[Unit]("Generates the resume")
+
+resume := {
+  println("Generating resume...")
+  "./build-resume.sh" !
+}
+
 resolvers ++= Seq("spray" at "http://repo.spray.io/")
 
 resolvers ++= Seq("snapshots", "releases").map(Resolver.sonatypeRepo)
@@ -91,6 +98,7 @@ test in assembly := {}
 parallelExecution in Test := false
 Revolver.settings
 
-compile in Compile := ((compile in Compile) dependsOn sass).value
+compile in Compile := ((compile in Compile) dependsOn resume).value
 compile in Compile := ((compile in Compile) dependsOn minifyjs).value
+compile in Compile := ((compile in Compile) dependsOn sass).value
 mainClass in(Compile, run) := Some("me.lsbengine.server.Blog")

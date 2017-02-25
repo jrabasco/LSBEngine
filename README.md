@@ -32,6 +32,7 @@ takes around 1 second to perform a hash)
 - `CONTACT_ADDRESS`: email for the footer (default `rabasco.jeremy@gmail.com`)
 - `HEADER_TITLE`: title in the header (default `LSBEngine`)
 - `SITE_URL`: the URL of the website (default `local.lsbengine.me`)
+- `RESUME_REPO`: link to your resume repository, see the Resume section
 
 ## Adding/Removing users
 
@@ -48,6 +49,11 @@ $ sbt run-main me.lsbengine.bin.UserManager remove <username>
 
 The usernames are case insensitive. Remember that all the users are considered _admin_ users.
 
+## Resume
+
+To make your resume available, you must provide a link to your resume repository. This repository must contain a Makefile so that when running `make` in the repository, it generates a file named `resume.pdf`. It will be then downloadable from the following route: `/assets/$firstname_$lastname_resume.pdf`. `$firstname` and `$lastname` are the provided names in lower case.
+
+If no repository is provided, this just does not happen at all.
 ## Running
 
 Clone the repository and run

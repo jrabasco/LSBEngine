@@ -58,3 +58,8 @@ tags
 src/main/resources/css/*
 # generated js
 src/main/resources/js/admin.min.js
+# resume folder
+resume/*
+src/main/resources/assets/*.pdf
+# environment folder
+env/*

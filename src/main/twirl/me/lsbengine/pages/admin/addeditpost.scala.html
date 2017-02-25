@@ -18,9 +18,7 @@
     <body><div class="page-wrap">
         @navbar.render("Posts")
         @header.render()
-    <h3>
-            Logged in as @token.userName.
-    </h3>
+
         <div id="form-error" class="error" style="display: none"></div>
         <div id="form-success" class="success" style="display: none"></div>
         <form class="post-edit-form" name="post-edit">
@@ -53,9 +51,7 @@
         </form>
         <div class="loader"></div>
         <div class="preview posts">
-            <hr/>
             <div class="post"></div>
-            <hr/>
             <input type="button" onclick="hidePreview()" value="Hide Preview"/>
         </div>
     </div>

@@ -35,7 +35,7 @@ html, body {
 
 h1 {
   font-size: 40px;
-  margin: 40px 0;
+  margin-bottom: 40px;
 }
 
 h2 {
@@ -119,8 +119,8 @@ h2 {
   display: none;
 
   input[type=button] {
-    display: inline-block;
-    margin: 0 50%;
+    display: block;
+    margin: 10px auto;
   }
 }
 

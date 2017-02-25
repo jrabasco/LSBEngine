@@ -60,7 +60,7 @@ src/main/resources/css/styles.css.map
 # generated js
 src/main/resources/js/admin.min.js
 # resume folder
-resume/*
+resume
 src/main/resources/assets/*.pdf
 # environment folder
 env/*

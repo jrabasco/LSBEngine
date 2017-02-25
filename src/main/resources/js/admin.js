@@ -278,7 +278,7 @@ function showPreview() {
     var contentMarkdown = form[0].contentmarkdown.value;
     var contentHtml = converter.makeHtml(contentMarkdown);
 
-    previewPost.html("<h2>" + title + "</h2>" + contentHtml);
+    previewPost.html("<h1>" + title + "</h1>" + contentHtml);
     $('pre code').each(function(i, block) {
         hljs.highlightBlock(block);
     });

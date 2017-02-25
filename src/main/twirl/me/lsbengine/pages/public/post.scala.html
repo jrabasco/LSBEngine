@@ -1,25 +1,10 @@
 @import me.lsbengine.database.model.Post
-@import me.lsbengine.server.BlogConfiguration
+@import me.lsbengine.components.public.html.head
 @import me.lsbengine.components.html.{header, footer}
 @(post: Post)
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="/css/styles.css">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/default.min.css">
-    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js"></script>
-    <script src="/js/@if(BlogConfiguration.appContext == "DEV") {jquery-3.1.1.js} else {jquery-3.1.1.min.js}"></script>
-    <script>
-        hljs.configure({languages: []});
-        $(document).ready(function() {
-            $('pre code').each(function(i, block) {
-                hljs.highlightBlock(block);
-            });
-        });
-    </script>
-    <title>@Html(BlogConfiguration.blogOwner)'s Blog</title>
-</head>
+    @head.render()
     <body><div class="page-wrap">
     @header.render()
         <div class="posts">

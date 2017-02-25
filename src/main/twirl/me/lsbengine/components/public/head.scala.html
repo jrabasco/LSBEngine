@@ -1,0 +1,51 @@
+@import me.lsbengine.server.BlogConfiguration
+@()
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="Author" content="@BlogConfiguration.blogOwner"/>
+    <meta name="Rev" content="@BlogConfiguration.contactAddress"/>
+    <meta name="Copyright" content="@BlogConfiguration.blogOwner 2017"/>
+    <meta name="Description" content="My personal blog"/>
+    <meta name="Robots" content="ALL"/>
+    <meta content="@BlogConfiguration.blogOwner's Personal Blog" property="og:site_name"/>
+    <meta content="@BlogConfiguration.blogOwner" property="og:title"/>
+    <meta content="@BlogConfiguration.siteUrl" property="og:url"/>
+    <meta content="profile" property="og:type"/>
+    <meta content="@BlogConfiguration.blogOwnerFirstName" property="og:profile:first_name"/>
+    <meta content="@BlogConfiguration.blogOwnerLastName" property="og:profile:last_name"/>
+    @if(BlogConfiguration.blogOwnerPseudo != "") {
+        <meta content="@BlogConfiguration.blogOwnerPseudo" property="og:profile:username"/>
+    }
+    <meta content="@BlogConfiguration.blogOwnerGender" property="og:profile:gender"/>
+    <meta content="@BlogConfiguration.blogMetaDescription" property="og:description"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <link rel="shortcut icon" type="image/png" href="/images/favicon.png"/>
+    <link rel="stylesheet" href="/css/styles.css">
+
+    @if(BlogConfiguration.appContext == "DEV") {
+        <script src="/js/jquery-3.1.1.js"></script>
+        <link rel="stylesheet" href="/css/default.min.css">
+        <script src="/js/highlight.min.js"></script>
+        <script src="/js/showdown.min.js"></script>
+    } else {
+        <script
+        src="https://code.jquery.com/jquery-3.1.1.min.js"
+        integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+        crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/default.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.6.3/showdown.min.js"></script>
+    }
+
+    <script>
+        hljs.configure({languages: []});
+        $(document).ready(function() {
+            $('pre code').each(function(i, block) {
+                hljs.highlightBlock(block);
+            });
+        });
+    </script>
+    <title>@Html(BlogConfiguration.blogOwner)</title>
+</head>

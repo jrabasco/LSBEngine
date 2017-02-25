@@ -56,3 +56,5 @@ tags
 *.sass-cache*
 # generated css
 src/main/resources/css/*
+# generated js
+src/main/resources/js/admin.min.js

@@ -64,6 +64,13 @@ sass := {
   "./build-sass.sh" !
 }
 
+lazy val minifyjs = taskKey[Unit]("Minifies the Javascript")
+
+minifyjs := {
+  println("Minifying javascript...")
+  "./minify-js.sh" !
+}
+
 resolvers ++= Seq("spray" at "http://repo.spray.io/")
 
 resolvers ++= Seq("snapshots", "releases").map(Resolver.sonatypeRepo)
@@ -85,4 +92,5 @@ parallelExecution in Test := false
 Revolver.settings
 
 compile in Compile := ((compile in Compile) dependsOn sass).value
+compile in Compile := ((compile in Compile) dependsOn minifyjs).value
 mainClass in(Compile, run) := Some("me.lsbengine.server.Blog")

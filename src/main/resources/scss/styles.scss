@@ -87,7 +87,7 @@ h2 {
 
 .error {
   padding: 10px;
-  margin: 10px;
+  margin: 10px auto;
   border: 2px solid $error-border-color;
   background: $error-box-background-color;
   color: $error-text-color;
@@ -102,7 +102,7 @@ h2 {
 
 .success {
   padding: 10px;
-  margin: 10px;
+  margin: 10px auto;
   border: 2px solid $success-border-color;
   background: $success-box-background-color;
   color: $success-text-color;

@@ -1,22 +1,28 @@
+@import me.lsbengine.components.admin.html.{head, navbar}
 @import me.lsbengine.components.html.footer
-@import me.lsbengine.database.model.Token
-@import me.lsbengine.components.admin.html.{navbar, head}
-@(token: Token)
+@import me.lsbengine.database.model.{NavBarConf, Token}
+@(token: Token, navBarConf: NavBarConf)
 <!DOCTYPE html>
 <html lang="en">
     @head.render("")
-    <body><div class="page-wrap">
-        @navbar.render("Home")
-        <h2>
-            Logged in as @token.userName.
-        </h2>
-        <div class="menu">
-            <ul>
-                <li><a href="/posts">Edit posts</a></li>
-                <li><a href="/password/edit">Change password</a></li>
-            </ul>
+<body><div class="page-wrap">
+    @navbar.render("Home")
+    <h2>Logged in as @token.userName</h2>
+    <h2>Public navigation bar:</h2>
+    <div id="form-error" class="error" style="display: none"></div>
+    <div id="form-success" class="success" style="display: none"></div>
+    <div class="loader"></div>
+    <form name="edit-navbar" class="edit-navbar-form">
+        <label for="projects">Projects:</label>
+        <input type="checkbox" id="projects" name="projects" @if(navBarConf.projects) {checked} />
+        <label for="about">About:</label>
+        <input type="checkbox" id="about" name="about" @if(navBarConf.about) {checked} />
+        <input type="hidden" name="csrf" value="@token.csrf">
+        <div class="buttons">
+            <input type="button" onclick="submitNavbarConf()" value="Update"/>
         </div>
-    </div>
+    </form>
+</div>
     @footer.render()
-    </body>
+</body>
 </html>

@@ -1,14 +1,13 @@
 package me.lsbengine.server
 
 import akka.event.LoggingAdapter
-import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.StatusCodes.{InternalServerError, NotFound}
+import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{RequestContext, Route, RouteResult}
 import me.lsbengine.api.PostsAccessor
 import me.lsbengine.api.public.PublicPostsAccessor
-import me.lsbengine.database.model.NavBarConf
-import me.lsbengine.pages.public.html
 import me.lsbengine.errors
+import me.lsbengine.pages.public.html
 import reactivemongo.api.{DefaultDB, MongoConnection}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -22,47 +21,63 @@ class PublicService(dbConnection: MongoConnection, dbName: String, log: LoggingA
       ctx => index(ctx)
     } ~ pathPrefix("posts") {
       path(IntNumber) { id =>
-          ctx => individualPost(ctx, id)
+        ctx => individualPost(ctx, id)
       }
     } ~ pathPrefix("about") {
-      complete(html.about.render(NavBarConf(true, true)))
+      ctx => about(ctx)
     } ~ pathPrefix("projects") {
       pathEndOrSingleSlash {
-        complete(html.projects.render(NavBarConf(true, true)))
+        ctx => projects(ctx)
       } ~ path(IntNumber) { id =>
-        complete(html.project.render(id, NavBarConf(true, true)))
+        ctx => individualProject(ctx, id)
       }
     }
 
   override val apiScope: String = "public"
 
   def index(requestContext: RequestContext): Future[RouteResult] = {
-    handleWithDb(requestContext) {
-      db =>
-        val postsAccessor = getPostsAccessor(db)
-        postsAccessor.listPosts.flatMap {
-          list =>
-            requestContext.complete(html.index.render(list, NavBarConf(true, true)))
-        }.recoverWith {
-          case _ =>
-            requestContext.complete(html.index.render(List(), NavBarConf(true, true)))
-        }
+    handleWithNavBarConf(requestContext) { (db, conf) =>
+      val postsAccessor = getPostsAccessor(db)
+      postsAccessor.listPosts.flatMap {
+        list =>
+          requestContext.complete(html.index.render(list, conf))
+      }.recoverWith {
+        case _ =>
+          requestContext.complete(html.index.render(List(), conf))
+      }
     }
   }
 
   def individualPost(requestContext: RequestContext, id: Int): Future[RouteResult] = {
-    handleWithDb(requestContext) {
-      db =>
-        val postsAccessor = getPostsAccessor(db)
-        postsAccessor.getPost(id).flatMap {
-          case Some(post) =>
-            requestContext.complete(html.post.render(post, NavBarConf(true, true)))
-          case None =>
-            requestContext.complete(NotFound, errors.html.notfound.render(s"Post $id not found."))
-        }.recoverWith {
-          case _ =>
-            requestContext.complete(InternalServerError, errors.html.internalerror(s"Database access failed."))
-        }
+    handleWithNavBarConf(requestContext) { (db, conf) =>
+      val postsAccessor = getPostsAccessor(db)
+      postsAccessor.getPost(id).flatMap {
+        case Some(post) =>
+          requestContext.complete(html.post.render(post, conf))
+        case None =>
+          requestContext.complete(NotFound, errors.html.notfound.render(s"Post $id not found."))
+      }.recoverWith {
+        case _ =>
+          requestContext.complete(InternalServerError, errors.html.internalerror(s"Database access failed."))
+      }
+    }
+  }
+
+  def about(requestContext: RequestContext): Future[RouteResult] = {
+    handleWithNavBarConf(requestContext) { (db, conf) =>
+      requestContext.complete(html.about.render(conf))
+    }
+  }
+
+  def projects(requestContext: RequestContext): Future[RouteResult] = {
+    handleWithNavBarConf(requestContext) { (db, conf) =>
+      requestContext.complete(html.projects.render(conf))
+    }
+  }
+
+  def individualProject(requestContext: RequestContext, id: Int): Future[RouteResult] = {
+    handleWithNavBarConf(requestContext) { (db, conf) =>
+      requestContext.complete(html.project.render(id, conf))
     }
   }
 

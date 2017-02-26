@@ -1,0 +1,13 @@
+@import me.lsbengine.components.html.footer
+@import me.lsbengine.components.admin.html.{navbar, head}
+@(id: Int)
+<!DOCTYPE html>
+<html lang="en">
+    @head.render("")
+    <body><div class="page-wrap">
+    @navbar.render("Projects")
+    <p>Project @id edition under construction...</p>
+    </div>
+     @footer.render()
+    </body>
+</html>

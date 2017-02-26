@@ -6,11 +6,11 @@ import akka.http.scaladsl.model.headers.`Access-Control-Allow-Credentials`
 import akka.http.scaladsl.server._
 import com.github.nscala_time.time.Imports._
 import me.lsbengine.api.PostsAccessor
-import me.lsbengine.api.admin.AdminPostsAccessor
+import me.lsbengine.api.admin.{AdminPostsAccessor, NavBarConfAccessor}
 import me.lsbengine.api.admin.security.CredentialsAuthenticator.Credentials
 import me.lsbengine.api.admin.security._
 import me.lsbengine.api.model.{PostCreationResponse, TokenResponse}
-import me.lsbengine.database.model.{Post, Token, User}
+import me.lsbengine.database.model.{NavBarConf, Post, Token, User}
 import me.lsbengine.errors
 import me.lsbengine.pages.admin
 import reactivemongo.api.{DefaultDB, MongoConnection}
@@ -41,24 +41,18 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
         }
       }
     } ~ cookieAuthenticator { token =>
-      pathPrefix("posts") {
-        pathEndOrSingleSlash {
-          ctx => postsIndex(ctx, token)
-        } ~ pathPrefix("edit") {
-          path(IntNumber) { id =>
+      resourceForms("posts", token, postsIndex, editPostForm, addPostForm) ~
+        resourceForms("projects", token, projectsIndex, editProjectForm, addProjectForm) ~
+        pathPrefix("password") {
+          path("edit") {
             get {
-              ctx => editPostForm(ctx, token, id)
+              ctx => passwordForm(ctx, token)
             }
           }
-        } ~ pathPrefix("add") {
-          get {
-            ctx => addPostForm(ctx, token)
-          }
-        }
-      } ~ pathPrefix("password") {
+        } ~ pathPrefix("perso") {
         path("edit") {
           get {
-            ctx => passwordForm(ctx, token)
+            ctx => personalDetailsEdition(ctx, token)
           }
         }
       }
@@ -155,10 +149,45 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
             }
           }
         }
+      } ~ pathPrefix("navbar") {
+        cookieWithCsrfCheck {
+          pathEndOrSingleSlash {
+            put {
+              entity(as[NavBarConf]) { conf =>
+                ctx => updateNavBarConf(ctx, conf)
+              }
+            }
+          }
+        }
       }
     }
 
   override val ownRoutes: Route = frontendRoutes ~ apiRoutes
+
+  override def getPostsAccessor(database: DefaultDB): PostsAccessor = {
+    new AdminPostsAccessor(database)
+  }
+
+  private def resourceForms(resourceName: String, token: Token,
+                            index: (RequestContext, Token) => Future[RouteResult],
+                            edit: (RequestContext, Token, Int) => Future[RouteResult],
+                            add: (RequestContext, Token) => Future[RouteResult]): Route = {
+    pathPrefix(resourceName) {
+      pathEndOrSingleSlash {
+        ctx => index(ctx, token)
+      } ~ pathPrefix("edit") {
+        path(IntNumber) { id =>
+          get {
+            ctx => edit(ctx, token, id)
+          }
+        }
+      } ~ pathPrefix("add") {
+        get {
+          ctx => add(ctx, token)
+        }
+      }
+    }
+  }
 
   private def loginRejectionHandler: RejectionHandler =
     RejectionHandler.newBuilder().handle {
@@ -202,12 +231,10 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
     }
   }
 
-  override def getPostsAccessor(database: DefaultDB): PostsAccessor = {
-    new AdminPostsAccessor(database)
-  }
-
   private def index(requestContext: RequestContext, token: Token): Future[RouteResult] = {
-    requestContext.complete(OK, admin.html.index.render(token))
+    handleWithNavBarConf(requestContext) { (_, conf) =>
+      requestContext.complete(OK, admin.html.index.render(token, conf))
+    }
   }
 
   private def postsIndex(requestContext: RequestContext, token: Token): Future[RouteResult] = {
@@ -219,6 +246,37 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
       }.recoverWith {
         case _ =>
           requestContext.complete(admin.html.postsindex.render(token, List()))
+      }
+    }
+  }
+
+  private def projectsIndex(requestContext: RequestContext, token: Token): Future[RouteResult] = {
+    requestContext.complete(admin.html.projectsindex.render())
+  }
+
+  private def editProjectForm(requestContext: RequestContext, token: Token, id: Int): Future[RouteResult] = {
+    requestContext.complete(admin.html.addeditproject.render(id))
+  }
+
+  private def addProjectForm(requestContext: RequestContext, token: Token): Future[RouteResult] = {
+    requestContext.complete(admin.html.addeditproject.render(12345))
+  }
+
+  private def personalDetailsEdition(requestContext: RequestContext, token: Token): Future[RouteResult] = {
+    requestContext.complete(admin.html.perso.render())
+  }
+
+  private def updateNavBarConf(requestContext: RequestContext, navBarConf: NavBarConf): Future[RouteResult] = {
+    handleWithDb(requestContext) { db =>
+      val navBarConfAccessor = new NavBarConfAccessor(db)
+      navBarConfAccessor.setConf(navBarConf).flatMap { updateWriteResult =>
+        if (updateWriteResult.ok) {
+          requestContext.complete(OK, "Updated.")
+        } else {
+          requestContext.complete(InternalServerError, "Write result not ok.")
+        }
+      }.recoverWith {
+        case e => requestContext.complete(InternalServerError, s"$e")
       }
     }
   }

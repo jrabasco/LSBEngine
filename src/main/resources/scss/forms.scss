@@ -34,7 +34,7 @@ form {
   }
 }
 
-.login-form, .edit-password-form {
+.login-form, .edit-password-form, .edit-navbar-form {
   max-width: 450px;
 
   .label-field {
@@ -51,10 +51,13 @@ form {
       margin-right: 5%;
     }
   }
+
+  .buttons {
+    margin-top: 20px;
+  }
 }
 
 .post-edit-form {
-  width: 90%;
   height: 800px;
   text-align: right;
 

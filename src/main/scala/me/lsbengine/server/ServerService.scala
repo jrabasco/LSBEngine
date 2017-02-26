@@ -7,7 +7,9 @@ import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{RequestContext, Route, RouteResult}
 import me.lsbengine.api.PostsAccessor
+import me.lsbengine.api.admin.NavBarConfAccessor
 import me.lsbengine.api.model.{FetchPostResponse, ListActionResponse}
+import me.lsbengine.database.model.NavBarConf
 import me.lsbengine.json.JSONSupport
 import reactivemongo.api.{DefaultDB, MongoConnection}
 
@@ -97,4 +99,14 @@ abstract class ServerService(dbConnection: MongoConnection, dbName: String, log:
   }
 
   def getPostsAccessor(database: DefaultDB): PostsAccessor
+
+  def handleWithNavBarConf(requestContext: RequestContext)
+                          (handler: (DefaultDB, NavBarConf) => Future[RouteResult]): Future[RouteResult] = {
+    handleWithDb(requestContext) { db =>
+      val navBarConfAccessor = new NavBarConfAccessor(db)
+      navBarConfAccessor.getConf.flatMap { conf =>
+        handler(db, conf)
+      }
+    }
+  }
 }

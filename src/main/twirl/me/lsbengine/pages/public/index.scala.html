@@ -12,7 +12,11 @@
         @header.render()
         <div class="posts">
             @for(p <- posts) {
-                <div class="post"><h1>@p.title</h1> @Html(p.contentHtml)</div>
+                <div class="post">
+                    <h1>@p.title</h1>
+                    @Html(p.contentHtml)
+                    <div class="post-link"><a href="/posts/@p.id" target="_blank">Direct link to this post</a></div>
+                </div>
             }
         </div>
     </div>

@@ -2,8 +2,10 @@
 <div class="navbar">
     <ul>
         <li><a href="/" @if(whichActive == "Home"){class="active"}>Home</a></li>
-        <li><a href="/posts" @if(whichActive == "Posts"){class="active"}>Edit Posts</a></li>
-        <li><a href="/password/edit" @if(whichActive == "Password"){class="active"}>Change password</a></li>
+        <li><a href="/posts" @if(whichActive == "Posts"){class="active"}>Posts</a></li>
+        <li><a href="/projects" @if(whichActive == "Projects"){class="active"}>Projects</a></li>
+        <li><a href="/perso/edit" @if(whichActive == "Perso"){class="active"}>Personal details</a></li>
+        <li><a href="/password/edit" @if(whichActive == "Password"){class="active"}>Password</a></li>
         <li><a href="javascript:void(0);" onclick="doLogout()">Logout</a></li>
     </ul>
 </div>

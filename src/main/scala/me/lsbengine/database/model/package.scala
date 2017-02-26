@@ -7,6 +7,7 @@ package object model {
 
   object MongoCollections {
     val postsCollectionName = "posts"
+    val navBarConfCollection = "navBarConf"
     val usersCollectionName = "users"
     val tokensCollectionName = "tokens"
     val trashCollectionName = "trash"

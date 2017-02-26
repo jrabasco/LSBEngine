@@ -22,7 +22,7 @@ function deletePost(id, statusId, toHide) {
     var toHideObject = $(toHide);
     var loader = $('.loader');
     if (!waiting && confirm("This will delete the post, are you sure you want to continue?")) {
-        hideMessage(statusId+"-error");
+        hideMessage(statusId + "-error");
         waiting = true;
         toHideObject.hide();
         loader.show();
@@ -37,7 +37,7 @@ function deletePost(id, statusId, toHide) {
             success: function () {
                 waiting = false;
                 loader.hide();
-                showMessage(statusId+"-success", "Deletion successful.");
+                showMessage(statusId + "-success", "Deletion successful.");
                 setTimeout(function () {
                     postsHome()
                 }, 500);
@@ -46,7 +46,7 @@ function deletePost(id, statusId, toHide) {
                 waiting = false;
                 loader.hide();
                 toHideObject.show();
-                showMessage(statusId+"-error", "Could not delete post for the following reason: " + resp.responseText);
+                showMessage(statusId + "-error", "Could not delete post for the following reason: " + resp.responseText);
             }
         });
     }
@@ -136,8 +136,8 @@ function hideMessage(divId) {
 
 function checkStr(text, minLength) {
     return ((typeof text != "undefined") &&
-        (typeof text.valueOf() == "string") &&
-        (text.length >= minLength));
+    (typeof text.valueOf() == "string") &&
+    (text.length >= minLength));
 }
 
 function doLogin() {
@@ -257,6 +257,52 @@ function updatePost(add) {
     }
 }
 
+function submitNavbarConf() {
+    var form = $('form[name="edit-navbar"]');
+    var loader = $('.loader');
+    if (!waiting) {
+        hideMessage("form-error");
+        waiting = true;
+        form.hide();
+        loader.show();
+
+        var projects = form[0].projects.checked;
+        var about = form[0].about.checked;
+
+        var navBarConf = {
+            projects: projects,
+            about: about
+        };
+
+        $.ajax({
+            type: "PUT",
+            url: "/api/navbar",
+            data: JSON.stringify(navBarConf),
+            cache: false,
+            contentType: "application/json",
+            headers: {
+                'X-Csrf-Protection': form[0].csrf.value
+            },
+            success: function () {
+                waiting = false;
+                loader.hide();
+                showMessage("form-success", "Update successful.");
+                setTimeout(function () {
+                    hideMessage("form-success");
+                    form.show();
+                }, 500);
+            },
+            error: function (resp) {
+                console.log(resp);
+                waiting = false;
+                loader.hide();
+                form.show();
+                showMessage("form-error", "Could not update post for the following reason: " + resp.responseText);
+            }
+        });
+    }
+}
+
 function publish(add) {
     if (!waiting && confirm("This will publish the post on the blog.")) {
         var publishDate = new Date();
@@ -279,7 +325,7 @@ function showPreview() {
     var contentHtml = converter.makeHtml(contentMarkdown);
 
     previewPost.html("<h1>" + title + "</h1>" + contentHtml);
-    $('pre code').each(function(i, block) {
+    $('pre code').each(function (i, block) {
         hljs.highlightBlock(block);
     });
     loader.hide();
@@ -359,7 +405,7 @@ function changePassword() {
 
 function resetFields(formName, errorId) {
     hideMessage(errorId);
-    var form = $('form[name="'+ formName + '"]');
+    var form = $('form[name="' + formName + '"]');
     form.find('input[type=password], input[type=text]').each(function () {
         var inputField = $(this);
         inputField.val("");

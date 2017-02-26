@@ -15,11 +15,15 @@
   pre {
     margin: 10px;
   }
+
+  .post-link {
+    font-size: 12px;
+    float: right;
+  }
 }
 
 .post {
-  box-shadow: 0 4px 2px -2px gray,
-              0 -4px 2px -2px gray;
+  border: 2px solid gray;
   padding: 20px $posts-horizontal-padding;
   margin: 20px 0;
   ul {

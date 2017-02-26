@@ -161,30 +161,3 @@ h2 {
 
   margin-bottom: 10px;
 }
-
-.menu {
-  max-width: 200px;
-  margin: 30px auto;
-  ul {
-    border-radius: 10px;
-    text-align: center;
-    list-style-type: none;
-    display: block;
-    margin: 0;
-    overflow: hidden;
-    background-color: $primary-color;
-  }
-
-  li a {
-    display: block;
-    color: $secondary-color;
-    text-align: center;
-    padding: 8px 16px;
-    text-decoration: none;
-  }
-
-  li a:hover {
-    background-color: $tertiary-color;
-    color: $secondary-color;
-  }
-}

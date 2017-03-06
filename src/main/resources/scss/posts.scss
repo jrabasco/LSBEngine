@@ -1,38 +1,8 @@
 @import "theme.scss";
 
-.posts {
-  text-align: left;
-  margin: auto;
-  font-size: 20px;
-
-  blockquote {
-    display: block;
-    margin: 1em 20px;
-    border-left: 2px solid lightgray;
-    padding-left: 10px;
-  }
-
-  pre {
-    margin: 10px;
-  }
-
-  .post-link {
-    font-size: 12px;
-    float: right;
-  }
-}
-
-.post {
-  border: 2px solid gray;
-  padding: 20px $posts-horizontal-padding;
-  margin: 20px 0;
-  ul {
-    margin: 1em 0 1em 20px;
-  }
-
-  li {
-    margin-left: 10px;
-  }
+.post-link {
+  font-size: 12px;
+  float: right;
 }
 
 .post-summary {

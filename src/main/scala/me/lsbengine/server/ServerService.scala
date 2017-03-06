@@ -104,7 +104,7 @@ abstract class ServerService(dbConnection: MongoConnection, dbName: String, log:
                           (handler: (DefaultDB, NavBarConf) => Future[RouteResult]): Future[RouteResult] = {
     handleWithDb(requestContext) { db =>
       val navBarConfAccessor = new NavBarConfAccessor(db)
-      navBarConfAccessor.getConf.flatMap { conf =>
+      navBarConfAccessor.getResource.flatMap { conf =>
         handler(db, conf)
       }
     }

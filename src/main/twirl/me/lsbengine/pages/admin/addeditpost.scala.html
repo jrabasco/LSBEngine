@@ -20,7 +20,7 @@
 
         <div id="form-error" class="error" style="display: none"></div>
         <div id="form-success" class="success" style="display: none"></div>
-        <form class="post-edit-form" name="post-edit">
+        <form class="big-form" name="post-edit">
             <div class="label-field title">
                 <label for="title">Title:</label>
                 <input type="text" id="title" name="title" value="@post.title"/>
@@ -31,7 +31,7 @@
             </div>
             <div class="label-field content">
                 <label for="contentmarkdown">Content:</label>
-                <textarea id="contentmarkdown" name="contentmarkdown">@post.contentMarkdown</textarea>
+                <textarea id="contentmarkdown" name="contentmarkdown">@post.content.markdown</textarea>
             </div>
             <div class="label-field-date publication">
                 <label for="publication">Publication:</label>
@@ -41,7 +41,7 @@
             <input type="hidden" name="csrf" value="@token.csrf">
             <input type="hidden" name="actualdate" id="actualdate" value="@post.published.getMillis">
             <div class="buttons">
-                <input type="button" onclick="showPreview()" value="Preview"/>
+                <input type="button" onclick="showPreview('post-edit', fillPostPreview)" value="Preview"/>
                 <input type="button" onclick="updatePost(@add)" value="@if(add){Create} else {Update}"/>
                 <input type="button" onclick="publish(@add)" value="Publish">
                 @if(!add){<input type="button" onclick="deletePost(@post.id, 'form', 'form[name=&#34;post-edit&#34;]')" value="Remove Post">}
@@ -50,8 +50,8 @@
         </form>
         <div class="loader"></div>
         <div class="preview posts">
-            <div class="post"></div>
-            <input type="button" onclick="hidePreview()" value="Hide Preview"/>
+            <div class="boxed-content"></div>
+            <input type="button" onclick="hidePreview('post-edit')" value="Hide Preview"/>
         </div>
     </div>
     @footer.render()

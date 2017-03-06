@@ -7,14 +7,18 @@ package object model {
 
   object MongoCollections {
     val postsCollectionName = "posts"
-    val navBarConfCollection = "navBarConf"
+    val aboutMeCollectionName = "aboutMe"
+    val navBarConfCollectionName = "navBarConf"
     val usersCollectionName = "users"
     val tokensCollectionName = "tokens"
     val trashCollectionName = "trash"
   }
 
+  case class HtmlMarkdownContent(html: String, markdown: String)
 
-  case class Post(id: Int, title: String, summary: String, contentMarkdown: String, contentHtml: String, published: DateTime)
+  case class Post(id: Int, title: String, summary: String, content: HtmlMarkdownContent, published: DateTime)
+
+  case class AboutMe(introduction: Option[HtmlMarkdownContent], resume: Option[HtmlMarkdownContent])
 
   case class NavBarConf(projects: Boolean, about: Boolean)
 
@@ -31,7 +35,10 @@ package object model {
       def write(dateTime: DateTime) = BSONDateTime(dateTime.getMillis)
     }
 
+    implicit val htmlMarkdownContentFormat: Formatter[HtmlMarkdownContent] = Macros.handler[HtmlMarkdownContent]
+
     implicit val postFormat: Formatter[Post] = Macros.handler[Post]
+    implicit val aboutMeFormat: Formatter[AboutMe] = Macros.handler[AboutMe]
     implicit val navBarFormat: Formatter[NavBarConf] = Macros.handler[NavBarConf]
     implicit val userFormat: Formatter[User] = Macros.handler[User]
     implicit val tokenFormat: Formatter[Token] = Macros.handler[Token]

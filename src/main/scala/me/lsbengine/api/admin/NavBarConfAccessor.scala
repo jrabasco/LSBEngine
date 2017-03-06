@@ -11,13 +11,14 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class NavBarConfAccessor(database: DefaultDB)
-  extends DatabaseAccessor[NavBarConf](database, MongoCollections.navBarConfCollection) {
+  extends DatabaseAccessor[NavBarConf](database, MongoCollections.navBarConfCollectionName)
+  with SimpleResourceAccessor[NavBarConf] {
 
-  def getConf: Future[NavBarConf] = {
+  override def getResource: Future[NavBarConf] = {
     super.getItem(BSONDocument()).map(_.getOrElse(NavBarConf(projects = true, about = true)))
   }
 
-  def setConf(navBarConf: NavBarConf): Future[UpdateWriteResult] = {
+  override def setResource(navBarConf: NavBarConf): Future[UpdateWriteResult] = {
     super.upsertItem(BSONDocument(), navBarConf)
   }
 }

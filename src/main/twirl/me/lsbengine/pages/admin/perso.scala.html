@@ -1,12 +1,40 @@
 @import me.lsbengine.components.html.footer
+@import me.lsbengine.database.model.{AboutMe, Token, HtmlMarkdownContent}
 @import me.lsbengine.components.admin.html.{navbar, head}
-@()
+@(aboutMe: AboutMe, token: Token)
 <!DOCTYPE html>
 <html lang="en">
     @head.render("")
     <body><div class="page-wrap">
     @navbar.render("Perso")
-    <p>Personal details edition under construction...</p>
+        <div id="form-error" class="error" style="display: none"></div>
+        <div id="form-success" class="success" style="display: none"></div>
+        <form class="big-form" name="aboutme-edit">
+            <div class="label-field introduction">
+                <label for="intromarkdown">Personal introduction:</label>
+                @defining(aboutMe.introduction.getOrElse(HtmlMarkdownContent("", ""))) { intro =>
+                    <textarea id="intromarkdown" name="intromarkdown" rows="2" cols="100">@intro.markdown</textarea>
+                }
+            </div>
+            <div class="label-field resume">
+                <label for="resumemarkdown">Resume:</label>
+                @defining(aboutMe.resume.getOrElse(HtmlMarkdownContent("", ""))) { resume =>
+                    <textarea id="resumemarkdown" name="resumemarkdown">@resume.markdown</textarea>
+                }
+            </div>
+            <input type="hidden" name="csrf" value="@token.csrf">
+            <div class="buttons">
+                <input type="button" onclick="showPreview('aboutme-edit', fillAboutMePreview)" value="Preview"/>
+                <input type="button" onclick="updateAbout()" value="Update"/>
+                <input type="button" onclick="backHome()" value="Back Home" />
+            </div>
+        </form>
+        <div class="loader"></div>
+        <div class="preview boxes">
+            <div class="boxed-content" id="introduction"></div>
+            <div class="boxed-content" id="resume"></div>
+            <input type="button" onclick="hidePreview('aboutme-edit')" value="Hide Preview"/>
+        </div>
     </div>
      @footer.render()
     </body>

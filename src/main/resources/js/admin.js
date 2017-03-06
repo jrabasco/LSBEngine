@@ -123,6 +123,10 @@ function postsHome() {
     window.location.href = "/posts"
 }
 
+function editAbout() {
+    window.location.href = "/perso/edit"
+}
+
 function showMessage(divId, message) {
     var errDiv = $("#" + divId);
     errDiv.empty();
@@ -197,6 +201,66 @@ function toISOString(date) {
     return resDate.toISOString();
 }
 
+function updateAbout() {
+    var form = $('form[name="aboutme-edit"]');
+    var loader = $('.loader');
+    if (!waiting) {
+        hideMessage("form-error");
+        waiting = true;
+        form.hide();
+        loader.show();
+
+        var converter = new showdown.Converter();
+        var introMarkdown = form[0].intromarkdown.value;
+        var introHtml = converter.makeHtml(introMarkdown);
+
+        var resumeMarkdown = form[0].resumemarkdown.value;
+        var resumeHtml = converter.makeHtml(resumeMarkdown);
+
+        var aboutMe = {};
+
+        if (checkStr(introMarkdown, 1)) {
+            aboutMe["introduction"] = {
+                html: introHtml,
+                markdown: introMarkdown
+            }
+        }
+
+        if (checkStr(resumeMarkdown, 1)) {
+            aboutMe["resume"] = {
+                html: resumeHtml,
+                markdown: resumeMarkdown
+            }
+        }
+
+        $.ajax({
+            type: "PUT",
+            url: "/api/perso",
+            data: JSON.stringify(aboutMe),
+            cache: false,
+            contentType: "application/json",
+            headers: {
+                'X-Csrf-Protection': form[0].csrf.value
+            },
+            success: function () {
+                waiting = false;
+                loader.hide();
+                showMessage("form-success", "Update successful.");
+                setTimeout(function () {
+                    editAbout();
+                }, 500);
+            },
+            error: function (resp) {
+                console.log(resp);
+                waiting = false;
+                loader.hide();
+                form.show();
+                showMessage("form-error", "Could not update post for the following reason: " + resp.responseText);
+            }
+        });
+    }
+}
+
 function updatePost(add) {
     var form = $('form[name="post-edit"]');
     var loader = $('.loader');
@@ -220,8 +284,10 @@ function updatePost(add) {
             id: id,
             title: title,
             summary: summary,
-            contentMarkdown: contentMarkdown,
-            contentHtml: contentHtml,
+            content: {
+                html: contentHtml,
+                markdown: contentMarkdown
+            },
             published: publishedDateStr
         };
 
@@ -311,14 +377,24 @@ function publish(add) {
     }
 }
 
-function showPreview() {
-    var form = $('form[name="post-edit"]');
+function showPreview(formName, fillPreview) {
+    var form = $('form[name="'+ formName+ '"]');
     var preview = $('.preview');
-    var previewPost = $('.preview > .post');
     var loader = $('.loader');
     form.hide();
     loader.show();
+
+    fillPreview();
+
+    loader.hide();
+    preview.show();
+}
+
+function fillPostPreview() {
+    var form = $('form[name="post-edit"]');
+    var preview = $('.preview');
     var title = form[0].title.value;
+    var previewPost = $('.preview > .boxed-content');
 
     var converter = new showdown.Converter();
     var contentMarkdown = form[0].contentmarkdown.value;
@@ -328,12 +404,43 @@ function showPreview() {
     $('pre code').each(function (i, block) {
         hljs.highlightBlock(block);
     });
-    loader.hide();
-    preview.show();
 }
 
-function hidePreview() {
-    var form = $('form[name="post-edit"]');
+function fillAboutMePreview() {
+    var form = $('form[name="aboutme-edit"]');
+    var preview = $('.preview');
+    var previewIntro = $('.preview > #introduction');
+    var previewResume = $('.preview > #resume');
+
+    var converter = new showdown.Converter();
+    var introMarkdown = form[0].intromarkdown.value;
+    var introHtml = converter.makeHtml(introMarkdown);
+
+    var resumeMarkdown = form[0].resumemarkdown.value;
+    var resumeHtml = converter.makeHtml(resumeMarkdown);
+
+    previewIntro.html(introHtml);
+    previewResume.html(resumeHtml);
+
+    if (checkStr(introMarkdown, 1)) {
+        previewIntro.show();
+    } else {
+        previewIntro.hide();
+    }
+
+    if (checkStr(resumeMarkdown, 1)) {
+        previewResume.show();
+    } else {
+        previewResume.hide();
+    }
+
+    $('pre code').each(function (i, block) {
+        hljs.highlightBlock(block);
+    });
+}
+
+function hidePreview(formName) {
+    var form = $('form[name="'+ formName+ '"]');
     var preview = $('.preview');
     preview.hide();
     form.show();

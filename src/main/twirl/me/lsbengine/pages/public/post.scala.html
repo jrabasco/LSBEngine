@@ -9,8 +9,8 @@
         @if(navBarConf.projects || navBarConf.about){
             @navbar.render("", navBarConf)
         }
-        <div class="posts">
-            <div class="post"><h1>@post.title</h1> @Html(post.contentHtml)</div>
+        <div class="boxes">
+            <div class="boxed-content"><h1>@post.title</h1> @Html(post.content.html)</div>
         </div>
     </div>
     @footer.render()

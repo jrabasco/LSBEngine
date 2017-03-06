@@ -34,7 +34,7 @@ form {
   }
 }
 
-.login-form, .edit-password-form, .edit-navbar-form {
+.small-form {
   max-width: 450px;
 
   .label-field {
@@ -57,7 +57,7 @@ form {
   }
 }
 
-.post-edit-form {
+.big-form {
   height: 800px;
   text-align: right;
 
@@ -98,8 +98,16 @@ form {
     height: 600px;
   }
 
+  .resume {
+    height: 660px;
+  }
+
   .summary {
     height: 60px;
+  }
+
+  .introduction {
+    height: 80px;
   }
 
   .buttons {

@@ -5,7 +5,9 @@ import akka.http.scaladsl.model.StatusCodes.{InternalServerError, NotFound}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{RequestContext, Route, RouteResult}
 import me.lsbengine.api.PostsAccessor
+import me.lsbengine.api.admin.AboutMeAccessor
 import me.lsbengine.api.public.PublicPostsAccessor
+import me.lsbengine.database.model.AboutMe
 import me.lsbengine.errors
 import me.lsbengine.pages.public.html
 import reactivemongo.api.{DefaultDB, MongoConnection}
@@ -38,12 +40,15 @@ class PublicService(dbConnection: MongoConnection, dbName: String, log: LoggingA
   def index(requestContext: RequestContext): Future[RouteResult] = {
     handleWithNavBarConf(requestContext) { (db, conf) =>
       val postsAccessor = getPostsAccessor(db)
-      postsAccessor.listPosts.flatMap {
-        list =>
-          requestContext.complete(html.index.render(list, conf))
+      val aboutMeAccessor = new AboutMeAccessor(db)
+
+      postsAccessor.listPosts.flatMap { list =>
+        aboutMeAccessor.getResource.flatMap { aboutMe =>
+          requestContext.complete(html.index.render(list, conf, aboutMe))
+        }
       }.recoverWith {
         case _ =>
-          requestContext.complete(html.index.render(List(), conf))
+          requestContext.complete(html.index.render(List(), conf, AboutMe(None, None)))
       }
     }
   }
@@ -65,7 +70,12 @@ class PublicService(dbConnection: MongoConnection, dbName: String, log: LoggingA
 
   def about(requestContext: RequestContext): Future[RouteResult] = {
     handleWithNavBarConf(requestContext) { (db, conf) =>
-      requestContext.complete(html.about.render(conf))
+      val aboutMeAccessor = new AboutMeAccessor(db)
+      aboutMeAccessor.getResource.flatMap { aboutMe =>
+        requestContext.complete(html.about.render(conf, aboutMe))
+      }
+    }.recoverWith {
+      case _ => requestContext.complete(InternalServerError, errors.html.internalerror(s"Database access failed."))
     }
   }
 

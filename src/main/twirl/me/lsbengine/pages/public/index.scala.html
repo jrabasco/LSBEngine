@@ -1,7 +1,7 @@
-@import me.lsbengine.database.model.{Post, NavBarConf}
+@import me.lsbengine.database.model.{Post, NavBarConf, AboutMe}
 @import me.lsbengine.components.public.html.{head, header, navbar}
 @import me.lsbengine.components.html.footer
-@(posts: List[Post], navBarConf: NavBarConf)
+@(posts: List[Post], navBarConf: NavBarConf, aboutMe: AboutMe)
 <!DOCTYPE html>
 <html lang="en">
     @head.render()
@@ -10,11 +10,17 @@
             @navbar.render("Home", navBarConf)
         }
         @header.render()
-        <div class="posts">
+        <div class="boxes">
+            @*
+            This syntax solves a glitch with HTML generation, never use Option.get otherwise
+            *@
+            @if(aboutMe.introduction.nonEmpty){
+                <div class="boxed-content">@Html(aboutMe.introduction.get.html)</div>
+            }
             @for(p <- posts) {
-                <div class="post">
+                <div class="boxed-content">
                     <h1>@p.title</h1>
-                    @Html(p.contentHtml)
+                    @Html(p.content.html)
                     <div class="post-link"><a href="/posts/@p.id" target="_blank">Direct link to this post</a></div>
                 </div>
             }

@@ -1,15 +1,30 @@
-@import me.lsbengine.database.model.NavBarConf
+@import me.lsbengine.database.model.{NavBarConf, AboutMe}
 @import me.lsbengine.components.html.footer
 @import me.lsbengine.components.public.html.{head, navbar}
-@(navBarConf: NavBarConf)
+@(navBarConf: NavBarConf, aboutMe: AboutMe)
 <!DOCTYPE html>
 <html lang="en">
     @head.render()
     <body><div class="page-wrap">
+        <div class="boxes">
         @if(navBarConf.projects || navBarConf.about) {
             @navbar.render("About", navBarConf)
         }
-        <p>About page under construction...</p>
+        @if(aboutMe.introduction.nonEmpty || aboutMe.resume.nonEmpty) {
+            @*
+                This syntax solves a glitch with HTML generation, never use Option.get otherwise
+            *@
+            @if(aboutMe.introduction.nonEmpty){
+                <div class="boxed-content">@Html(aboutMe.introduction.get.html)</div>
+            }
+
+            @if(aboutMe.resume.nonEmpty){
+                <div class="boxed-content">@Html(aboutMe.resume.get.html)</div>
+            }
+        } else {
+            <div class="boxed-content">This page has no content...</div>
+        }
+        </div>
     </div>
     @footer.render()
     </body>

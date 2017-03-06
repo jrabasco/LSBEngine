@@ -4,13 +4,14 @@ import akka.event.LoggingAdapter
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model.headers.`Access-Control-Allow-Credentials`
 import akka.http.scaladsl.server._
+import akka.http.scaladsl.unmarshalling.FromRequestUnmarshaller
 import com.github.nscala_time.time.Imports._
 import me.lsbengine.api.PostsAccessor
-import me.lsbengine.api.admin.{AdminPostsAccessor, NavBarConfAccessor}
 import me.lsbengine.api.admin.security.CredentialsAuthenticator.Credentials
 import me.lsbengine.api.admin.security._
+import me.lsbengine.api.admin.{AboutMeAccessor, AdminPostsAccessor, NavBarConfAccessor, SimpleResourceAccessor}
 import me.lsbengine.api.model.{PostCreationResponse, TokenResponse}
-import me.lsbengine.database.model.{NavBarConf, Post, Token, User}
+import me.lsbengine.database.model._
 import me.lsbengine.errors
 import me.lsbengine.pages.admin
 import reactivemongo.api.{DefaultDB, MongoConnection}
@@ -149,17 +150,7 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
             }
           }
         }
-      } ~ pathPrefix("navbar") {
-        cookieWithCsrfCheck {
-          pathEndOrSingleSlash {
-            put {
-              entity(as[NavBarConf]) { conf =>
-                ctx => updateNavBarConf(ctx, conf)
-              }
-            }
-          }
-        }
-      }
+      } ~ handleSingleResourceUpdate[NavBarConf]("navbar", new NavBarConfAccessor(_)) ~ handleSingleResourceUpdate[AboutMe]("perso", new AboutMeAccessor(_))
     }
 
   override val ownRoutes: Route = frontendRoutes ~ apiRoutes
@@ -263,13 +254,22 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
   }
 
   private def personalDetailsEdition(requestContext: RequestContext, token: Token): Future[RouteResult] = {
-    requestContext.complete(admin.html.perso.render())
+    handleWithDb(requestContext) { db =>
+      val aboutMeAccessor = new AboutMeAccessor(db)
+      aboutMeAccessor.getResource.flatMap { aboutMe =>
+        requestContext.complete(admin.html.perso.render(aboutMe, token))
+      }
+    }.recoverWith {
+      case e => requestContext.complete(InternalServerError, errors.html.internalerror(s"$e"))
+    }
   }
 
-  private def updateNavBarConf(requestContext: RequestContext, navBarConf: NavBarConf): Future[RouteResult] = {
+  private def updateSimpleResource[T](requestContext: RequestContext,
+                                      accessorCreator: DefaultDB => SimpleResourceAccessor[T],
+                                      t: T): Future[RouteResult] = {
     handleWithDb(requestContext) { db =>
-      val navBarConfAccessor = new NavBarConfAccessor(db)
-      navBarConfAccessor.setConf(navBarConf).flatMap { updateWriteResult =>
+      val simpleResourceAccessor = accessorCreator(db)
+      simpleResourceAccessor.setResource(t).flatMap { updateWriteResult =>
         if (updateWriteResult.ok) {
           requestContext.complete(OK, "Updated.")
         } else {
@@ -330,6 +330,21 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
     }
   }
 
+  private def handleSingleResourceUpdate[Resource](resourceName: String, accessorCreator: DefaultDB => SimpleResourceAccessor[Resource])
+                                                  (implicit unMarshaller: FromRequestUnmarshaller[Resource]): Route = {
+    pathPrefix(resourceName) {
+      cookieWithCsrfCheck {
+        pathEndOrSingleSlash {
+          put {
+            entity(as[Resource]) { res =>
+              ctx => updateSimpleResource(ctx, accessorCreator, res)
+            }
+          }
+        }
+      }
+    }
+  }
+
   private def downloadTrash(requestContext: RequestContext): Future[RouteResult] = {
     log.info(s"[$apiScope] Downloading trash.")
     handleWithDb(requestContext) { db =>
@@ -351,7 +366,7 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
   }
 
   private def addPostForm(requestContext: RequestContext, token: Token): Future[RouteResult] = {
-    requestContext.complete(admin.html.addeditpost.render(token, Post(-1, "", "", "", "", DateTime.now + 10.years), add = true))
+    requestContext.complete(admin.html.addeditpost.render(token, Post(-1, "", "", HtmlMarkdownContent("", ""), DateTime.now + 10.years), add = true))
   }
 
   private def editPostForm(requestContext: RequestContext, token: Token, id: Int): Future[RouteResult] = {

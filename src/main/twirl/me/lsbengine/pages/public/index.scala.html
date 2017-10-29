@@ -10,19 +10,24 @@
             @navbar.render("Home", navBarConf)
         }
         @header.render()
-        <div class="boxes">
+        <div class="docs">
             @*
             This syntax solves a glitch with HTML generation, never use Option.get otherwise
             *@
             @if(aboutMe.introduction.nonEmpty){
-                <div class="boxed-content">@Html(aboutMe.introduction.get.html)</div>
+                <div class="doc">@Html(aboutMe.introduction.get.html)</div>
             }
-            @for(p <- posts) {
-                <div class="boxed-content">
-                    <h1>@p.title</h1>
-                    @Html(p.content.html)
-                    <div class="post-link"><a href="/posts/@p.id" target="_blank">Direct link to this post</a></div>
-                </div>
+            @if(posts.nonEmpty) {
+	            @for(p <- posts.init) {
+	                <div class="doc underline">
+	                    <h1><a href="/posts/@p.id" target="_blank">@p.title</a></h1>
+	                    @Html(p.content.html)
+	                </div>
+	            }
+               	<div class="doc">
+                   	<h1><a href="/posts/@posts.last.id" target="_blank">@posts.last.title</a></h1>
+                   	@Html(posts.last.content.html)
+               	</div>
             }
         </div>
     </div>

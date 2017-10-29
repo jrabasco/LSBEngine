@@ -33,6 +33,8 @@ takes around 1 second to perform a hash)
 - `HEADER_TITLE`: title in the header (default `LSBEngine`)
 - `SITE_URL`: the URL of the website (default `local.lsbengine.me`)
 - `RESUME_REPO`: link to your resume repository, see the Resume section
+- `DISCLAIMER`: A disclaimer that will appear in the footer (default `My opinions do not necessarily represent those of my employer.`)
+- `COPYRIGHT`: copyright mention for the footer (default `Copyright &copy; 2017`)
 
 ## Adding/Removing users
 

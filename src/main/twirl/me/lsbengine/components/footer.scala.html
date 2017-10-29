@@ -1,5 +1,11 @@
 @import me.lsbengine.server.BlogConfiguration
 @()
 <footer class="site-footer">
-    Copyright &copy; 2017 @Html(BlogConfiguration.blogOwner), find the code on <a href="@BlogConfiguration.repositoryLink">GitHub</a>
+	@if(BlogConfiguration.copyright.nonEmpty){
+    @Html(BlogConfiguration.copyright) @Html(BlogConfiguration.blogOwner). 
+    }Find the code on <a href="@BlogConfiguration.repositoryLink">GitHub</a>
+    @if(BlogConfiguration.disclaimer.nonEmpty){
+    <br>
+    <i>@Html(BlogConfiguration.disclaimer)</i>
+    }
 </footer>

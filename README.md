@@ -39,12 +39,14 @@ takes around 1 second to perform a hash)
 To add a user run:
 
 ```
-$ sbt run-main me.lsbengine.bin.UserManager add <username> <password>
+$ sbt
+> run-main me.lsbengine.bin.UserManager add <username> <password>
 ```
 
 To remove a user run:
 ```
-$ sbt run-main me.lsbengine.bin.UserManager remove <username>
+$ sbt
+> run-main me.lsbengine.bin.UserManager remove <username>
 ```
 
 The usernames are case insensitive. Remember that all the users are considered _admin_ users.

@@ -17,6 +17,7 @@ object UserManager extends App {
   val driver = new MongoDriver
   val mongoHost = BlogConfiguration.mongoDBHost
   val mongodbName = BlogConfiguration.mongoDBName
+
   val connection: MongoConnection = driver.connection(List(mongoHost))
 
   if (args.length < 1) {

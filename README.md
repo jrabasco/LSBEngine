@@ -18,7 +18,7 @@ The server is configured with environment variables:
 - `SERVER_HOST`: the host on which to bind. Default used is `localhost` which makes it unreachable from the outside
 - `PUBLIC_PORT`: the port for the public api (default `8080`)
 - `ADMIN_PORT`: the port for the admin api (default `9090`)
-- `REPOSITORY_LINK`: link given in the `server/info` route (default `https://github.com/jrabasco/SBlog`)
+- `REPOSITORY_LINK`: link given in the `server/info` route (default `https://github.com/jrabasco/LSBEngine`)
 - `MONGO_HOST`: host for the mongo database (default `localhost`)
 - `MONGO_PORT`: port of the mongo database (default `27017`)
 - `MONGO_NAME`: name of the database (default `lsbengine`)

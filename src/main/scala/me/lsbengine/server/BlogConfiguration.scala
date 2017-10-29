@@ -21,4 +21,6 @@ object BlogConfiguration {
   val contactAddress: String = envOrElse("CONTACT_ADDRESS", "rabasco.jeremy@gmail.com")
   val headerTitle: String = envOrElse("HEADER_TITLE", "LSBEngine")
   val siteUrl: String = envOrElse("SITE_UTL", "local.lsbengine.me")
+  val disclaimer: String = envOrElse("DISCLAIMER", "My opinions do not necessarily represent those of my employer.")
+  val copyright: String = envOrElse("COPYRIGHT", "Copyright &copy; 2017")
 }

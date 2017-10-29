@@ -394,7 +394,7 @@ function fillPostPreview() {
     var form = $('form[name="post-edit"]');
     var preview = $('.preview');
     var title = form[0].title.value;
-    var previewPost = $('.preview > .boxed-content');
+    var previewPost = $('.preview > .doc');
 
     var converter = new showdown.Converter();
     var contentMarkdown = form[0].contentmarkdown.value;

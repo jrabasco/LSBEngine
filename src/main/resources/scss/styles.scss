@@ -200,4 +200,21 @@ h2 {
   pre {
     margin: 10px;
   }
+
+	h2, h3, h4 {
+		position: relative;
+
+		.anchor {
+			display: none;
+			position: absolute;
+			left: -27px;
+			width: 30px;
+		}
+		&:hover {
+			.anchor {
+				display: inline-block;
+			}
+		}
+	}
+
 }

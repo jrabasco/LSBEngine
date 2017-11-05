@@ -1,13 +1,59 @@
+@import me.lsbengine.database.model.Project
+@import me.lsbengine.database.model.Token
 @import me.lsbengine.components.html.footer
 @import me.lsbengine.components.admin.html.{navbar, head}
-@(id: Int)
+@(token: Token, project: Project, add: Boolean)
 <!DOCTYPE html>
 <html lang="en">
-    @head.render("")
+    @head.render(
+    """hljs.configure({languages: []});
+    $(function () {
+        var dateStr = $("#actualdate").val();
+        var date = new Date(parseInt(dateStr));
+        $("input[type='datetime-local']").val(formatForForm(date));
+
+        showdown.setFlavor("github");
+    });"""
+    )
     <body><div class="page-wrap">
-    @navbar.render("Projects")
-    <p>Project @id edition under construction...</p>
+        @navbar.render("Projects")
+
+        <div id="form-error" class="error" style="display: none"></div>
+        <div id="form-success" class="success" style="display: none"></div>
+        <form class="big-form" name="project-edit">
+            <div class="label-field title">
+                <label for="title">Title:</label>
+                <input type="text" id="title" name="title" value="@project.title"/>
+            </div>
+            <div class="label-field abstract">
+                <label for="abstract">Abstract:</label>
+                <textarea id="abstract" name="abstract" rows="2" cols="100">@{project.`abstract`}</textarea>
+            </div>
+            <div class="label-field content">
+                <label for="contentmarkdown">Content:</label>
+                <textarea id="contentmarkdown" name="contentmarkdown">@project.content.markdown</textarea>
+            </div>
+            <div class="label-field-date publication">
+                <label for="publication">Publication:</label>
+                <input type="datetime-local" id="publication" name="publication" value="1970-01-01T00:00"/>
+            </div>
+            <input type="hidden" name="id" value="@project.id">
+            <input type="hidden" name="csrf" value="@token.csrf">
+            <input type="hidden" name="actualdate" id="actualdate" value="@project.published.getMillis">
+            <div class="buttons">
+                <input type="button" onclick="showPreview('project-edit', fillDocPreview('project-edit'))" value="Preview"/>
+                <input type="button" onclick="update('projects', @add, 'project-edit')" value="@if(add){Create} else {Update}"/>
+                <input type="button" onclick="publish('projects', @add, 'project-edit')" value="Publish">
+                @if(!add){<input type="button" onclick="delDoc('projects', @project.id, 'form', 'form[name=&#34;project-edit&#34;]', projectsHome)" value="Remove Project">}
+                <input type="button" onclick="projectsHome()" value="Quit @if(add){Adding} else {Editing}" />
+            </div>
+        </form>
+        <div class="loader"></div>
+        <div class="preview docs">
+            <div class="doc"></div>
+            <input type="button" onclick="hidePreview('project-edit')" value="Hide Preview"/>
+        </div>
     </div>
-     @footer.render()
+    @footer.render()
     </body>
 </html>

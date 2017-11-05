@@ -7,16 +7,20 @@ package object model {
 
   object MongoCollections {
     val postsCollectionName = "posts"
+    val projectsCollectionName = "projects"
     val aboutMeCollectionName = "aboutMe"
     val navBarConfCollectionName = "navBarConf"
     val usersCollectionName = "users"
     val tokensCollectionName = "tokens"
-    val trashCollectionName = "trash"
+    val postsTrashCollectionName = "postsTrash"
+    val projectsTrashCollectionName = "projectsTrash"
   }
 
   case class HtmlMarkdownContent(html: String, markdown: String)
 
-  case class Post(id: Int, title: String, summary: String, content: HtmlMarkdownContent, published: DateTime)
+  case class Post(id: Int, title: String, `abstract`: String, content: HtmlMarkdownContent, published: DateTime)
+
+  case class Project(id: Int, title: String, `abstract`: String, content: HtmlMarkdownContent, published: DateTime)
 
   case class AboutMe(introduction: Option[HtmlMarkdownContent], resume: Option[HtmlMarkdownContent])
 
@@ -38,6 +42,7 @@ package object model {
     implicit val htmlMarkdownContentFormat: Formatter[HtmlMarkdownContent] = Macros.handler[HtmlMarkdownContent]
 
     implicit val postFormat: Formatter[Post] = Macros.handler[Post]
+    implicit val projectFormat: Formatter[Project] = Macros.handler[Project]
     implicit val aboutMeFormat: Formatter[AboutMe] = Macros.handler[AboutMe]
     implicit val navBarFormat: Formatter[NavBarConf] = Macros.handler[NavBarConf]
     implicit val userFormat: Formatter[User] = Macros.handler[User]

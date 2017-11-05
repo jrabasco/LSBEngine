@@ -14,18 +14,18 @@
         <div id="posts-list">
         @for(post <- posts) {
             @defining(DateTimeFormat.forPattern("dd-MM-yyyy' at 'HH:mm:ss' (UTC)'")) { formatter =>
-                <div class="post-summary">
+                <div class="doc-summary">
                     <h4>@post.title</h4>
-                    @post.summary
+                    @{post.`abstract`}
                     <div class="date">@post.published.toString(formatter)</div>
-                    <input type="button" onclick="edit(@post.id)" value="Edit"/>
-                    <input type="button" onclick="deletePost(@post.id, 'index', '#posts-list')" value="Remove"/>
+                    <input type="button" onclick="edit('posts', @post.id)" value="Edit"/>
+                    <input type="button" onclick="delDoc('posts', @post.id, 'posts-index', '#posts-list', postsHome)" value="Remove"/>
                 </div>
             }
         }
-        <input type="button" onclick="addPost()" value="Add Post"/>
-        <input type="button" onclick="downloadTrash()" value="Download Deleted Posts"/>
-        <input type="button" onclick="purgeTrash()" value="Purge Deleted Posts"/>
+        <input type="button" onclick="add('posts')" value="Add Post"/>
+        <input type="button" onclick="downloadTrash('posts', 'posts-index')" value="Download Deleted Posts"/>
+        <input type="button" onclick="purgeTrash('posts', 'posts-index')" value="Purge Deleted Posts"/>
         <input type="button" onclick="backHome()" value="Back Home">
         </div>
         <div class="loader"></div>

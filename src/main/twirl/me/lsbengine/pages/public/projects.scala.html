@@ -1,7 +1,7 @@
-@import me.lsbengine.database.model.NavBarConf
+@import me.lsbengine.database.model.{Project, NavBarConf}
+@import me.lsbengine.components.public.html.{head, header, navbar}
 @import me.lsbengine.components.html.footer
-@import me.lsbengine.components.public.html.{head, navbar}
-@(navBarConf: NavBarConf)
+@(projects: List[Project], navBarConf: NavBarConf)
 <!DOCTYPE html>
 <html lang="en">
     @head.render()
@@ -9,7 +9,23 @@
         @if(navBarConf.projects || navBarConf.about){
             @navbar.render("Projects", navBarConf)
         }
-        <p>Projects list under construction...</p>
+        <div class="docs">
+            @*
+            This syntax solves a glitch with HTML generation, never use Option.get otherwise
+            *@
+            @if(projects.nonEmpty) {
+	            @for(p <- projects.init) {
+	                <div class="doc underline">
+	                    <h1><a href="/projects/@p.id" target="_blank">@p.title</a></h1>
+	                    @Html(p.content.html)
+	                </div>
+	            }
+               	<div class="doc">
+                   	<h1><a href="/projects/@projects.last.id" target="_blank">@projects.last.title</a></h1>
+                   	@Html(projects.last.content.html)
+               	</div>
+            }
+        </div>
     </div>
     @footer.render()
     </body>

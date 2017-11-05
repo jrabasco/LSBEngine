@@ -6,10 +6,10 @@ import akka.http.scaladsl.model.headers.`Access-Control-Allow-Credentials`
 import akka.http.scaladsl.server._
 import akka.http.scaladsl.unmarshalling.FromRequestUnmarshaller
 import com.github.nscala_time.time.Imports._
-import me.lsbengine.api.PostsAccessor
+import me.lsbengine.api.{PostsAccessor, ProjectsAccessor}
 import me.lsbengine.api.admin.security.CredentialsAuthenticator.Credentials
 import me.lsbengine.api.admin.security._
-import me.lsbengine.api.admin.{AboutMeAccessor, AdminPostsAccessor, NavBarConfAccessor, SimpleResourceAccessor}
+import me.lsbengine.api.admin._
 import me.lsbengine.api.model.{PostCreationResponse, TokenResponse}
 import me.lsbengine.database.model._
 import me.lsbengine.errors
@@ -140,13 +140,43 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
             }
           }
         }
+      } ~ pathPrefix("projects") {
+        cookieWithCsrfCheck {
+          pathEndOrSingleSlash {
+            post {
+              entity(as[Project]) { projData =>
+                ctx => createProject(ctx, projData)
+              }
+            }
+          } ~ path(IntNumber) { id =>
+            put {
+              entity(as[Project]) { projData =>
+                ctx => updateProject(ctx, id, projData)
+              }
+            } ~ delete {
+              ctx => deleteProject(ctx, id)
+            }
+          }
+        }
       } ~ pathPrefix("trash") {
-        cookieAuthenticator { token =>
-          get {
-            ctx => downloadTrash(ctx)
-          } ~ csrfCheck(token) {
-            delete {
-              ctx => purgeTrash(ctx)
+        path("posts") {
+          cookieAuthenticator { token =>
+            get {
+              ctx => downloadPostsTrash(ctx)
+            } ~ csrfCheck(token) {
+              delete {
+                ctx => purgePostsTrash(ctx)
+              }
+            }
+          }
+        } ~ path("projects") {
+          cookieAuthenticator { token =>
+            get {
+              ctx => downloadProjectsTrash(ctx)
+            } ~ csrfCheck(token) {
+              delete {
+                ctx => purgeProjectsTrash(ctx)
+              }
             }
           }
         }
@@ -157,6 +187,10 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
 
   override def getPostsAccessor(database: DefaultDB): PostsAccessor = {
     new AdminPostsAccessor(database)
+  }
+
+  override def getProjectsAccessor(database: DefaultDB): ProjectsAccessor = {
+    new AdminProjectsAccessor(database)
   }
 
   private def resourceForms(resourceName: String, token: Token,
@@ -242,15 +276,36 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
   }
 
   private def projectsIndex(requestContext: RequestContext, token: Token): Future[RouteResult] = {
-    requestContext.complete(admin.html.projectsindex.render())
+    handleWithDb(requestContext) { db =>
+      val projectsAccessor = new AdminProjectsAccessor(db)
+      projectsAccessor.listProjects.flatMap {
+        list =>
+          requestContext.complete(admin.html.projectsindex.render(token, list))
+      }.recoverWith {
+        case _ =>
+          requestContext.complete(admin.html.projectsindex.render(token, List()))
+      }
+    }
   }
 
   private def editProjectForm(requestContext: RequestContext, token: Token, id: Int): Future[RouteResult] = {
-    requestContext.complete(admin.html.addeditproject.render(id))
+    handleWithDb(requestContext) { db =>
+      val projectsAccessor = new AdminProjectsAccessor(db)
+
+      projectsAccessor.getProject(id).flatMap {
+        case Some(project) =>
+          requestContext.complete(admin.html.addeditproject.render(token, project, add = false))
+        case None =>
+          requestContext.complete(NotFound, errors.html.notfound.render(s"Post $id does not exist."))
+      }.recoverWith {
+        case e =>
+          requestContext.complete(InternalServerError, errors.html.internalerror.render(s"Failed to retrieve post $id : $e"))
+      }
+    }
   }
 
   private def addProjectForm(requestContext: RequestContext, token: Token): Future[RouteResult] = {
-    requestContext.complete(admin.html.addeditproject.render(12345))
+    requestContext.complete(admin.html.addeditproject.render(token, Project(-1, "", "", HtmlMarkdownContent("", ""), DateTime.now + 10.years), add = true))
   }
 
   private def personalDetailsEdition(requestContext: RequestContext, token: Token): Future[RouteResult] = {
@@ -315,10 +370,59 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
   }
 
   private def deletePost(requestContext: RequestContext, id: Int): Future[RouteResult] = {
-    log.info(s"[$apiScope] Deleting post with id $id: $post.")
+    log.info(s"[$apiScope] Deleting post with id $id.")
     handleWithDb(requestContext) { db =>
       val postsAccessor = new AdminPostsAccessor(db)
       postsAccessor.deletePost(id).flatMap { writeResult =>
+        if (writeResult.ok) {
+          requestContext.complete("Deleted.")
+        } else {
+          requestContext.complete(InternalServerError, "Write result is not ok.")
+        }
+      }.recoverWith {
+        case e => requestContext.complete(InternalServerError, s"$e")
+      }
+    }
+  }
+
+  private def updateProject(requestContext: RequestContext, id: Int, project: Project): Future[RouteResult] = {
+    log.info(s"[$apiScope] Updating project with id $id: $project.")
+    handleWithDb(requestContext) { db =>
+      val projectsAccessor = new AdminProjectsAccessor(db)
+      projectsAccessor.updateProject(id, project).flatMap { updateWriteResult =>
+        if (updateWriteResult.ok && updateWriteResult.n > 0) {
+          requestContext.complete("Updated.")
+        } else if (!updateWriteResult.ok) {
+          requestContext.complete(InternalServerError, "Write result is not ok.")
+        } else {
+          requestContext.complete(NotFound, s"Project $id not found.")
+        }
+      }.recoverWith {
+        case e => requestContext.complete(InternalServerError, s"$e")
+      }
+    }
+  }
+
+  private def createProject(requestContext: RequestContext, project: Project): Future[RouteResult] = {
+    log.info(s"[$apiScope] Creating post : $post")
+    handleWithDb(requestContext) { db =>
+      val projectsAccessor = new AdminProjectsAccessor(db)
+      projectsAccessor.createProject(project).flatMap {
+        case Some(createdProject) =>
+          requestContext.complete(PostCreationResponse(createdProject.id))
+        case None =>
+          requestContext.complete(InternalServerError, "Could not create project.")
+      }.recoverWith {
+        case e => requestContext.complete(InternalServerError, s"$e")
+      }
+    }
+  }
+
+  private def deleteProject(requestContext: RequestContext, id: Int): Future[RouteResult] = {
+    log.info(s"[$apiScope] Deleting project with id $id.")
+    handleWithDb(requestContext) { db =>
+      val projectsAccessor = new AdminProjectsAccessor(db)
+      projectsAccessor.deleteProject(id).flatMap { writeResult =>
         if (writeResult.ok) {
           requestContext.complete("Deleted.")
         } else {
@@ -345,8 +449,8 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
     }
   }
 
-  private def downloadTrash(requestContext: RequestContext): Future[RouteResult] = {
-    log.info(s"[$apiScope] Downloading trash.")
+  private def downloadPostsTrash(requestContext: RequestContext): Future[RouteResult] = {
+    log.info(s"[$apiScope] Downloading posts trash.")
     handleWithDb(requestContext) { db =>
       val trashAccessor = new AdminPostsAccessor(db)
       trashAccessor.getTrash.flatMap { posts =>
@@ -355,10 +459,30 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
     }
   }
 
-  private def purgeTrash(requestContext: RequestContext): Future[RouteResult] = {
-    log.info(s"[$apiScope] Purging trash.")
+  private def purgePostsTrash(requestContext: RequestContext): Future[RouteResult] = {
+    log.info(s"[$apiScope] Purging posts trash.")
     handleWithDb(requestContext) { db =>
       val postsAccessor = new AdminPostsAccessor(db)
+      postsAccessor.purgeTrash.flatMap {
+        _ => requestContext.complete("Done.")
+      }
+    }
+  }
+
+  private def downloadProjectsTrash(requestContext: RequestContext): Future[RouteResult] = {
+    log.info(s"[$apiScope] Downloading projects trash.")
+    handleWithDb(requestContext) { db =>
+      val trashAccessor = new AdminProjectsAccessor(db)
+      trashAccessor.getTrash.flatMap { posts =>
+        requestContext.complete(posts)
+      }
+    }
+  }
+
+  private def purgeProjectsTrash(requestContext: RequestContext): Future[RouteResult] = {
+    log.info(s"[$apiScope] Purging projets trash.")
+    handleWithDb(requestContext) { db =>
+      val postsAccessor = new AdminProjectsAccessor(db)
       postsAccessor.purgeTrash.flatMap {
         _ => requestContext.complete("Done.")
       }

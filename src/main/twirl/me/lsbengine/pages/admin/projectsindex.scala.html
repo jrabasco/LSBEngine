@@ -1,12 +1,36 @@
+@import me.lsbengine.database.model.Token
+@import me.lsbengine.database.model.Project
+@import com.github.nscala_time.time.Imports._
 @import me.lsbengine.components.html.footer
 @import me.lsbengine.components.admin.html.{navbar, head}
-@()
+@(token: Token, projects: List[Project])
 <!DOCTYPE html>
 <html lang="en">
     @head.render("")
     <body><div class="page-wrap">
     @navbar.render("Projects")
-    <p>Projects edition under construction...</p>
+        <div id="projects-index-error" class="error" style="display: none"></div>
+        <div id="projects-index-success" class="success" style="display: none"></div>
+        <div id="projects-list">
+        @for(project <- projects) {
+            @defining(DateTimeFormat.forPattern("dd-MM-yyyy' at 'HH:mm:ss' (UTC)'")) { formatter =>
+                <div class="doc-summary">
+                    <h4>@project.title</h4>
+                    @{project.`abstract`}
+                    <div class="date">@project.published.toString(formatter)</div>
+                    <input type="button" onclick="edit('projects', @project.id)" value="Edit"/>
+                    <input type="button" onclick="delDoc('projects', @project.id, 'projects-index', '#projects-list', projectsHome)" value="Remove"/>
+                </div>
+            }
+        }
+        <input type="button" onclick="add('projects')" value="Add Project"/>
+        <input type="button" onclick="downloadTrash('projects', 'projects-index')" value="Download Deleted Projects"/>
+        <input type="button" onclick="purgeTrash('projects', 'projects-index')" value="Purge Deleted Projects"/>
+        <input type="button" onclick="backHome()" value="Back Home">
+        </div>
+        <div class="loader"></div>
+        <input type="hidden" name="csrf" id="csrf" value="@token.csrf"/>
+        <a id="downloadAnchorElem" style="display:none"></a>
     </div>
      @footer.render()
     </body>

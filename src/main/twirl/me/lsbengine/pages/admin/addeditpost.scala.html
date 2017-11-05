@@ -25,9 +25,9 @@
                 <label for="title">Title:</label>
                 <input type="text" id="title" name="title" value="@post.title"/>
             </div>
-            <div class="label-field summary">
-                <label for="summary">Summary:</label>
-                <textarea id="summary" name="summary" rows="2" cols="100">@post.summary</textarea>
+            <div class="label-field abstract">
+                <label for="abstract">Abstract:</label>
+                <textarea id="abstract" name="abstract" rows="2" cols="100">@{post.`abstract`}</textarea>
             </div>
             <div class="label-field content">
                 <label for="contentmarkdown">Content:</label>
@@ -41,10 +41,10 @@
             <input type="hidden" name="csrf" value="@token.csrf">
             <input type="hidden" name="actualdate" id="actualdate" value="@post.published.getMillis">
             <div class="buttons">
-                <input type="button" onclick="showPreview('post-edit', fillPostPreview)" value="Preview"/>
-                <input type="button" onclick="updatePost(@add)" value="@if(add){Create} else {Update}"/>
-                <input type="button" onclick="publish(@add)" value="Publish">
-                @if(!add){<input type="button" onclick="deletePost(@post.id, 'form', 'form[name=&#34;post-edit&#34;]')" value="Remove Post">}
+                <input type="button" onclick="showPreview('post-edit', fillDocPreview('post-edit'))" value="Preview"/>
+                <input type="button" onclick="update('posts', @add, 'post-edit')" value="@if(add){Create} else {Update}"/>
+                <input type="button" onclick="publish('posts', @add, 'post-edit')" value="Publish">
+                @if(!add){<input type="button" onclick="delDoc('posts', @post.id, 'form', 'form[name=&#34;post-edit&#34;]', postsHome)" value="Remove Post">}
                 <input type="button" onclick="postsHome()" value="Quit @if(add){Adding} else {Editing}" />
             </div>
         </form>

@@ -35,7 +35,7 @@ function doLogout() {
     });
 }
 
-function deletePost(id, statusId, toHide) {
+function delDoc(type, id, statusId, toHide, homeFn) {
     var csrfInput = $('input[name="csrf"]');
     var toHideObject = $(toHide);
     var loader = $('.loader');
@@ -46,7 +46,7 @@ function deletePost(id, statusId, toHide) {
         loader.show();
         $.ajax({
             type: "DELETE",
-            url: "/api/posts/" + id,
+            url: "/api/"+type+"/" + id,
             cache: false,
             contentType: "application/json",
             headers: {
@@ -57,26 +57,26 @@ function deletePost(id, statusId, toHide) {
                 loader.hide();
                 showMessage(statusId + "-success", "Deletion successful.");
                 setTimeout(function () {
-                    postsHome()
+                    homeFn()
                 }, 500);
             },
             error: function (resp) {
                 waiting = false;
                 loader.hide();
                 toHideObject.show();
-                showMessage(statusId + "-error", "Could not delete post for the following reason: " + resp.responseText);
+                showMessage(statusId + "-error", "Could not delete for the following reason: " + resp.responseText);
             }
         });
     }
 }
 
-function downloadTrash() {
+function downloadTrash(type, statusId) {
     if (!waiting) {
-        hideMessage("index-error");
+        hideMessage(statusId + "-error");
         waiting = true;
         $.ajax({
             type: "GET",
-            url: "/api/trash",
+            url: "/api/trash/" + type,
             cache: false,
             contentType: "application/json",
             success: function (resp) {
@@ -84,27 +84,27 @@ function downloadTrash() {
                 var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(resp, null, 2));
                 var dlAnchorElem = $('#downloadAnchorElem')[0];
                 dlAnchorElem.setAttribute("href", dataStr);
-                dlAnchorElem.setAttribute("download", "deleted.json");
+                dlAnchorElem.setAttribute("download", "deleted"+type+".json");
                 dlAnchorElem.click();
                 dlAnchorElem.removeAttribute("href");
                 dlAnchorElem.removeAttribute("download");
             },
             error: function (resp) {
                 waiting = false;
-                showMessage("index-error", "Could not download deleted posts for the following reason: " + resp.responseText);
+                showMessage(statusId + "-error", "Could not download deleted items for the following reason: " + resp.responseText);
             }
         });
     }
 }
 
-function purgeTrash() {
+function purgeTrash(type, statusId) {
     var csrfInput = $('input[name="csrf"]');
     if (!waiting) {
-        hideMessage("index-error");
+        hideMessage(statusId + "-error");
         waiting = true;
         $.ajax({
             type: "DELETE",
-            url: "/api/trash",
+            url: "/api/trash/" + type,
             cache: false,
             contentType: "application/json",
             headers: {
@@ -112,25 +112,25 @@ function purgeTrash() {
             },
             success: function () {
                 waiting = false;
-                showMessage("posts-index-success", "Deleted posts purged.");
+                showMessage(statusId + "-success", "Deleted items purged.");
                 setTimeout(function () {
-                    hideMessage("posts-index-success");
+                    hideMessage(statusId + "-success");
                 }, 1000);
             },
             error: function (resp) {
                 waiting = false;
-                showMessage("posts-index-error", "Could not purge deleted posts for the following reason: " + resp.responseText);
+                showMessage(statusId + "-error", "Could not purge deleted items for the following reason: " + resp.responseText);
             }
         });
     }
 }
 
-function edit(id) {
-    window.location.href = "/posts/edit/" + id;
+function edit(type, id) {
+    window.location.href = "/" + type + "/edit/" + id;
 }
 
-function addPost() {
-    window.location.href = "/posts/add";
+function add(type) {
+    window.location.href = "/" + type + "/add";
 }
 
 function backHome() {
@@ -139,6 +139,10 @@ function backHome() {
 
 function postsHome() {
     window.location.href = "/posts"
+}
+
+function projectsHome() {
+    window.location.href = "/projects"
 }
 
 function editAbout() {
@@ -279,8 +283,8 @@ function updateAbout() {
     }
 }
 
-function updatePost(add) {
-    var form = $('form[name="post-edit"]');
+function update(type, add, formName) {
+    var form = $('form[name="'+formName+'"]');
     var loader = $('.loader');
     if (!waiting) {
         hideMessage("form-error");
@@ -289,19 +293,19 @@ function updatePost(add) {
         loader.show();
         var id = parseInt(form[0].id.value);
         var title = form[0].title.value;
-        var summary = form[0].summary.value;
+        var abstract = form[0].abstract.value;
 
         var converter = getConverter();
         var contentMarkdown = form[0].contentmarkdown.value;
         var contentHtml = converter.makeHtml(contentMarkdown);
-        //Assures consistency between firefox and chrome
+        //Ensures consistency between firefox and chrome
         var publishedDate = new Date(form[0].publication.value + ":00Z");
         var publishedDateStr = toISOString(publishedDate);
 
-        var post = {
+        var doc = {
             id: id,
             title: title,
-            summary: summary,
+            abstract: abstract,
             content: {
                 html: contentHtml,
                 markdown: contentMarkdown
@@ -314,8 +318,8 @@ function updatePost(add) {
 
         $.ajax({
             type: reqType,
-            url: "/api/posts" + urlEnd,
-            data: JSON.stringify(post),
+            url: "/api/" + type + urlEnd,
+            data: JSON.stringify(doc),
             cache: false,
             contentType: "application/json",
             headers: {
@@ -327,7 +331,7 @@ function updatePost(add) {
                 showMessage("form-success", "Update successful.");
                 var editId = add ? resp.id : id;
                 setTimeout(function () {
-                    edit(editId);
+                    edit(type, editId);
                 }, 500);
             },
             error: function (resp) {
@@ -335,7 +339,7 @@ function updatePost(add) {
                 waiting = false;
                 loader.hide();
                 form.show();
-                showMessage("form-error", "Could not update post for the following reason: " + resp.responseText);
+                showMessage("form-error", "Could not update for the following reason: " + resp.responseText);
             }
         });
     }
@@ -387,11 +391,11 @@ function submitNavbarConf() {
     }
 }
 
-function publish(add) {
-    if (!waiting && confirm("This will publish the post on the blog.")) {
+function publish(type, add, formName) {
+    if (!waiting && confirm("This will publish the item on the blog.")) {
         var publishDate = new Date();
         $("input[type='datetime-local']").val(formatForForm(publishDate));
-        updatePost(add)
+        update(type, add, formName)
     }
 }
 
@@ -402,23 +406,23 @@ function showPreview(formName, fillPreview) {
     form.hide();
     loader.show();
 
-    fillPreview();
+    fillDocPreview(formName);
 
     loader.hide();
     preview.show();
 }
 
-function fillPostPreview() {
-    var form = $('form[name="post-edit"]');
+function fillDocPreview(formName) {
+    var form = $('form[name="' + formName + '"]');
     var preview = $('.preview');
     var title = form[0].title.value;
-    var previewPost = $('.preview > .doc');
+    var previewDoc = $('.preview > .doc');
 
     var converter = getConverter();
     var contentMarkdown = form[0].contentmarkdown.value;
     var contentHtml = converter.makeHtml(contentMarkdown);
 
-    previewPost.html("<h1>" + title + "</h1>" + contentHtml);
+    previewDoc.html("<h1>" + title + "</h1>" + contentHtml);
     $('pre code').each(function (i, block) {
         hljs.highlightBlock(block);
     });

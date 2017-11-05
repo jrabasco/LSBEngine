@@ -1,15 +1,19 @@
-@import me.lsbengine.database.model.NavBarConf
-@import me.lsbengine.components.html.footer
+@import me.lsbengine.database.model.{Project, NavBarConf}
 @import me.lsbengine.components.public.html.{head, navbar}
-@(id: Int, navBarConf: NavBarConf)
+@import me.lsbengine.components.html.footer
+@(project: Project, navBarConf: NavBarConf)
 <!DOCTYPE html>
 <html lang="en">
     @head.render()
     <body><div class="page-wrap">
         @if(navBarConf.projects || navBarConf.about){
-            @navbar.render("Projects", navBarConf)
+            @navbar.render("", navBarConf)
         }
-        <p>Project @id page under construction...</p>
+        <div class="docs">
+        	<div class="doc">
+        		<h1><a href="/projects/@project.id">@project.title</a></h1> @Html(project.content.html)
+        	</div>
+        </div>
     </div>
     @footer.render()
     </body>

@@ -1,7 +1,7 @@
-@import me.lsbengine.database.model.{Post, NavBarConf, AboutMe}
-@import me.lsbengine.components.public.html.{head, header, navbar}
+@import me.lsbengine.database.model.{Post, NavBarConf, AboutMe, Categories}
+@import me.lsbengine.components.public.html.{head, header, navbar, postitem}
 @import me.lsbengine.components.html.footer
-@(posts: List[Post], navBarConf: NavBarConf, aboutMe: AboutMe)
+@(posts: List[Post], navBarConf: NavBarConf, categories: Categories, aboutMe: AboutMe)
 <!DOCTYPE html>
 <html lang="en">
     @head.render()
@@ -17,16 +17,19 @@
             @if(aboutMe.introduction.nonEmpty){
                 <div class="doc">@Html(aboutMe.introduction.get.html)</div>
             }
+            
+            @for(title <- categories.titles.sortBy(_.order)) {
+            	<i><a href="?category=@title.title">@title.title</a></i>
+            }
+            
             @if(posts.nonEmpty) {
 	            @for(p <- posts.init) {
 	                <div class="doc underline">
-	                    <h1><a href="/posts/@p.id" target="_blank">@p.title</a></h1>
-	                    @Html(p.content.html)
+	                    @postitem.render(p)
 	                </div>
 	            }
                	<div class="doc">
-                   	<h1><a href="/posts/@posts.last.id" target="_blank">@posts.last.title</a></h1>
-                   	@Html(posts.last.content.html)
+                   	@postitem.render(posts.last)
                	</div>
             }
         </div>

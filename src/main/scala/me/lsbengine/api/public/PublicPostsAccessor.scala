@@ -23,12 +23,23 @@ class PublicPostsAccessor(db: DefaultDB)
     super.getItem(query)
   }
 
-  def listPosts: Future[List[Post]] = {
+  def listPosts(category: Option[String] = None): Future[List[Post]] = {
     val now = DateTime.now
     val sort = BSONDocument("published" -> -1)
-    val query = BSONDocument("published" -> BSONDocument(
-      "$lte" -> BSONDateTime(now.getMillis)
-    ))
+    val query = category match {
+      case Some(cat) =>
+        BSONDocument(
+          "category" -> cat,
+          "published" -> BSONDocument(
+            "$lte" -> BSONDateTime(now.getMillis)
+        ))
+      case None =>
+        BSONDocument(
+          "published" -> BSONDocument(
+            "$lte" -> BSONDateTime(now.getMillis)
+        ))
+    }
     super.getItems(query = query, sort = sort)
   }
+  
 }

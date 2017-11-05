@@ -312,6 +312,10 @@ function update(type, add, formName) {
             },
             published: publishedDateStr
         };
+        
+        if (type === "posts") {
+        	addPostValues(form, doc);
+        }
 
         var reqType = add ? "POST" : "PUT";
         var urlEnd = add ? "" : "/" + id;
@@ -345,13 +349,23 @@ function update(type, add, formName) {
     }
 }
 
+function addPostValues(form, doc) {
+	var category = $("#category option:selected").text();
+	if (category !== "None") {
+		doc.category = category;
+	}
+	doc.explicit = form[0].explicit.checked;
+}
+
 function submitNavbarConf() {
     var form = $('form[name="edit-navbar"]');
+    var formTitle = $('#nav-title');
     var loader = $('.loader');
     if (!waiting) {
         hideMessage("form-error");
         waiting = true;
         form.hide();
+        formTitle.hide();
         loader.show();
 
         var projects = form[0].projects.checked;
@@ -378,6 +392,7 @@ function submitNavbarConf() {
                 setTimeout(function () {
                     hideMessage("form-success");
                     form.show();
+                    formTitle.show();
                 }, 500);
             },
             error: function (resp) {
@@ -385,7 +400,8 @@ function submitNavbarConf() {
                 waiting = false;
                 loader.hide();
                 form.show();
-                showMessage("form-error", "Could not update post for the following reason: " + resp.responseText);
+                formTitle.show();
+                showMessage("form-error", "Could not update navigation bar for the following reason: " + resp.responseText);
             }
         });
     }
@@ -541,4 +557,82 @@ function resetFields(formName, errorId) {
         inputField.removeClass("ok");
         inputField.addClass("not-ok");
     });
+}
+
+function removeCategory(id) {
+	$('#category'+id).remove();
+}
+
+function addCategory() {
+	var form = $('form[name="edit-categories"]');
+	var nextCat = form[0].nextcat;
+	var id = nextCat.value;
+	var newCat = form[0].newcategory;
+	var newCatName = newCat.value;
+	if (newCatName !== "") {
+		$('#categories').append(
+		  '<div class="listitem" id="category'+id+'">'+
+		     '<label>'+newCatName+'</label><div class="remove-icon" style="cursor: pointer;" onclick="removeCategory('+id+')">&#10006;</div>'+
+		  '</div>'
+		);
+		newCat.value = '';
+		nextCat.value = id + 1;
+	}
+}
+
+function submitCategories() {
+	var form = $('form[name="edit-categories"]');
+	var formTitle = $('#cat-title');
+    var loader = $('.loader');
+    if (!waiting) {
+        hideMessage("form-error");
+        waiting = true;
+        form.hide();
+        formTitle.hide();
+        loader.show();
+
+    	var nextCat = form[0].nextcat.value;
+    	var categories = {titles: []};
+    	var order = 0;
+    	for (var i = 0; i < nextCat; ++i) {
+    		var cat = $('#category'+i);
+    		if (cat.length) {
+    			categories.titles.push({
+    				title: cat.children('label').text(),
+    				order: order
+    			});
+    			order++;
+    		}
+    	}
+
+
+        $.ajax({
+            type: "PUT",
+            url: "/api/categories",
+            data: JSON.stringify(categories),
+            cache: false,
+            contentType: "application/json",
+            headers: {
+                'X-Csrf-Protection': form[0].csrf.value
+            },
+            success: function () {
+                waiting = false;
+                loader.hide();
+                showMessage("form-success", "Update successful.");
+                setTimeout(function () {
+                    hideMessage("form-success");
+                    form.show();
+                    formTitle.show();
+                }, 500);
+            },
+            error: function (resp) {
+                console.log(resp);
+                waiting = false;
+                loader.hide();
+                form.show();
+                formTitle.show();
+                showMessage("form-error", "Could not update categories for the following reason: " + resp.responseText);
+            }
+        });
+    }
 }

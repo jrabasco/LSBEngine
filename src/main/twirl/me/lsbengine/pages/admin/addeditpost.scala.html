@@ -1,8 +1,8 @@
-@import me.lsbengine.database.model.Post
+@import me.lsbengine.database.model.{Post, Categories}
 @import me.lsbengine.database.model.Token
 @import me.lsbengine.components.html.footer
 @import me.lsbengine.components.admin.html.{navbar, head}
-@(token: Token, post: Post, add: Boolean)
+@(token: Token, post: Post, categories: Categories, add: Boolean)
 <!DOCTYPE html>
 <html lang="en">
     @head.render(
@@ -36,6 +36,19 @@
             <div class="label-field-date publication">
                 <label for="publication">Publication:</label>
                 <input type="datetime-local" id="publication" name="publication" value="1970-01-01T00:00"/>
+            </div>
+            <div class="label-field">
+                <label for="explicit">Explicit ?</label>
+                <input type="checkbox" id="explicit" name="explicit" @if(post.explicit) {checked} />
+            </div>
+            <div class="label-field">
+            	<label for="category">Category:</label>
+	            <select id="category">
+	            	<option @if(post.category.isEmpty) {selected="selected"}>None</option>
+	                @for(title <- categories.titles.sortBy(_.order)) {
+	            	<option @if(post.category.contains(title.title)){selected="selected"}>@title.title</option>
+	            	}
+	            </select>
             </div>
             <input type="hidden" name="id" value="@post.id">
             <input type="hidden" name="csrf" value="@token.csrf">

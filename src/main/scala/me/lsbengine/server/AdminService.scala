@@ -180,7 +180,13 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
             }
           }
         }
-      } ~ handleSingleResourceUpdate[NavBarConf]("navbar", new NavBarConfAccessor(_)) ~ handleSingleResourceUpdate[AboutMe]("perso", new AboutMeAccessor(_))
+      } ~ {
+        handleSingleResourceUpdate[NavBarConf]("navbar", new NavBarConfAccessor(_))
+      } ~ {
+        handleSingleResourceUpdate[AboutMe]("perso", new AboutMeAccessor(_))
+      } ~ {
+        handleSingleResourceUpdate[Categories]("categories", new CategoriesAccessor(_))
+      }
     }
 
   override val ownRoutes: Route = frontendRoutes ~ apiRoutes
@@ -257,15 +263,21 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
   }
 
   private def index(requestContext: RequestContext, token: Token): Future[RouteResult] = {
-    handleWithNavBarConf(requestContext) { (_, conf) =>
-      requestContext.complete(OK, admin.html.index.render(token, conf))
+    handleWithNavBarConf(requestContext) { (db, conf) =>
+      val categoriesAccessor = new CategoriesAccessor(db)
+      categoriesAccessor.getResource.flatMap {
+        cats => requestContext.complete(OK, admin.html.index.render(token, cats, conf))
+      }.recoverWith {
+        case _ =>
+          requestContext.complete(OK, admin.html.index.render(token, Categories(titles=List()), conf))
+      }
     }
   }
 
   private def postsIndex(requestContext: RequestContext, token: Token): Future[RouteResult] = {
     handleWithDb(requestContext) { db =>
       val postsAccessor = new AdminPostsAccessor(db)
-      postsAccessor.listPosts.flatMap {
+      postsAccessor.listPosts(None).flatMap {
         list =>
           requestContext.complete(admin.html.postsindex.render(token, list))
       }.recoverWith {
@@ -490,18 +502,26 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
   }
 
   private def addPostForm(requestContext: RequestContext, token: Token): Future[RouteResult] = {
-    requestContext.complete(admin.html.addeditpost.render(token, Post(-1, "", "", HtmlMarkdownContent("", ""), DateTime.now + 10.years), add = true))
+    handleWithDb(requestContext) { db =>
+      val categoriesAccessor = new CategoriesAccessor(db)
+      categoriesAccessor.getResource.flatMap { categories =>
+        requestContext.complete(admin.html.addeditpost.render(token, Post(-1, "", "", HtmlMarkdownContent("", ""), DateTime.now + 10.years, explicit=false, category=None), categories, add = true))
+      }
+    }
   }
 
   private def editPostForm(requestContext: RequestContext, token: Token, id: Int): Future[RouteResult] = {
     handleWithDb(requestContext) { db =>
       val postsAccessor = new AdminPostsAccessor(db)
+      val categoriesAccessor = new CategoriesAccessor(db)
 
-      postsAccessor.getPost(id).flatMap {
-        case Some(post) =>
-          requestContext.complete(admin.html.addeditpost.render(token, post, add = false))
-        case None =>
-          requestContext.complete(NotFound, errors.html.notfound.render(s"Post $id does not exist."))
+      categoriesAccessor.getResource.flatMap { categories =>
+        postsAccessor.getPost(id).flatMap {
+          case Some(post) =>
+            requestContext.complete(admin.html.addeditpost.render(token, post, categories, add = false))
+          case None =>
+            requestContext.complete(NotFound, errors.html.notfound.render(s"Post $id does not exist."))
+        }
       }.recoverWith {
         case e =>
           requestContext.complete(InternalServerError, errors.html.internalerror.render(s"Failed to retrieve post $id : $e"))

@@ -1,0 +1,13 @@
+@import me.lsbengine.database.model.Post
+@(post: Post)
+<h1><a href="/posts/@post.id" target="_blank">@post.title</a></h1>
+@if(post.explicit) {
+<div>
+    @{post.`abstract`}
+</div>
+<div class="explicit-link">
+    <i><a href="/posts/@post.id">Read more (warning: explicit)</a></i>
+</div>
+} else {
+@Html(post.content.html)
+}

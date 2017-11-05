@@ -9,6 +9,7 @@ package object model {
     val postsCollectionName = "posts"
     val projectsCollectionName = "projects"
     val aboutMeCollectionName = "aboutMe"
+    val categoriesCollectionName = "categories"
     val navBarConfCollectionName = "navBarConf"
     val usersCollectionName = "users"
     val tokensCollectionName = "tokens"
@@ -18,7 +19,11 @@ package object model {
 
   case class HtmlMarkdownContent(html: String, markdown: String)
 
-  case class Post(id: Int, title: String, `abstract`: String, content: HtmlMarkdownContent, published: DateTime)
+  case class Post(id: Int, title: String, `abstract`: String, content: HtmlMarkdownContent, published: DateTime, explicit: Boolean, category: Option[String])
+  
+  case class OrderedTitle(title: String, order: Int)
+  
+  case class Categories(titles: List[OrderedTitle])
 
   case class Project(id: Int, title: String, `abstract`: String, content: HtmlMarkdownContent, published: DateTime)
 
@@ -44,6 +49,8 @@ package object model {
     implicit val postFormat: Formatter[Post] = Macros.handler[Post]
     implicit val projectFormat: Formatter[Project] = Macros.handler[Project]
     implicit val aboutMeFormat: Formatter[AboutMe] = Macros.handler[AboutMe]
+    implicit val orderedTitleFormat: Formatter[OrderedTitle] = Macros.handler[OrderedTitle]
+    implicit val categoriesFormat: Formatter[Categories] = Macros.handler[Categories]
     implicit val navBarFormat: Formatter[NavBarConf] = Macros.handler[NavBarConf]
     implicit val userFormat: Formatter[User] = Macros.handler[User]
     implicit val tokenFormat: Formatter[Token] = Macros.handler[Token]

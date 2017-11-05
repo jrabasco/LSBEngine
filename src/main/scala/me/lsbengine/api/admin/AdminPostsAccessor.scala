@@ -24,9 +24,15 @@ class AdminPostsAccessor(db: DefaultDB)
     super.getItem(query)
   }
 
-  def listPosts: Future[List[Post]] = {
+  def listPosts(category: Option[String]): Future[List[Post]] = {
     val sort = BSONDocument("published" -> -1)
-    super.getItems(sort = sort)
+    category match {
+      case Some(cat) =>
+        val query = BSONDocument("category" -> cat)
+        super.getItems(query = query, sort = sort)
+      case None =>
+        super.getItems(sort = sort)
+    }
   }
 
   def updatePost(id: Int, post: Post): Future[UpdateWriteResult] = {

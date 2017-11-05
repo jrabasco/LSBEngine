@@ -15,6 +15,7 @@ import reactivemongo.api.{DefaultDB, MongoConnection}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.language.postfixOps
 
 abstract class ServerService(dbConnection: MongoConnection, dbName: String, log: LoggingAdapter)
   extends JSONSupport {
@@ -32,7 +33,10 @@ abstract class ServerService(dbConnection: MongoConnection, dbName: String, log:
       pathPrefix("posts") {
         path("list") {
           get {
-            ctx => listPosts(ctx)
+            parameter("category"?) {
+              cat => 
+                ctx => listPosts(ctx, cat)
+            }
           }
         } ~ path(IntNumber) {
           id =>
@@ -58,12 +62,12 @@ abstract class ServerService(dbConnection: MongoConnection, dbName: String, log:
       }
     }
 
-  def listPosts(requestContext: RequestContext): Future[RouteResult] = {
+  def listPosts(requestContext: RequestContext, cat: Option[String]): Future[RouteResult] = {
     log.info(s"[$apiScope] Listing posts.")
     handleWithDb(requestContext) {
       db =>
         val postsAccessor = getPostsAccessor(db)
-        postsAccessor.listPosts.flatMap {
+        postsAccessor.listPosts(cat).flatMap {
           list =>
             requestContext.complete(ListPostsResponse(list))
         }

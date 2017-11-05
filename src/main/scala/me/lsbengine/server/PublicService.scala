@@ -5,22 +5,26 @@ import akka.http.scaladsl.model.StatusCodes.{InternalServerError, NotFound}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{RequestContext, Route, RouteResult}
 import me.lsbengine.api.{PostsAccessor, ProjectsAccessor}
-import me.lsbengine.api.admin.AboutMeAccessor
+import me.lsbengine.api.admin.{AboutMeAccessor, CategoriesAccessor}
 import me.lsbengine.api.public.{PublicPostsAccessor, PublicProjectsAccessor}
-import me.lsbengine.database.model.AboutMe
+import me.lsbengine.database.model.{AboutMe, Categories}
 import me.lsbengine.errors
 import me.lsbengine.pages.public.html
 import reactivemongo.api.{DefaultDB, MongoConnection}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.language.postfixOps
 
 class PublicService(dbConnection: MongoConnection, dbName: String, log: LoggingAdapter)
   extends ServerService(dbConnection, dbName, log) {
 
   override val ownRoutes: Route =
     pathSingleSlash {
-      ctx => index(ctx)
+      parameter("category"?) {
+        cat =>
+          ctx => index(ctx, cat)
+      }
     } ~ pathPrefix("posts") {
       path(IntNumber) { id =>
         ctx => individualPost(ctx, id)
@@ -37,18 +41,21 @@ class PublicService(dbConnection: MongoConnection, dbName: String, log: LoggingA
 
   override val apiScope: String = "public"
 
-  def index(requestContext: RequestContext): Future[RouteResult] = {
+  def index(requestContext: RequestContext, cat: Option[String]): Future[RouteResult] = {
     handleWithNavBarConf(requestContext) { (db, conf) =>
       val postsAccessor = getPostsAccessor(db)
       val aboutMeAccessor = new AboutMeAccessor(db)
+      val categoriesAccessor = new CategoriesAccessor(db)
 
-      postsAccessor.listPosts.flatMap { list =>
+      postsAccessor.listPosts(cat).flatMap { list =>
         aboutMeAccessor.getResource.flatMap { aboutMe =>
-          requestContext.complete(html.index.render(list, conf, aboutMe))
+          categoriesAccessor.getResource.flatMap { cats =>
+            requestContext.complete(html.index.render(list, conf, cats, aboutMe))
+          }
         }
       }.recoverWith {
         case _ =>
-          requestContext.complete(html.index.render(List(), conf, AboutMe(None, None)))
+          requestContext.complete(html.index.render(List(), conf, Categories(titles=List()), AboutMe(None, None)))
       }
     }
   }

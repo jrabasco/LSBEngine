@@ -55,10 +55,20 @@ form {
   .buttons {
     margin-top: 20px;
   }
+
+  input[type=button]:not(.buttons) {
+    margin-left: 2px
+  }
+
+  .listitem {
+    .remove-icon {
+      display: inline-block;
+    }
+  }
 }
 
 .big-form {
-  height: 800px;
+  max-height: 900px;
   text-align: right;
 
   .label-field {
@@ -73,6 +83,13 @@ form {
     input, textarea {
       width: 80%;
       margin-left: 5%;
+    }
+    select {
+      margin-left: 5%;
+    }
+    input[type=checkbox] {
+      margin-left: 5%;
+      width: 10px;
     }
   }
 

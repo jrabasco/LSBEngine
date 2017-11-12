@@ -21,6 +21,10 @@ class DatabaseAccessor[T](db: DefaultDB, collectionName: String) {
     getCollection.find(query).one[T]
   }
 
+  def countItems(query: BSONDocument = BSONDocument()): Future[Int] = {
+    getCollection.count(Some(query))
+  }
+
   def upsertItem(selector: BSONDocument, item: T)(implicit writer: BSONDocumentWriter[T]): Future[UpdateWriteResult] = {
     getCollection.update(selector, item, WriteConcern.Acknowledged, upsert = true)
   }

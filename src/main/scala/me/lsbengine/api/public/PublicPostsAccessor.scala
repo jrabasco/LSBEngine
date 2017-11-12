@@ -10,6 +10,7 @@ import reactivemongo.api.DefaultDB
 import reactivemongo.bson.{BSONDateTime, BSONDocument}
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class PublicPostsAccessor(db: DefaultDB)
   extends DatabaseAccessor[Post](db, MongoCollections.postsCollectionName)
@@ -24,7 +25,7 @@ class PublicPostsAccessor(db: DefaultDB)
     super.getItem(query)
   }
 
-  def listPosts(category: Option[String], pageOpt: Option[Int] = None, postsPerPageOpt: Option[Int] = None): Future[List[Post]] = {
+  def listPosts(category: Option[String], pageOpt: Option[Int] = None, postsPerPageOpt: Option[Int] = None): Future[(List[Post], Int)] = {
     val now = DateTime.now
     val sort = BSONDocument("published" -> -1)
     val page = pageOpt.getOrElse(1)
@@ -35,7 +36,14 @@ class PublicPostsAccessor(db: DefaultDB)
             "$lte" -> BSONDateTime(now.getMillis)
         )) ++ category.fold(BSONDocument())(cat => BSONDocument("category" -> cat))
     val skip = (page - 1) * postsPerPage
-    super.getItems(query = query, sort = sort, skip = skip, maxItems = postsPerPage)
+    super.getItems(query = query, sort = sort, skip = skip, maxItems = postsPerPage).flatMap {
+      list =>
+        super.countItems(query).map {
+          number =>
+            val lastPage = (if (number % postsPerPage > 0)  1 else 0) + (number / postsPerPage)
+            (list, lastPage)
+        }
+    }
   }
   
 }

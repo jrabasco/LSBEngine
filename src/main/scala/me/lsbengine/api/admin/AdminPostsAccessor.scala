@@ -25,17 +25,19 @@ class AdminPostsAccessor(db: DefaultDB)
     super.getItem(query)
   }
 
-  def listPosts(category: Option[String], pageOpt: Option[Int] = None, postsPerPageOpt: Option[Int] = None): Future[List[Post]] = {
+  def listPosts(category: Option[String], pageOpt: Option[Int] = None, postsPerPageOpt: Option[Int] = None): Future[(List[Post], Int)] = {
     val sort = BSONDocument("published" -> -1)
     val page = pageOpt.getOrElse(1)
     val postsPerPage = postsPerPageOpt.getOrElse(BlogConfiguration.defaultPostsPerPage)
     val skip = (page - 1) * postsPerPage
-    category match {
-      case Some(cat) =>
-        val query = BSONDocument("category" -> cat)
-        super.getItems(query = query, sort = sort, skip = skip, maxItems = postsPerPage)
-      case None =>
-        super.getItems(sort = sort, skip = skip, maxItems = postsPerPage)
+    val query = category.fold(BSONDocument())(cat => BSONDocument("category" -> cat))
+    super.getItems(query = query, sort = sort, skip = skip, maxItems = postsPerPage).flatMap {
+      list =>
+        super.countItems(query).map {
+          number =>
+            val lastPage = (if (number % postsPerPage > 0)  1 else 0) + (number / postsPerPage)
+            (list, lastPage)
+        }
     }
   }
 

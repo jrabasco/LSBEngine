@@ -1,7 +1,7 @@
 @import me.lsbengine.database.model.{Post, NavBarConf, AboutMe, Categories}
 @import me.lsbengine.components.public.html.{head, header, navbar, postitem}
 @import me.lsbengine.components.html.footer
-@(posts: List[Post], navBarConf: NavBarConf, categories: Categories, aboutMe: AboutMe,curCat: Option[String], page: Int, postsPerPage: Int)
+@(posts: List[Post], navBarConf: NavBarConf, categories: Categories, aboutMe: AboutMe,curCat: Option[String], page: Int, postsPerPage: Int, lastPage: Int)
 <!DOCTYPE html>
 <html lang="en">
     @head.render()
@@ -36,9 +36,11 @@
             }
             <div>
             <br/>
-            @if(page > 1){<a href="?page=@(page-1)&posts_per_page=@postsPerPage@if(curCat.nonEmpty){&category=@(curCat.get)}">}&lt;@if(page > 1){</a>}
-            @page
-            <a href="?page=@(page+1)&posts_per_page=@postsPerPage@if(curCat.nonEmpty){&category=@(curCat.get)}">&gt;</a>
+            @pageLink(pageNr: Int) = @{
+                val base = "?page=" + pageNr + "&posts_per_page=" + postsPerPage
+                base + curCat.fold("")(c => "&category=" + c)
+            }
+            @if(page > 1){<a href="@pageLink(page - 1)">}&lt;@if(page > 1){</a>&nbsp;<a href="@pageLink(1)">1</a>}@if(page > 4){...}@if(page > 3){&nbsp;<a href="@pageLink(page - 2)">@(page - 2)</a>&nbsp;<a href="@pageLink(page - 1)">@(page - 1)</a>} else if(page > 2){&nbsp;<a href="@pageLink(page - 1)">@(page - 1)</a>}&nbsp;@page@if(page < lastPage - 2){&nbsp;<a href="@pageLink(page + 1)">@(page + 1)</a>&nbsp;<a href="@pageLink(page + 2)">@(page + 2)</a>} else if(page < lastPage - 1) {&nbsp;<a href="@pageLink(page + 1)">@(page + 1)</a>}@if(page < lastPage - 3){...}@if(page < lastPage){&nbsp;<a href="@pageLink(lastPage)">@lastPage</a>&nbsp;<a href="@pageLink(page + 1)">}&gt;@if(page < lastPage){</a>}
             </div>
         </div>
     </div>

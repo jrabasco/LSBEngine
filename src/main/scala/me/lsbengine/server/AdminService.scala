@@ -282,11 +282,11 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
     handleWithDb(requestContext) { db =>
       val postsAccessor = new AdminPostsAccessor(db)
       postsAccessor.listPosts(None, page, postsPerPage).flatMap {
-        list =>
-          requestContext.complete(admin.html.postsindex.render(token, list, page.getOrElse(1), postsPerPage.getOrElse(BlogConfiguration.defaultPostsPerPage)))
+        case (list, lastPage) =>
+          requestContext.complete(admin.html.postsindex.render(token, list, page.getOrElse(1), postsPerPage.getOrElse(BlogConfiguration.defaultPostsPerPage), lastPage))
       }.recoverWith {
         case _ =>
-          requestContext.complete(admin.html.postsindex.render(token, List(), page.getOrElse(1), postsPerPage.getOrElse(BlogConfiguration.defaultPostsPerPage)))
+          requestContext.complete(admin.html.postsindex.render(token, List(), page.getOrElse(1), postsPerPage.getOrElse(BlogConfiguration.defaultPostsPerPage), 1))
       }
     }
   }

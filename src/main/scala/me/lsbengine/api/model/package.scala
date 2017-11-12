@@ -4,7 +4,7 @@ import me.lsbengine.database.model._
 
 package object model {
 
-  case class ListPostsResponse(list: List[Post])
+  case class ListPostsResponse(list: List[Post], lastPage: Int)
 
   case class ListProjectsResponse(list: List[Project])
 

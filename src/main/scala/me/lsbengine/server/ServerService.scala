@@ -68,8 +68,8 @@ abstract class ServerService(dbConnection: MongoConnection, dbName: String, log:
       db =>
         val postsAccessor = getPostsAccessor(db)
         postsAccessor.listPosts(cat, page, postsPerPage).flatMap {
-          list =>
-            requestContext.complete(ListPostsResponse(list))
+          case (list, lastPage) =>
+            requestContext.complete(ListPostsResponse(list, lastPage))
         }
     }
   }

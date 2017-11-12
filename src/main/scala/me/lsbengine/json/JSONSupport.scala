@@ -52,7 +52,7 @@ trait JSONSupport extends SprayJsonSupport with DefaultJsonProtocol with Collect
   implicit val categoriesFormat: RootJsonFormat[Categories] = jsonFormat1(Categories)
   implicit val navbarFormat: RootJsonFormat[NavBarConf] = jsonFormat2(NavBarConf)
   implicit val tokenResponseFormat: RootJsonFormat[TokenResponse] = jsonFormat1(TokenResponse)
-  implicit val listPostsResponseFormat: RootJsonFormat[ListPostsResponse] = jsonFormat1(ListPostsResponse)
+  implicit val listPostsResponseFormat: RootJsonFormat[ListPostsResponse] = jsonFormat2(ListPostsResponse)
   implicit val fetchPostResponseFormat: RootJsonFormat[FetchPostResponse] = jsonFormat1(FetchPostResponse)
   implicit val postCreationResponseFormat: RootJsonFormat[PostCreationResponse] = jsonFormat1(PostCreationResponse)
   implicit val listProjectsResponseFormat: RootJsonFormat[ListProjectsResponse] = jsonFormat1(ListProjectsResponse)

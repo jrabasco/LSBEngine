@@ -9,7 +9,7 @@ package object api {
   trait PostsAccessor {
     def getPost(id: Int): Future[Option[Post]]
 
-    def listPosts(category: Option[String] = None, pageOpt: Option[Int] = None, postsPerPageOpt: Option[Int] = None): Future[List[Post]]
+    def listPosts(category: Option[String] = None, pageOpt: Option[Int] = None, postsPerPageOpt: Option[Int] = None): Future[(List[Post], Int)]
   }
 
   trait ProjectsAccessor {

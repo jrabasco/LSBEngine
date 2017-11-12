@@ -47,17 +47,18 @@ class PublicService(dbConnection: MongoConnection, dbName: String, log: LoggingA
       val aboutMeAccessor = new AboutMeAccessor(db)
       val categoriesAccessor = new CategoriesAccessor(db)
 
-      postsAccessor.listPosts(cat, page, postsPerPage).flatMap { list =>
-        aboutMeAccessor.getResource.flatMap { aboutMe =>
-          categoriesAccessor.getResource.flatMap { cats =>
-            requestContext.complete(html.index.render(list, conf, cats, aboutMe, cat, page.getOrElse(1), postsPerPage.getOrElse(BlogConfiguration.defaultPostsPerPage)))
+      postsAccessor.listPosts(cat, page, postsPerPage).flatMap {
+        case (list, lastPage) =>
+          aboutMeAccessor.getResource.flatMap { aboutMe =>
+            categoriesAccessor.getResource.flatMap { cats =>
+              requestContext.complete(html.index.render(list, conf, cats, aboutMe, cat, page.getOrElse(1), postsPerPage.getOrElse(BlogConfiguration.defaultPostsPerPage), lastPage))
+            }
           }
-        }
       }.recoverWith {
         case _ =>
           requestContext.complete(html.index.render(List(),
               conf, Categories(titles=List()), AboutMe(None, None), cat,
-              page.getOrElse(1), postsPerPage.getOrElse(BlogConfiguration.defaultPostsPerPage)))
+              page.getOrElse(1), postsPerPage.getOrElse(BlogConfiguration.defaultPostsPerPage), 1))
       }
     }
   }

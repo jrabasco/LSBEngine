@@ -3,7 +3,8 @@
 @import com.github.nscala_time.time.Imports._
 @import me.lsbengine.components.html.footer
 @import me.lsbengine.components.admin.html.{navbar, head}
-@(token: Token, posts: List[Post], page: Int, postsPerPage: Int)
+
+@(token: Token, posts: List[Post], page: Int, postsPerPage: Int, lastPage: Int)
 <!DOCTYPE html>
 <html lang="en">
     @head.render("")
@@ -33,9 +34,10 @@
         <a id="downloadAnchorElem" style="display:none"></a>
         <div>
         <br/>
-        @if(page > 1){<a href="?page=@(page-1)&items_per_page=@postsPerPage">}&lt;@if(page > 1){</a>}
-        @page
-        <a href="?page=@(page+1)&items_per_page=@postsPerPage">&gt;</a>
+        @pageLink(pageNr: Int) = @{
+            "?page=" + pageNr + "&items_per_page=" + postsPerPage
+        }
+        @if(page > 1){<a href="@pageLink(page - 1)">}&lt;@if(page > 1){</a>&nbsp;<a href="@pageLink(1)">1</a>}@if(page > 4){...}@if(page > 3){&nbsp;<a href="@pageLink(page - 2)">@(page - 2)</a>&nbsp;<a href="@pageLink(page - 1)">@(page - 1)</a>} else if(page > 2){&nbsp;<a href="@pageLink(page - 1)">@(page - 1)</a>}&nbsp;@page@if(page < lastPage - 2){&nbsp;<a href="@pageLink(page + 1)">@(page + 1)</a>&nbsp;<a href="@pageLink(page + 2)">@(page + 2)</a>} else if(page < lastPage - 1) {&nbsp;<a href="@pageLink(page + 1)">@(page + 1)</a>}@if(page < lastPage - 3){...}@if(page < lastPage){&nbsp;<a href="@pageLink(lastPage)">@lastPage</a>&nbsp;<a href="@pageLink(page + 1)">}&gt;@if(page < lastPage){</a>}
         </div>
     </div>
      @footer.render()

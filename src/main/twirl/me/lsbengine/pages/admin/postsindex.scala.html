@@ -3,7 +3,7 @@
 @import com.github.nscala_time.time.Imports._
 @import me.lsbengine.components.html.footer
 @import me.lsbengine.components.admin.html.{navbar, head}
-@(token: Token, posts: List[Post])
+@(token: Token, posts: List[Post], page: Int, postsPerPage: Int)
 <!DOCTYPE html>
 <html lang="en">
     @head.render("")
@@ -31,6 +31,12 @@
         <div class="loader"></div>
         <input type="hidden" name="csrf" id="csrf" value="@token.csrf"/>
         <a id="downloadAnchorElem" style="display:none"></a>
+        <div>
+        <br/>
+        @if(page > 1){<a href="?page=@(page-1)&items_per_page=@postsPerPage">}&lt;@if(page > 1){</a>}
+        @page
+        <a href="?page=@(page+1)&items_per_page=@postsPerPage">&gt;</a>
+        </div>
     </div>
      @footer.render()
     </body>

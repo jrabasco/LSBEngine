@@ -16,6 +16,7 @@ import me.lsbengine.errors
 import me.lsbengine.pages.admin
 import reactivemongo.api.{DefaultDB, MongoConnection}
 
+import scala.language.postfixOps
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -200,12 +201,15 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
   }
 
   private def resourceForms(resourceName: String, token: Token,
-                            index: (RequestContext, Token) => Future[RouteResult],
+                            index: (RequestContext, Token, Option[Int], Option[Int]) => Future[RouteResult],
                             edit: (RequestContext, Token, Int) => Future[RouteResult],
                             add: (RequestContext, Token) => Future[RouteResult]): Route = {
     pathPrefix(resourceName) {
       pathEndOrSingleSlash {
-        ctx => index(ctx, token)
+        parameters("page".as[Int]?, "items_per_page".as[Int]?) {
+          (page, itemsPerPage) =>
+            ctx => index(ctx, token, page, itemsPerPage)
+        }
       } ~ pathPrefix("edit") {
         path(IntNumber) { id =>
           get {
@@ -274,20 +278,20 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
     }
   }
 
-  private def postsIndex(requestContext: RequestContext, token: Token): Future[RouteResult] = {
+  private def postsIndex(requestContext: RequestContext, token: Token, page: Option[Int], postsPerPage: Option[Int]): Future[RouteResult] = {
     handleWithDb(requestContext) { db =>
       val postsAccessor = new AdminPostsAccessor(db)
-      postsAccessor.listPosts(None).flatMap {
+      postsAccessor.listPosts(None, page, postsPerPage).flatMap {
         list =>
-          requestContext.complete(admin.html.postsindex.render(token, list))
+          requestContext.complete(admin.html.postsindex.render(token, list, page.getOrElse(1), postsPerPage.getOrElse(BlogConfiguration.defaultPostsPerPage)))
       }.recoverWith {
         case _ =>
-          requestContext.complete(admin.html.postsindex.render(token, List()))
+          requestContext.complete(admin.html.postsindex.render(token, List(), page.getOrElse(1), postsPerPage.getOrElse(BlogConfiguration.defaultPostsPerPage)))
       }
     }
   }
 
-  private def projectsIndex(requestContext: RequestContext, token: Token): Future[RouteResult] = {
+  private def projectsIndex(requestContext: RequestContext, token: Token, page: Option[Int], projectsPerPage: Option[Int]): Future[RouteResult] = {
     handleWithDb(requestContext) { db =>
       val projectsAccessor = new AdminProjectsAccessor(db)
       projectsAccessor.listProjects.flatMap {

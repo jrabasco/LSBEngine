@@ -33,9 +33,9 @@ abstract class ServerService(dbConnection: MongoConnection, dbName: String, log:
       pathPrefix("posts") {
         path("list") {
           get {
-            parameter("category"?) {
-              cat => 
-                ctx => listPosts(ctx, cat)
+            parameters("category"?, "page".as[Int]?, "posts_per_page".as[Int]?) {
+              (cat, page, postsPerPage) =>
+                ctx => listPosts(ctx, cat, page, postsPerPage)
             }
           }
         } ~ path(IntNumber) {
@@ -62,12 +62,12 @@ abstract class ServerService(dbConnection: MongoConnection, dbName: String, log:
       }
     }
 
-  def listPosts(requestContext: RequestContext, cat: Option[String]): Future[RouteResult] = {
+  def listPosts(requestContext: RequestContext, cat: Option[String], page: Option[Int], postsPerPage: Option[Int]): Future[RouteResult] = {
     log.info(s"[$apiScope] Listing posts.")
     handleWithDb(requestContext) {
       db =>
         val postsAccessor = getPostsAccessor(db)
-        postsAccessor.listPosts(cat).flatMap {
+        postsAccessor.listPosts(cat, page, postsPerPage).flatMap {
           list =>
             requestContext.complete(ListPostsResponse(list))
         }

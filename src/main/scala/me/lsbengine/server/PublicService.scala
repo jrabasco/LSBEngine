@@ -21,9 +21,9 @@ class PublicService(dbConnection: MongoConnection, dbName: String, log: LoggingA
 
   override val ownRoutes: Route =
     pathSingleSlash {
-      parameter("category"?) {
-        cat =>
-          ctx => index(ctx, cat)
+      parameter("category"?, "page".as[Int]?, "posts_per_page".as[Int]?) {
+        (cat, page, postsPerPage) =>
+          ctx => index(ctx, cat, page, postsPerPage)
       }
     } ~ pathPrefix("posts") {
       path(IntNumber) { id =>
@@ -41,21 +41,23 @@ class PublicService(dbConnection: MongoConnection, dbName: String, log: LoggingA
 
   override val apiScope: String = "public"
 
-  def index(requestContext: RequestContext, cat: Option[String]): Future[RouteResult] = {
+  def index(requestContext: RequestContext, cat: Option[String], page: Option[Int], postsPerPage: Option[Int]): Future[RouteResult] = {
     handleWithNavBarConf(requestContext) { (db, conf) =>
       val postsAccessor = getPostsAccessor(db)
       val aboutMeAccessor = new AboutMeAccessor(db)
       val categoriesAccessor = new CategoriesAccessor(db)
 
-      postsAccessor.listPosts(cat).flatMap { list =>
+      postsAccessor.listPosts(cat, page, postsPerPage).flatMap { list =>
         aboutMeAccessor.getResource.flatMap { aboutMe =>
           categoriesAccessor.getResource.flatMap { cats =>
-            requestContext.complete(html.index.render(list, conf, cats, aboutMe))
+            requestContext.complete(html.index.render(list, conf, cats, aboutMe, cat, page.getOrElse(1), postsPerPage.getOrElse(BlogConfiguration.defaultPostsPerPage)))
           }
         }
       }.recoverWith {
         case _ =>
-          requestContext.complete(html.index.render(List(), conf, Categories(titles=List()), AboutMe(None, None)))
+          requestContext.complete(html.index.render(List(),
+              conf, Categories(titles=List()), AboutMe(None, None), cat,
+              page.getOrElse(1), postsPerPage.getOrElse(BlogConfiguration.defaultPostsPerPage)))
       }
     }
   }

@@ -1,7 +1,7 @@
 @import me.lsbengine.database.model.{Post, NavBarConf, AboutMe, Categories}
 @import me.lsbengine.components.public.html.{head, header, navbar, postitem}
 @import me.lsbengine.components.html.footer
-@(posts: List[Post], navBarConf: NavBarConf, categories: Categories, aboutMe: AboutMe)
+@(posts: List[Post], navBarConf: NavBarConf, categories: Categories, aboutMe: AboutMe,curCat: Option[String], page: Int, postsPerPage: Int)
 <!DOCTYPE html>
 <html lang="en">
     @head.render()
@@ -31,7 +31,15 @@
                	<div class="doc">
                    	@postitem.render(posts.last)
                	</div>
+            } else {
+                <div>Nothing more to see here :(</div>
             }
+            <div>
+            <br/>
+            @if(page > 1){<a href="?page=@(page-1)&posts_per_page=@postsPerPage@if(curCat.nonEmpty){&category=@(curCat.get)}">}&lt;@if(page > 1){</a>}
+            @page
+            <a href="?page=@(page+1)&posts_per_page=@postsPerPage@if(curCat.nonEmpty){&category=@(curCat.get)}">&gt;</a>
+            </div>
         </div>
     </div>
     @footer.render()

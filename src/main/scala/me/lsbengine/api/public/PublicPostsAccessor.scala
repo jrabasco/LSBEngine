@@ -5,6 +5,7 @@ import me.lsbengine.api.PostsAccessor
 import me.lsbengine.database.DatabaseAccessor
 import me.lsbengine.database.model.{MongoCollections, Post}
 import me.lsbengine.database.model.MongoFormats._
+import me.lsbengine.server.BlogConfiguration
 import reactivemongo.api.DefaultDB
 import reactivemongo.bson.{BSONDateTime, BSONDocument}
 
@@ -23,23 +24,18 @@ class PublicPostsAccessor(db: DefaultDB)
     super.getItem(query)
   }
 
-  def listPosts(category: Option[String] = None): Future[List[Post]] = {
+  def listPosts(category: Option[String], pageOpt: Option[Int] = None, postsPerPageOpt: Option[Int] = None): Future[List[Post]] = {
     val now = DateTime.now
     val sort = BSONDocument("published" -> -1)
-    val query = category match {
-      case Some(cat) =>
-        BSONDocument(
-          "category" -> cat,
+    val page = pageOpt.getOrElse(1)
+    val postsPerPage = postsPerPageOpt.getOrElse(BlogConfiguration.defaultPostsPerPage)
+    val query = 
+      BSONDocument(
           "published" -> BSONDocument(
             "$lte" -> BSONDateTime(now.getMillis)
-        ))
-      case None =>
-        BSONDocument(
-          "published" -> BSONDocument(
-            "$lte" -> BSONDateTime(now.getMillis)
-        ))
-    }
-    super.getItems(query = query, sort = sort)
+        )) ++ category.fold(BSONDocument())(cat => BSONDocument("category" -> cat))
+    val skip = (page - 1) * postsPerPage
+    super.getItems(query = query, sort = sort, skip = skip, maxItems = postsPerPage)
   }
   
 }

@@ -4,6 +4,7 @@ import me.lsbengine.api.PostsAccessor
 import me.lsbengine.database.DatabaseAccessor
 import me.lsbengine.database.model.MongoFormats._
 import me.lsbengine.database.model.{MongoCollections, Post}
+import me.lsbengine.server.BlogConfiguration
 import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.api.commands.{UpdateWriteResult, WriteConcern}
 import reactivemongo.api.{Cursor, DefaultDB}
@@ -24,14 +25,17 @@ class AdminPostsAccessor(db: DefaultDB)
     super.getItem(query)
   }
 
-  def listPosts(category: Option[String]): Future[List[Post]] = {
+  def listPosts(category: Option[String], pageOpt: Option[Int] = None, postsPerPageOpt: Option[Int] = None): Future[List[Post]] = {
     val sort = BSONDocument("published" -> -1)
+    val page = pageOpt.getOrElse(1)
+    val postsPerPage = postsPerPageOpt.getOrElse(BlogConfiguration.defaultPostsPerPage)
+    val skip = (page - 1) * postsPerPage
     category match {
       case Some(cat) =>
         val query = BSONDocument("category" -> cat)
-        super.getItems(query = query, sort = sort)
+        super.getItems(query = query, sort = sort, skip = skip, maxItems = postsPerPage)
       case None =>
-        super.getItems(sort = sort)
+        super.getItems(sort = sort, skip = skip, maxItems = postsPerPage)
     }
   }
 

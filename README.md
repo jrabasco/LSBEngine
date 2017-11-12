@@ -35,6 +35,7 @@ takes around 1 second to perform a hash)
 - `RESUME_REPO`: link to your resume repository, see the Resume section
 - `DISCLAIMER`: A disclaimer that will appear in the footer (default `My opinions do not necessarily represent those of my employer.`)
 - `COPYRIGHT`: copyright mention for the footer (default `Copyright &copy; 2017`)
+- `DEFAULT_POSTS_PER_PAGE`: number of posts per page when no parameter is supplied (default `5`)
 
 ## Adding/Removing users
 

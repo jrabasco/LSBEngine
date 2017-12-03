@@ -10,37 +10,40 @@
             @navbar.render("Home", navBarConf)
         }
         @header.render()
-        <div class="docs">
             @*
             This syntax solves a glitch with HTML generation, never use Option.get otherwise
             *@
             @if(aboutMe.introduction.nonEmpty){
-                <div class="doc">@Html(aboutMe.introduction.get.html)</div>
+                <div class="docs doc">@Html(aboutMe.introduction.get.html)</div>
             }
-            
-            @for(title <- categories.titles.sortBy(_.order)) {
-            	<i><a href="?category=@title.title">@title.title</a></i>
+            @if(categories.titles.nonEmpty) {
+              <div class="categories"><ul>
+							  <li><a @if(curCat.isEmpty){class="active-cat"} href="/">All</a>
+              @for(title <- categories.titles.sortBy(_.order)) {
+                <li><a @if(curCat.getOrElse("")==title.title){class="active-cat"} href="?category=@title.title">@title.title</a></li>
+              }
+              </ul></div>
             }
+        <div class="docs">
             
             @if(posts.nonEmpty) {
-	            @for(p <- posts.init) {
-	                <div class="doc underline">
-	                    @postitem.render(p)
-	                </div>
-	            }
-               	<div class="doc">
-                   	@postitem.render(posts.last)
-               	</div>
+              @for(p <- posts.init) {
+                  <div class="doc underline">
+                      @postitem.render(p)
+                  </div>
+              }
+                 <div class="doc">
+                     @postitem.render(posts.last)
+                 </div>
             } else {
                 <div>Nothing more to see here :(</div>
             }
-            <div>
-            <br/>
+            <div class="pagination">
             @pageLink(pageNr: Int) = @{
                 val base = "?page=" + pageNr + "&posts_per_page=" + postsPerPage
                 base + curCat.fold("")(c => "&category=" + c)
             }
-            @if(page > 1){<a href="@pageLink(page - 1)">}&lt;@if(page > 1){</a>&nbsp;<a href="@pageLink(1)">1</a>}@if(page > 4){...}@if(page > 3){&nbsp;<a href="@pageLink(page - 2)">@(page - 2)</a>&nbsp;<a href="@pageLink(page - 1)">@(page - 1)</a>} else if(page > 2){&nbsp;<a href="@pageLink(page - 1)">@(page - 1)</a>}&nbsp;@page@if(page < lastPage - 2){&nbsp;<a href="@pageLink(page + 1)">@(page + 1)</a>&nbsp;<a href="@pageLink(page + 2)">@(page + 2)</a>} else if(page < lastPage - 1) {&nbsp;<a href="@pageLink(page + 1)">@(page + 1)</a>}@if(page < lastPage - 3){...}@if(page < lastPage){&nbsp;<a href="@pageLink(lastPage)">@lastPage</a>&nbsp;<a href="@pageLink(page + 1)">}&gt;@if(page < lastPage){</a>}
+						@if(page > 1){<a class ="pg-item" href="@pageLink(page - 1)">&lt;</a><a class="pg-item" href="@pageLink(1)">1</a>}@if(page > 4){<span class="pg-spacer">...</span>}@if(page > 3){<a class ="pg-item" href="@pageLink(page - 2)">@(page - 2)</a><a class ="pg-item" href="@pageLink(page - 1)">@(page - 1)</a>} else if(page > 2){<a class="pg-item" href="@pageLink(page - 1)">@(page - 1)</a>}<span class="pg-item active">@page</span>@if(page < lastPage - 2){<a class="pg-item" href="@pageLink(page + 1)">@(page + 1)</a><a class="pg-item" href="@pageLink(page + 2)">@(page + 2)</a>} else if(page < lastPage - 1) {<a class="pg-item" href="@pageLink(page + 1)">@(page + 1)</a>}@if(page < lastPage - 3){<span class="pg-spacer">...</span>}@if(page < lastPage){<a class="pg-item" href="@pageLink(lastPage)">@lastPage</a>}@if(page < lastPage){<a class="pg-item" href="@pageLink(page + 1)">&gt;</a>}
             </div>
         </div>
     </div>

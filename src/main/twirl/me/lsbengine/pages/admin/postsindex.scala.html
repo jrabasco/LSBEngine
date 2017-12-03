@@ -32,13 +32,12 @@
         <div class="loader"></div>
         <input type="hidden" name="csrf" id="csrf" value="@token.csrf"/>
         <a id="downloadAnchorElem" style="display:none"></a>
-        <div>
-        <br/>
+				<div class="pagination">
         @pageLink(pageNr: Int) = @{
             "?page=" + pageNr + "&items_per_page=" + postsPerPage
         }
-        @if(page > 1){<a href="@pageLink(page - 1)">}&lt;@if(page > 1){</a>&nbsp;<a href="@pageLink(1)">1</a>}@if(page > 4){...}@if(page > 3){&nbsp;<a href="@pageLink(page - 2)">@(page - 2)</a>&nbsp;<a href="@pageLink(page - 1)">@(page - 1)</a>} else if(page > 2){&nbsp;<a href="@pageLink(page - 1)">@(page - 1)</a>}&nbsp;@page@if(page < lastPage - 2){&nbsp;<a href="@pageLink(page + 1)">@(page + 1)</a>&nbsp;<a href="@pageLink(page + 2)">@(page + 2)</a>} else if(page < lastPage - 1) {&nbsp;<a href="@pageLink(page + 1)">@(page + 1)</a>}@if(page < lastPage - 3){...}@if(page < lastPage){&nbsp;<a href="@pageLink(lastPage)">@lastPage</a>&nbsp;<a href="@pageLink(page + 1)">}&gt;@if(page < lastPage){</a>}
-        </div>
+				@if(page > 1){<a class ="pg-item" href="@pageLink(page - 1)">&lt;</a><a class="pg-item" href="@pageLink(1)">1</a>}@if(page > 4){<span class="pg-spacer">...</span>}@if(page > 3){<a class ="pg-item" href="@pageLink(page - 2)">@(page - 2)</a><a class ="pg-item" href="@pageLink(page - 1)">@(page - 1)</a>} else if(page > 2){<a class="pg-item" href="@pageLink(page - 1)">@(page - 1)</a>}<span class="pg-item active">@page</span>@if(page < lastPage - 2){<a class="pg-item" href="@pageLink(page + 1)">@(page + 1)</a><a class="pg-item" href="@pageLink(page + 2)">@(page + 2)</a>} else if(page < lastPage - 1) {<a class="pg-item" href="@pageLink(page + 1)">@(page + 1)</a>}@if(page < lastPage - 3){<span class="pg-spacer">...</span>}@if(page < lastPage){<a class="pg-item" href="@pageLink(lastPage)">@lastPage</a>}@if(page < lastPage){<a class="pg-item" href="@pageLink(page + 1)">&gt;</a>}
+				</div>
     </div>
      @footer.render()
     </body>

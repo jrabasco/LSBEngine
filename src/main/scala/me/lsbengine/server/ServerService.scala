@@ -25,11 +25,7 @@ abstract class ServerService(dbConnection: MongoConnection, dbName: String, log:
   }
 
   def commonRoutes: Route =
-    path("info") {
-      get {
-        complete(getInfo)
-      }
-    } ~ pathPrefix("api") {
+    pathPrefix("api") {
       pathPrefix("posts") {
         path("list") {
           get {
@@ -97,10 +93,6 @@ abstract class ServerService(dbConnection: MongoConnection, dbName: String, log:
   val apiScope: String
 
   def routes: Route = assetsRoutes ~ commonRoutes ~ ownRoutes
-
-  def getInfo: Map[String, Any] = {
-    BuildInfo.toMap + ("repositoryLink" -> BlogConfiguration.repositoryLink) + ("apiScope" -> apiScope)
-  }
 
   def getPostsAccessor(database: DefaultDB): PostsAccessor
 

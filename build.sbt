@@ -2,11 +2,7 @@ name := "LSBEngine"
 
 version := "0.0"
 
-scalaVersion := "2.12.1"
-
-ivyScala := ivyScala.value map {
-  _.copy(overrideScalaVersion = true)
-}
+scalaVersion := "2.12.4"
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-encoding", "utf8", "-feature")
 
@@ -41,22 +37,10 @@ libraryDependencies ++= {
 }
 
 lazy val `lsbengine` = project.in(file(".")).
-  enablePlugins(BuildInfoPlugin, SbtTwirl).
-  settings(
-    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
-    buildInfoPackage := "me.lsbengine.server"
-  )
+  enablePlugins(SbtTwirl)
 
-
-buildInfoOptions += BuildInfoOption.BuildTime
-buildInfoOptions += BuildInfoOption.ToJson
-
-buildInfoKeys ++= Seq[BuildInfoKey](
-  BuildInfoKey.action("commitHash") {
-    Process("git rev-parse HEAD").lines.head
-  }
-)
-
+// importing the ! operator for strings
+import scala.sys.process._
 lazy val sass = taskKey[Unit]("Compiles the css")
 
 sass := {
@@ -96,7 +80,6 @@ assemblyJarName in assembly := "lsbengine.jar"
 test in assembly := {}
 
 parallelExecution in Test := false
-Revolver.settings
 
 compile in Compile := ((compile in Compile) dependsOn resume).value
 compile in Compile := ((compile in Compile) dependsOn minifyjs).value

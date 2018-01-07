@@ -13,12 +13,12 @@
         <div id="posts-index-error" class="error" style="display: none"></div>
         <div id="posts-index-success" class="success" style="display: none"></div>
         <div id="posts-list">
-        @for(post <- posts) {
-            @defining(DateTimeFormat.forPattern("dd-MM-yyyy' at 'HH:mm:ss' (UTC)'")) { formatter =>
+        @defining(DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ")) { formatter =>
+            @for(post <- posts) {
                 <div class="doc-summary">
                     <h4>@post.title</h4>
                     @{post.`abstract`}
-                    <div class="date">@post.published.toString(formatter)</div>
+                    <div data-raw-date>@post.published.toString(formatter)</div>
                     <input type="button" onclick="edit('posts', @post.id)" value="Edit"/>
                     <input type="button" onclick="delDoc('posts', @post.id, 'posts-index', '#posts-list', postsHome)" value="Remove"/>
                 </div>

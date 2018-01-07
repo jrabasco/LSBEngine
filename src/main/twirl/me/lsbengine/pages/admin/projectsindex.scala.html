@@ -12,12 +12,12 @@
         <div id="projects-index-error" class="error" style="display: none"></div>
         <div id="projects-index-success" class="success" style="display: none"></div>
         <div id="projects-list">
-        @for(project <- projects) {
-            @defining(DateTimeFormat.forPattern("dd-MM-yyyy' at 'HH:mm:ss' (UTC)'")) { formatter =>
+        @defining(DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ")) { formatter =>
+            @for(project <- projects) {
                 <div class="doc-summary">
                     <h4>@project.title</h4>
                     @{project.`abstract`}
-                    <div class="date">@project.published.toString(formatter)</div>
+                    <div data-raw-date>@project.published.toString(formatter)</div>
                     <input type="button" onclick="edit('projects', @project.id)" value="Edit"/>
                     <input type="button" onclick="delDoc('projects', @project.id, 'projects-index', '#projects-list', projectsHome)" value="Remove"/>
                 </div>

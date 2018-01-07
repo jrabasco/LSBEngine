@@ -2,6 +2,7 @@
 @import me.lsbengine.database.model.Token
 @import me.lsbengine.components.html.footer
 @import me.lsbengine.components.admin.html.{navbar, head}
+@import com.github.nscala_time.time.Imports._
 @(token: Token, post: Post, categories: Categories, add: Boolean)
 <!DOCTYPE html>
 <html lang="en">
@@ -9,7 +10,7 @@
     """hljs.configure({languages: []});
     $(function () {
         var dateStr = $("#actualdate").val();
-        var date = new Date(parseInt(dateStr));
+        var date = new Date(dateStr);
         $("input[type='datetime-local']").val(formatForForm(date));
 
         showdown.setFlavor("github");
@@ -52,7 +53,9 @@
             </div>
             <input type="hidden" name="id" value="@post.id">
             <input type="hidden" name="csrf" value="@token.csrf">
-            <input type="hidden" name="actualdate" id="actualdate" value="@post.published.getMillis">
+            @defining(DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ")) { formatter =>
+            <input type="hidden" name="actualdate" id="actualdate" value="@post.published.toString(formatter)">
+            }
             <div class="buttons">
                 <input type="button" onclick="showPreview('post-edit', fillDocPreview('post-edit'))" value="Preview"/>
                 <input type="button" onclick="update('posts', @add, 'post-edit')" value="@if(add){Create} else {Update}"/>

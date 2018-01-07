@@ -12,6 +12,23 @@ showdown.extension('header-anchors', function() {
   }];
 });
 
+function formatForForm(date) {
+    var year = date.getFullYear();
+    var month = leftPad(date.getMonth() + 1 + '', 2, '0');
+    var day = leftPad(date.getDate() + '', 2, '0');
+    var hours = leftPad(date.getHours() + '', 2, '0');
+    var minutes = leftPad(date.getMinutes() + '', 2, '0');
+    return year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
+}
+
+function leftPad(str, goalLength, padChar) {
+    if (str.length < goalLength) {
+        return new Array(goalLength - str.length + 1).join(padChar) + str;
+    } else {
+        return str;
+    }
+}
+
 function getConverter() {
 	return new showdown.Converter({
 		  extensions: ['header-anchors']
@@ -199,30 +216,6 @@ function doLogin() {
     }
 }
 
-function formatForForm(date) {
-    var year = date.getFullYear();
-    var month = leftPad(date.getMonth() + 1 + '', 2, '0');
-    var day = leftPad(date.getDate() + '', 2, '0');
-    var hours = leftPad(date.getHours() + '', 2, '0');
-    var minutes = leftPad(date.getMinutes() + '', 2, '0');
-    return year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
-}
-
-function leftPad(str, goalLength, padChar) {
-    if (str.length < goalLength) {
-        return new Array(goalLength - str.length + 1).join(padChar) + str;
-    } else {
-        return str;
-    }
-}
-
-function toISOString(date) {
-    var resDate = new Date(date);
-    var offset = date.getTimezoneOffset();
-    resDate.setMinutes(date.getMinutes() + offset);
-    return resDate.toISOString();
-}
-
 function updateAbout() {
     var form = $('form[name="aboutme-edit"]');
     var loader = $('.loader');
@@ -298,9 +291,8 @@ function update(type, add, formName) {
         var converter = getConverter();
         var contentMarkdown = form[0].contentmarkdown.value;
         var contentHtml = converter.makeHtml(contentMarkdown);
-        //Ensures consistency between firefox and chrome
-        var publishedDate = new Date(form[0].publication.value + ":00Z");
-        var publishedDateStr = toISOString(publishedDate);
+        var publishedDate = new Date(form[0].publication.value);
+        var publishedDateStr = publishedDate.toISOString();
 
         var doc = {
             id: id,
@@ -312,7 +304,7 @@ function update(type, add, formName) {
             },
             published: publishedDateStr
         };
-        
+
         if (type === "posts") {
         	addPostValues(form, doc);
         }
@@ -636,3 +628,13 @@ function submitCategories() {
         });
     }
 }
+
+
+// Transforms date in local format
+$(function () {
+	$('[data-raw-date]').each( function () {
+		var rawDate = $(this).html();
+		const options = { weekday: "short", year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "numeric"};
+		$(this).html(new Date(rawDate).toLocaleString("en-GB", options));
+	});
+});

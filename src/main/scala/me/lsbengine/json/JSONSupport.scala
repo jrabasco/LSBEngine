@@ -28,7 +28,7 @@ trait JSONSupport extends SprayJsonSupport with DefaultJsonProtocol with Collect
 
     def error(v: Any): DateTime = {
       val example = formatter.print(0)
-      deserializationError(s"$v is not a valid date. Dates must be in ISO formatForForm : $example")
+      deserializationError(s"$v is not a valid date. Dates must be in ISO format : $example")
     }
   }
 

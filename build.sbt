@@ -11,7 +11,7 @@ libraryDependencies ++= {
   val akkaHttpV = "10.0.3"
   val reactiveMongoV = "0.12.6"
   val scalaTestV = "3.0.1"
-  val nscalaTimeV = "2.14.0"
+  val nscalaTimeV = "2.18.0"
   val slf4jV = "1.7.21"
   val logbackV = "1.1.7"
 

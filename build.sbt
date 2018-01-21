@@ -1,6 +1,6 @@
 name := "LSBEngine"
 
-version := "0.0"
+version := "1.0"
 
 scalaVersion := "2.12.4"
 
@@ -39,29 +39,6 @@ libraryDependencies ++= {
 lazy val `lsbengine` = project.in(file(".")).
   enablePlugins(SbtTwirl)
 
-// importing the ! operator for strings
-import scala.sys.process._
-lazy val sass = taskKey[Unit]("Compiles the css")
-
-sass := {
-  println("Compiling css...")
-  "./build-sass.sh" !
-}
-
-lazy val minifyjs = taskKey[Unit]("Minifies the Javascript")
-
-minifyjs := {
-  println("Minifying javascript...")
-  "./minify-js.sh" !
-}
-
-lazy val resume = taskKey[Unit]("Generates the resume")
-
-resume := {
-  println("Generating resume...")
-  "./build-resume.sh" !
-}
-
 resolvers ++= Seq("spray" at "http://repo.spray.io/")
 
 resolvers ++= Seq("snapshots", "releases").map(Resolver.sonatypeRepo)
@@ -81,7 +58,12 @@ test in assembly := {}
 
 parallelExecution in Test := false
 
-compile in Compile := ((compile in Compile) dependsOn resume).value
-compile in Compile := ((compile in Compile) dependsOn minifyjs).value
-compile in Compile := ((compile in Compile) dependsOn sass).value
 mainClass in(Compile, run) := Some("me.lsbengine.server.Blog")
+
+enablePlugins(JavaAppPackaging)
+enablePlugins(DockerPlugin)
+enablePlugins(AshScriptPlugin)
+import com.typesafe.sbt.packager.docker._
+dockerBaseImage := "openjdk:jre-alpine"
+dockerEntrypoint := Seq("bin/blog")
+dockerExposedPorts := Seq(9090, 8080)

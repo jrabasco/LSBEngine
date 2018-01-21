@@ -29,8 +29,8 @@ object Blog extends App {
 
   DateTimeZone.setDefault(DateTimeZone.forID("UTC"))
 
-  Http().bindAndHandle(publicService.routes, hostName, publicPort)
-  Http().bindAndHandle(adminService.routes, hostName, adminPort)
+  val publicBindingFuture = Http().bindAndHandle(publicService.routes, hostName, publicPort)
+  val adminBindingFuture = Http().bindAndHandle(adminService.routes, hostName, adminPort)
 
   Signal.handle(new Signal("INT"), (_: Signal) => {
     shutdown()

@@ -41,5 +41,5 @@ if [[ ! -z "${RESUME_REPO}" ]]; then
     firstname=$(echo "$FIRSTNAME" | tr '[:upper:]' '[:lower:]')
     lastname=$(echo "$LASTNAME" | tr '[:upper:]' '[:lower:]')
 
-    cp resume/resume.pdf src/main/resources/assets/"$firstname"_"$lastname"_resume.pdf
+    cp resume/resume.pdf assets/"$firstname"_"$lastname"_resume.pdf
 fi

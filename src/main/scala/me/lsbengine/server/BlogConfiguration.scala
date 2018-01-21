@@ -20,7 +20,7 @@ object BlogConfiguration {
   val hostName: String = envOrElse("SERVER_HOST", "localhost")
   val mongoDBHost: String = envOrElse("MONGO_HOST", "localhost")
   val mongoDBName: String = envOrElse("MONGO_NAME", "lsbengine")
-  val mongoDBPort: Int = envOrElse("MONGO_PORT", "27017").toInt
+  val mongoDBPort: Int = envOrElse("MONGO_CUST_PORT", "27017").toInt
   val publicPort: Int = envOrElse("PUBLIC_PORT", "8080").toInt
   val repositoryLink: String = envOrElse("REPOSITORY_LINK", "https://github.com/jrabasco/LSBEngine")
   val siteUrl: String = envOrElse("SITE_UTL", "local.lsbengine.me")

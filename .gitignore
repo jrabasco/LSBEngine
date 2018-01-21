@@ -55,12 +55,15 @@ tags
 # Sass
 *.sass-cache*
 # generated css
-src/main/resources/css/styles.css
-src/main/resources/css/styles.css.map
+src/main/resources/css/
+css/styles.css
+css/styles.css.map
 # generated js
 src/main/resources/js/admin.min.js
+js/admin.min.js
 # resume folder
 resume
 src/main/resources/assets/*.pdf
+assets/*.pdf
 # environment folder
 env/*

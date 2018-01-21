@@ -62,7 +62,7 @@ object UserManager extends App {
                         printAndExit("OK.")
                       }
                     case None =>
-                      usersAccessor.updateUser(user).onComplete {
+                      usersAccessor.upsertUser(user).onComplete {
                         case Success(w) =>
                           if (w.ok) {
                             printAndExit(s"User created.")

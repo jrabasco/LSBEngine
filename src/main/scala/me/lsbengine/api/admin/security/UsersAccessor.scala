@@ -20,4 +20,9 @@ class UsersAccessor(database: DefaultDB) extends DatabaseAccessor[User](database
   def updateUser(user: User): Future[UpdateWriteResult] = {
     super.updateItem(selectorForUsername(user.userName), user)
   }
+
+  def upsertUser(user: User): Future[UpdateWriteResult] = {
+    super.upsertItem(selectorForUsername(user.userName), user)
+  }
+
 }

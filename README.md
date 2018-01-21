@@ -64,5 +64,14 @@ If no repository is provided, this just does not happen at all.
 Clone the repository and run
 
 ```
-$  sbt run
+$  make run
+```
+
+## Docker run
+
+If you plan to run this on the production machine, make sure you set the `TRUE_DOMAIN` environment variable to be your actual domain name then run:
+
+```
+$ make build-docker
+$ docker-compose up -d
 ```

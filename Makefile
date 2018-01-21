@@ -23,7 +23,7 @@ minify-js:
 	mkdir -p js
 	uglifyjs src/main/js/admin.js > js/admin.min.js
 
-build-docker: build
+build-lsbengine-docker: build
 	sbt docker:publishLocal
 
 build-nginx: build
@@ -34,3 +34,5 @@ build-nginx: build
 	rm -r nginx/assets
 	rm -r nginx/js
 	rm -r nginx/css
+
+build-docker: build-lsbengine-docker build-nginx

@@ -25,3 +25,12 @@ minify-js:
 
 build-docker: build
 	sbt docker:publishLocal
+
+build-nginx: build
+	cp -r assets nginx/
+	cp -r js nginx/
+	cp -r css nginx/
+	docker build nginx -t my-nginx:latest
+	rm -r nginx/assets
+	rm -r nginx/js
+	rm -r nginx/css

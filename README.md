@@ -69,7 +69,7 @@ $  make run
 
 ## Docker run
 
-If you plan to run this on the production machine, make sure you set the `TRUE_DOMAIN` environment variable to be your actual domain name then run:
+If you plan to run this on the production machine, make sure you set the `PUBLIC_DOMAINS` environment variable to be your actual list of valid public domain names and `ADMIN_DOMAINS` to be the location for your admin interface then run:
 
 ```
 $ make build-docker

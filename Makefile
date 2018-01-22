@@ -31,8 +31,8 @@ build-nginx: build
 	cp -r js nginx/
 	cp -r css nginx/
 	cp nginx/nginx.conf nginx/nginx.conf.back
-	sed -i s/public.lsbengine.me/${TRUE_DOMAIN}/g nginx/nginx.conf
-	sed -i s/admin.lsbengine.me/admin.${TRUE_DOMAIN}/g nginx/nginx.conf
+	sed -i s/public.lsbengine.me/"${PUBLIC_DOMAINS}"/g nginx/nginx.conf
+	sed -i s/admin.lsbengine.me/${ADMIN_DOMAINS}/g nginx/nginx.conf
 	docker build nginx -t my-nginx:latest
 	mv nginx/nginx.conf.back nginx/nginx.conf
 	rm -r nginx/assets

@@ -34,7 +34,7 @@ takes around 1 second to perform a hash)
 - `SITE_URL`: the URL of the website (default `local.lsbengine.me`)
 - `RESUME_REPO`: link to your resume repository, see the Resume section
 - `DISCLAIMER`: A disclaimer that will appear in the footer (default `My opinions do not necessarily represent those of my employer.`)
-- `COPYRIGHT`: copyright mention for the footer (default `Copyright &copy; 2017`)
+- `COPYRIGHT`: copyright mention for the footer (defaults to nothing)
 - `DEFAULT_POSTS_PER_PAGE`: number of posts per page when no parameter is supplied (default `5`)
 
 ## Adding/Removing users
@@ -69,7 +69,7 @@ $  make run
 
 ## Docker run
 
-If you plan to run this on the production machine, make sure you set the `PUBLIC_DOMAINS` environment variable to be your actual list of valid public domain names and `ADMIN_DOMAINS` to be the location for your admin interface then run:
+If you plan to run this on the production machine, make sure you set the `PUBLIC_DOMAINS` environment variable to be your actual list of valid public domain names, `ADMIN_DOMAINS` to be the location for your admin interface and `DOMAIN` to be just your domain name then run:
 
 ```
 $ make build-docker

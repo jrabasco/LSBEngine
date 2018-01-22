@@ -15,6 +15,9 @@ build-resume:
 	mkdir -p assets
 	bash build-resume.sh
 
+clean-resume:
+	rm -rf resume/
+
 build-sass:
 	mkdir -p css
 	sass --style compressed src/main/scss/styles.scss css/styles.css
@@ -31,9 +34,16 @@ build-nginx: build
 	cp -r js nginx/
 	cp -r css nginx/
 	cp nginx/nginx.conf nginx/nginx.conf.back
-	sed -i s/public.lsbengine.me/"${PUBLIC_DOMAINS}"/g nginx/nginx.conf
-	sed -i s/admin.lsbengine.me/${ADMIN_DOMAINS}/g nginx/nginx.conf
+	cp nginx/renew_certificate.sh nginx/renew_certificate.sh.back
+	cp nginx/Dockerfile nginx/Dockerfile.back
+	sed -i s/PUBLIC_DOMAINS/"${PUBLIC_DOMAINS}"/g nginx/nginx.conf
+	sed -i s/ADMIN_DOMAINS/"${ADMIN_DOMAINS}"/g nginx/nginx.conf
+	sed -i s/DOMAIN/"${DOMAIN}"/g nginx/nginx.conf
+	sed -i s/DOMAIN/"${DOMAIN}"/g nginx/renew_certificate.sh
+	sed -i s/DOMAIN/"${DOMAIN}"/g nginx/Dockerfile
 	docker build nginx -t my-nginx:latest
+	mv nginx/Dockerfile.back nginx/Dockerfile
+	mv nginx/renew_certificate.sh.back nginx/renew_certificate.sh
 	mv nginx/nginx.conf.back nginx/nginx.conf
 	rm -r nginx/assets
 	rm -r nginx/js

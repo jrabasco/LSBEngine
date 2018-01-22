@@ -7,9 +7,6 @@ services:
       - mongo
     env_file:
       - env/docker.env
-    ports:
-      - 8080:8080
-      - 9090:9090
   
   mongo:
     image: mongo:3.4
@@ -20,5 +17,9 @@ services:
     image: my-nginx:latest
     ports:
       - 80:80
+      - 443:443
     links:
       - lsbengine
+    volumes:
+      - /etc/ssl/dhparams:/etc/ssl/dhparams
+      - /etc/letsencrypt:/etc/letsencrypt

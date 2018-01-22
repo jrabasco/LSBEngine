@@ -12,7 +12,7 @@ object BlogConfiguration {
   val blogOwnerGender: String = envOrElse("BLOG_OWNER_GENDER", "male")
   val blogOwnerPseudo: String = envOrElse("BLOG_OWNER_PSEUDO", "")
   val contactAddress: String = envOrElse("CONTACT_ADDRESS", "rabasco.jeremy@gmail.com")
-  val copyright: String = envOrElse("COPYRIGHT", "Copyright &copy; 2017")
+  val copyright: String = envOrElse("COPYRIGHT", "")
   val defaultPostsPerPage: Int = envOrElse("DEFAULT_POSTS_PER_PAGE", "5").toInt
   val disclaimer: String = envOrElse("DISCLAIMER", "My opinions do not necessarily represent those of my employer.")
   val hashIterations: Int = envOrElse("HASH_ITERATIONS", "300000").toInt

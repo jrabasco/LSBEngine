@@ -57,7 +57,7 @@
             <input type="hidden" name="actualdate" id="actualdate" value="@post.published.toString(formatter)">
             }
             <div class="buttons">
-                <input type="button" onclick="showPreview('post-edit', fillDocPreview('post-edit'))" value="Preview"/>
+                <input type="button" onclick="showPreview('post-edit', fillDocPreview)" value="Preview"/>
                 <input type="button" onclick="update('posts', @add, 'post-edit')" value="@if(add){Create} else {Update}"/>
                 <input type="button" onclick="publish('posts', @add, 'post-edit')" value="Publish">
                 @if(!add){<input type="button" onclick="delDoc('posts', @post.id, 'form', 'form[name=&#34;post-edit&#34;]', postsHome)" value="Remove Post">}

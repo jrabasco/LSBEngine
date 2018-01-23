@@ -414,7 +414,7 @@ function showPreview(formName, fillPreview) {
     form.hide();
     loader.show();
 
-    fillDocPreview(formName);
+    fillPreview(formName);
 
     loader.hide();
     preview.show();

@@ -43,7 +43,7 @@
             <input type="hidden" name="actualdate" id="actualdate" value="@project.published.toString(formatter)">
             }
             <div class="buttons">
-                <input type="button" onclick="showPreview('project-edit', fillDocPreview('project-edit'))" value="Preview"/>
+                <input type="button" onclick="showPreview('project-edit', fillDocPreview)" value="Preview"/>
                 <input type="button" onclick="update('projects', @add, 'project-edit')" value="@if(add){Create} else {Update}"/>
                 <input type="button" onclick="publish('projects', @add, 'project-edit')" value="Publish">
                 @if(!add){<input type="button" onclick="delDoc('projects', @project.id, 'form', 'form[name=&#34;project-edit&#34;]', projectsHome)" value="Remove Project">}

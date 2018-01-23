@@ -7,7 +7,7 @@ import me.lsbengine.database.model.Token
 
 object TokenGenerator {
   def generateToken(userName: String): Token = {
-    val random = SecureRandom.getInstance("SHA1PRNG", "SUN")
+    val random = new SecureRandom()
     random.nextBytes(new Array[Byte](32))
     val tokenIdBytes = new Array[Byte](64)
     val csrfBytes = new Array[Byte](64)

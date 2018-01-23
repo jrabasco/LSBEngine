@@ -19,7 +19,7 @@ object PasswordHasher {
   }
 
   def generateSalt(): Array[Byte] = {
-    val random = SecureRandom.getInstance("SHA1PRNG", "SUN")
+    val random = new SecureRandom()
     random.nextBytes(new Array[Byte](32))
     val salt = new Array[Byte](64)
     random.nextBytes(salt)

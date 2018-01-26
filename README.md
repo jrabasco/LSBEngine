@@ -77,7 +77,7 @@ $ docker-compose up -d
 ```
 
 Example of a valid domains setup script:
-```
+```bash
 export PUBLIC_DOMAINS="public.lsbengine.me lsbengine.me blog.lsbengine.me www.lsbengine.me"
 export ADMIN_DOMAINS="admin.lsbengine.me"
 export DOMAIN="lsbengine.me"

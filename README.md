@@ -69,9 +69,16 @@ $  make run
 
 ## Docker run
 
-If you plan to run this on the production machine, make sure you set the `PUBLIC_DOMAINS` environment variable to be your actual list of valid public domain names, `ADMIN_DOMAINS` to be the location for your admin interface and `DOMAIN` to be just your domain name then run:
+If you plan to run this on the production machine, make sure you set the `PUBLIC_DOMAINS` environment variable to be your actual list of valid public domains/subdomains, `ADMIN_DOMAINS` to be the location for your admin interface and `DOMAIN` to be just your domain name then run:
 
 ```
 $ make build-docker
 $ docker-compose up -d
+```
+
+Example of a valid domains setup script:
+```
+export PUBLIC_DOMAINS="public.lsbengine.me lsbengine.me blog.lsbengine.me www.lsbengine.me"
+export ADMIN_DOMAINS="admin.lsbengine.me"
+export DOMAIN="lsbengine.me"
 ```

@@ -1,0 +1,24 @@
+@import me.lsbengine.server.BlogConfiguration
+@import me.lsbengine.database.model.Project
+@import com.github.nscala_time.time.Imports._
+@(projects: List[Project])<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>@BlogConfiguration.blogOwner's projects</title>
+    <link>@BlogConfiguration.siteUrl</link>
+    <description>My Projects</description>
+    @defining(DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ")) { formatter =>
+    @for(p <- projects) {
+    <item>
+      <title>@p.title</title>
+      <description>
+        @Html(p.content.html)
+      </description>
+      <pubDate>@p.published.toString(formatter)</pubDate>
+      <link>@{BlogConfiguration.siteUrl}/projects/@p.id</link>
+      <guid isPermaLink="true">@{BlogConfiguration.siteUrl}/projects/@p.id</guid>
+    </item>
+    }
+    }
+  </channel>
+</rss>

@@ -11,6 +11,7 @@ object BlogConfiguration {
   val blogOwner: String = blogOwnerFirstName + " " + blogOwnerLastName
   val blogOwnerGender: String = envOrElse("BLOG_OWNER_GENDER", "male")
   val blogOwnerPseudo: String = envOrElse("BLOG_OWNER_PSEUDO", "")
+  val blogShortDesc: String = envOrElse("BLOG_SHORT_DESCRIPTION", "My Personal Blog")
   val contactAddress: String = envOrElse("CONTACT_ADDRESS", "rabasco.jeremy@gmail.com")
   val copyright: String = envOrElse("COPYRIGHT", "")
   val defaultPostsPerPage: Int = envOrElse("DEFAULT_POSTS_PER_PAGE", "5").toInt

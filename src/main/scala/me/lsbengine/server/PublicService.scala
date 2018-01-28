@@ -4,12 +4,14 @@ import akka.event.LoggingAdapter
 import akka.http.scaladsl.model.StatusCodes.{InternalServerError, NotFound}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{RequestContext, Route, RouteResult}
+
 import me.lsbengine.api.{PostsAccessor, ProjectsAccessor}
 import me.lsbengine.api.admin.{AboutMeAccessor, CategoriesAccessor}
 import me.lsbengine.api.public.{PublicPostsAccessor, PublicProjectsAccessor}
 import me.lsbengine.database.model.{AboutMe, Categories}
 import me.lsbengine.errors
 import me.lsbengine.pages.public.html
+import me.lsbengine.rss.xml
 import reactivemongo.api.{DefaultDB, MongoConnection}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -37,6 +39,12 @@ class PublicService(dbConnection: MongoConnection, dbName: String, log: LoggingA
       } ~ path(IntNumber) { id =>
         ctx => individualProject(ctx, id)
       }
+    } ~ pathPrefix("feed") {
+      path("posts") {
+        ctx => postsRssFeed(ctx)
+      } ~ path("projects") {
+        ctx => projectsRssFeed(ctx)
+      }
     }
 
   override val apiScope: String = "public"
@@ -59,6 +67,20 @@ class PublicService(dbConnection: MongoConnection, dbName: String, log: LoggingA
           requestContext.complete(html.index.render(List(),
               conf, Categories(titles=List()), AboutMe(None, None), cat,
               page.getOrElse(1), postsPerPage.getOrElse(BlogConfiguration.defaultPostsPerPage), 1))
+      }
+    }
+  }
+
+  def postsRssFeed(requestContext: RequestContext): Future[RouteResult] = {
+    handleWithDb(requestContext) { db =>
+      val postsAccessor = getPostsAccessor(db)
+      
+      postsAccessor.listPosts(None).flatMap {
+        case (list, _ ) =>
+          requestContext.complete(xml.posts.render(list))
+      }.recoverWith {
+        case _ =>
+          requestContext.complete(InternalServerError, errors.html.internalerror(s"Database access failed."))
       }
     }
   }
@@ -98,6 +120,19 @@ class PublicService(dbConnection: MongoConnection, dbName: String, log: LoggingA
       }.recoverWith {
         case _ =>
           requestContext.complete(html.projects.render(List(), conf))
+      }
+    }
+  }
+
+  def projectsRssFeed(requestContext: RequestContext): Future[RouteResult] = {
+    handleWithDb(requestContext) { db =>
+      val projectsAccessor = getProjectsAccessor(db)
+      
+      projectsAccessor.listProjects.flatMap { list =>
+          requestContext.complete(xml.projects.render(list))
+      }.recoverWith {
+        case _ =>
+          requestContext.complete(InternalServerError, errors.html.internalerror(s"Database access failed."))
       }
     }
   }

@@ -1,0 +1,32 @@
+@import me.lsbengine.server.BlogConfiguration
+@import me.lsbengine.database.model.Post
+@import com.github.nscala_time.time.Imports._
+@(posts: List[Post])<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>@BlogConfiguration.blogOwner's blog posts</title>
+    <link>@BlogConfiguration.siteUrl</link>
+    <description>@BlogConfiguration.blogShortDesc</description>
+    @defining(DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ")) { formatter =>
+    @for(p <- posts) {
+    <item>
+      <title>@p.title</title>
+      @if(p.explicit) {
+      <description>
+        @{p.`abstract`}
+        <br/>
+        <i><a href="/posts/@p.id">Read more (warning: explicit)</a></i>
+      </description>
+      }else{
+      <description>
+        @Html(p.content.html)
+      </description>
+      }
+      <pubDate>@p.published.toString(formatter)</pubDate>
+      <link>@{BlogConfiguration.siteUrl}/posts/@p.id</link>
+      <guid isPermaLink="true">@{BlogConfiguration.siteUrl}/posts/@p.id</guid>
+    </item>
+    }
+    }
+  </channel>
+</rss>

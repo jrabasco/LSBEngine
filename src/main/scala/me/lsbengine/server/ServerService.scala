@@ -3,9 +3,10 @@ package me.lsbengine.server
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.{Marshaller, ToEntityMarshaller}
 import akka.http.scaladsl.model.StatusCodes._
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
+import akka.http.scaladsl.model.{ContentTypes, HttpEntity, MediaTypes, HttpCharsets}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{RequestContext, Route, RouteResult}
+
 import me.lsbengine.api.{PostsAccessor, ProjectsAccessor}
 import me.lsbengine.api.admin.NavBarConfAccessor
 import me.lsbengine.api.model.{FetchPostResponse, ListPostsResponse}
@@ -20,8 +21,12 @@ import scala.language.postfixOps
 abstract class ServerService(dbConnection: MongoConnection, dbName: String, log: LoggingAdapter)
   extends JSONSupport {
 
-  implicit val twirlMarshaller: ToEntityMarshaller[play.twirl.api.HtmlFormat.Appendable] = Marshaller.opaque { html =>
+  implicit val twirlHtmlMarshaller: ToEntityMarshaller[play.twirl.api.HtmlFormat.Appendable] = Marshaller.opaque { html =>
     HttpEntity(ContentTypes.`text/html(UTF-8)`, html.toString)
+  }
+
+  implicit val twirlRssMarshaller: ToEntityMarshaller[play.twirl.api.XmlFormat.Appendable] = Marshaller.opaque { xml =>
+    HttpEntity(ContentTypes.`text/xml(UTF-8)`, xml.toString)
   }
 
   def commonRoutes: Route =

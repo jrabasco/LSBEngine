@@ -28,7 +28,7 @@ takes around 1 second to perform a hash)
 - `BLOG_OWNER_LAST_NAME`: last name of the owner of the blog (default `Rabasco`)
 - `BLOG_OWNER_PSEUDO`: owner's usual pseudonym (default empty)
 - `BLOG_OWNER_GENDER`: owner's gender (default `male`, remember that it was built for me initially and I am a male, no discrimination here)
-- `BLOG_SHORT_DESCRIPTION`: short description of the blog, for the RSS flux (default `My Personal Blog`
+- `BLOG_SHORT_DESCRIPTION`: short description of the blog, for the RSS flux (default `My Personal Blog`)
 - `BLOG_META_DESCRIPTION`: short description for the blog (default `My name is Jeremy Rabasco. I am a Computer Science major and I currently work at <JOB_HERE>.`)
 - `CONTACT_ADDRESS`: email for the footer (default `rabasco.jeremy@gmail.com`)
 - `HEADER_TITLE`: title in the header (default `LSBEngine`)

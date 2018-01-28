@@ -1,6 +1,11 @@
+@import com.github.nscala_time.time.Imports._
 @import me.lsbengine.database.model.Post
 @(post: Post)
 <h1><a href="/posts/@post.id" target="_blank">@post.title</a></h1>
+    @defining(DateTimeFormat.forPattern("d MMM Y")) { formatter =>
+    <i class="small-date">@post.published.toString(formatter)</i>
+    }
+    <br/>
 @if(post.explicit) {
 <div>
     @{post.`abstract`}

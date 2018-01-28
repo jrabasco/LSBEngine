@@ -17,7 +17,7 @@
     )
     <body><div class="page-wrap">
         @navbar.render("Projects")
-
+        <div class="content-wrap">
         <div id="form-error" class="error" style="display: none"></div>
         <div id="form-success" class="success" style="display: none"></div>
         <form class="big-form" name="project-edit">
@@ -55,7 +55,7 @@
             <div class="doc"></div>
             <input type="button" onclick="hidePreview('project-edit')" value="Hide Preview"/>
         </div>
-    </div>
+    </div></div>
     @footer.render()
     </body>
 </html>

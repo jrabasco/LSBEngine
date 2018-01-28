@@ -9,12 +9,13 @@
         @if(navBarConf.projects || navBarConf.about){
             @navbar.render("", navBarConf)
         }
+        <div class="content-wrap">
         <div class="docs">
-        	<div class="doc">
-        		<h1><a href="/posts/@post.id">@post.title</a></h1> @Html(post.content.html)
-        	</div>
+          <div class="doc">
+            <h1><a href="/posts/@post.id">@post.title</a></h1> @Html(post.content.html)
+          </div>
         </div>
-    </div>
+    </div></div>
     @footer.render()
     </body>
 </html>

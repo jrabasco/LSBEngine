@@ -18,7 +18,7 @@
     )
     <body><div class="page-wrap">
         @navbar.render("Posts")
-
+        <div class="content-wrap">
         <div id="form-error" class="error" style="display: none"></div>
         <div id="form-success" class="success" style="display: none"></div>
         <form class="big-form" name="post-edit">
@@ -43,13 +43,13 @@
                 <input type="checkbox" id="explicit" name="explicit" @if(post.explicit) {checked} />
             </div>
             <div class="label-field">
-            	<label for="category">Category:</label>
-	            <select id="category">
-	            	<option @if(post.category.isEmpty) {selected="selected"}>None</option>
-	                @for(title <- categories.titles.sortBy(_.order)) {
-	            	<option @if(post.category.contains(title.title)){selected="selected"}>@title.title</option>
-	            	}
-	            </select>
+              <label for="category">Category:</label>
+              <select id="category">
+                <option @if(post.category.isEmpty) {selected="selected"}>None</option>
+                  @for(title <- categories.titles.sortBy(_.order)) {
+                <option @if(post.category.contains(title.title)){selected="selected"}>@title.title</option>
+                }
+              </select>
             </div>
             <input type="hidden" name="id" value="@post.id">
             <input type="hidden" name="csrf" value="@token.csrf">
@@ -69,7 +69,7 @@
             <div class="doc"></div>
             <input type="button" onclick="hidePreview('post-edit')" value="Hide Preview"/>
         </div>
-    </div>
+    </div></div>
     @footer.render()
     </body>
 </html>

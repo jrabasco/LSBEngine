@@ -9,6 +9,7 @@
         @if(navBarConf.projects || navBarConf.about){
             @navbar.render("Home", navBarConf)
         }
+        <div class="content-wrap">
         @header.render()
             @*
             This syntax solves a glitch with HTML generation, never use Option.get otherwise
@@ -18,7 +19,7 @@
             }
             @if(categories.titles.nonEmpty) {
               <div class="categories"><ul>
-							  <li><a @if(curCat.isEmpty){class="active-cat"} href="/">All</a>
+                <li><a @if(curCat.isEmpty){class="active-cat"} href="/">All</a>
               @for(title <- categories.titles.sortBy(_.order)) {
                 <li><a @if(curCat.getOrElse("")==title.title){class="active-cat"} href="?category=@title.title">@title.title</a></li>
               }
@@ -43,10 +44,10 @@
                 val base = "?page=" + pageNr + "&posts_per_page=" + postsPerPage
                 base + curCat.fold("")(c => "&category=" + c)
             }
-						@if(page > 1){<a class ="pg-item" href="@pageLink(page - 1)">&lt;</a><a class="pg-item" href="@pageLink(1)">1</a>}@if(page > 4){<span class="pg-spacer">...</span>}@if(page > 3){<a class ="pg-item" href="@pageLink(page - 2)">@(page - 2)</a><a class ="pg-item" href="@pageLink(page - 1)">@(page - 1)</a>} else if(page > 2){<a class="pg-item" href="@pageLink(page - 1)">@(page - 1)</a>}<span class="pg-item active">@page</span>@if(page < lastPage - 2){<a class="pg-item" href="@pageLink(page + 1)">@(page + 1)</a><a class="pg-item" href="@pageLink(page + 2)">@(page + 2)</a>} else if(page < lastPage - 1) {<a class="pg-item" href="@pageLink(page + 1)">@(page + 1)</a>}@if(page < lastPage - 3){<span class="pg-spacer">...</span>}@if(page < lastPage){<a class="pg-item" href="@pageLink(lastPage)">@lastPage</a>}@if(page < lastPage){<a class="pg-item" href="@pageLink(page + 1)">&gt;</a>}
+            @if(page > 1){<a class ="pg-item" href="@pageLink(page - 1)">&lt;</a><a class="pg-item" href="@pageLink(1)">1</a>}@if(page > 4){<span class="pg-spacer">...</span>}@if(page > 3){<a class ="pg-item" href="@pageLink(page - 2)">@(page - 2)</a><a class ="pg-item" href="@pageLink(page - 1)">@(page - 1)</a>} else if(page > 2){<a class="pg-item" href="@pageLink(page - 1)">@(page - 1)</a>}<span class="pg-item active">@page</span>@if(page < lastPage - 2){<a class="pg-item" href="@pageLink(page + 1)">@(page + 1)</a><a class="pg-item" href="@pageLink(page + 2)">@(page + 2)</a>} else if(page < lastPage - 1) {<a class="pg-item" href="@pageLink(page + 1)">@(page + 1)</a>}@if(page < lastPage - 3){<span class="pg-spacer">...</span>}@if(page < lastPage){<a class="pg-item" href="@pageLink(lastPage)">@lastPage</a>}@if(page < lastPage){<a class="pg-item" href="@pageLink(page + 1)">&gt;</a>}
             </div>
         </div>
-    </div>
+    </div></div>
     @footer.render()
     </body>
 </html>

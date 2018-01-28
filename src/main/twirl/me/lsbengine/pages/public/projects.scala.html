@@ -9,24 +9,25 @@
         @if(navBarConf.projects || navBarConf.about){
             @navbar.render("Projects", navBarConf)
         }
+        <div class="content-wrap">
         <div class="docs">
             @*
             This syntax solves a glitch with HTML generation, never use Option.get otherwise
             *@
             @if(projects.nonEmpty) {
-	            @for(p <- projects.init) {
-	                <div class="doc underline">
-	                    <h1><a href="/projects/@p.id" target="_blank">@p.title</a></h1>
-	                    @Html(p.content.html)
-	                </div>
-	            }
-               	<div class="doc">
-                   	<h1><a href="/projects/@projects.last.id" target="_blank">@projects.last.title</a></h1>
-                   	@Html(projects.last.content.html)
-               	</div>
+              @for(p <- projects.init) {
+                  <div class="doc underline">
+                      <h1><a href="/projects/@p.id" target="_blank">@p.title</a></h1>
+                      @Html(p.content.html)
+                  </div>
+              }
+                 <div class="doc">
+                     <h1><a href="/projects/@projects.last.id" target="_blank">@projects.last.title</a></h1>
+                     @Html(projects.last.content.html)
+                 </div>
             }
         </div>
-    </div>
+    </div></div>
     @footer.render()
     </body>
 </html>

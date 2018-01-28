@@ -7,6 +7,7 @@
     @head.render("")
 <body><div class="page-wrap">
     @navbar.render("Home")
+    <div class="content-wrap">
     <h2>Logged in as @token.userName</h2>
     <h2 id="nav-title">Public navigation bar:</h2>
     <div id="form-error" class="error" style="display: none"></div>
@@ -25,13 +26,13 @@
     
     <h2 id="cat-title">Categories:</h2>
     <form name="edit-categories" class="small-form" onsubmit="event.preventDefault(); addCategory();">
-    	<div id="categories">
-	    @for((title, id) <- categories.titles.sortBy(_.order).zipWithIndex) {
-	    	<div class="listitem" id="category@id">
-	    		<label>@title.title</label><div class="remove-icon" style="cursor: pointer;" onclick="removeCategory(@id)">&#10006;</div>
-	    	</div>
-	    }
-    	</div>
+      <div id="categories">
+      @for((title, id) <- categories.titles.sortBy(_.order).zipWithIndex) {
+        <div class="listitem" id="category@id">
+          <label>@title.title</label><div class="remove-icon" style="cursor: pointer;" onclick="removeCategory(@id)">&#10006;</div>
+        </div>
+      }
+      </div>
         <label for="newcategory">Add category:</label>
         <input type="text" id="new-category" name="newcategory" placeholder="Category"><input type="button" onclick="addCategory()" value="Add"/>
         <input type="hidden" name="csrf" value="@token.csrf">
@@ -40,7 +41,7 @@
             <input type="button" onclick="submitCategories()" value="Update"/>
         </div>
     </form>
-</div>
+    </div></div>
     @footer.render()
 </body>
 </html>

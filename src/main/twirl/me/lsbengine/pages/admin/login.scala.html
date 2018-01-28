@@ -26,6 +26,7 @@
     )
     <body><div class="page-wrap">
     @header.render()
+    <div class="content-wrap">
         <h2>Admin Login Page</h2>
         <form class="small-form" name="login">
             <div class="label-field">
@@ -39,7 +40,7 @@
             <input type="button" onclick="resetFields('login', 'login-error')" value="Reset"/>
         </form>
         <div class="loader"></div>
-    </div>
+    </div></div>
     @footer.render()
     </body>
 </html>

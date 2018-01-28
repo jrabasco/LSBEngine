@@ -9,6 +9,7 @@
         @if(navBarConf.projects || navBarConf.about) {
             @navbar.render("About", navBarConf)
         }
+        <div class="content-wrap">
         <div class="docs">
         @if(aboutMe.introduction.nonEmpty || aboutMe.resume.nonEmpty) {
             @*
@@ -25,7 +26,7 @@
             <div class="doc">This page has no content...</div>
         }
         </div>
-    </div>
+    </div></div>
     @footer.render()
     </body>
 </html>

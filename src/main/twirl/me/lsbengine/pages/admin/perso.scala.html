@@ -7,6 +7,7 @@
     @head.render("")
     <body><div class="page-wrap">
     @navbar.render("Perso")
+    <div class="content-wrap">
         <div id="form-error" class="error" style="display: none"></div>
         <div id="form-success" class="success" style="display: none"></div>
         <form class="big-form" name="aboutme-edit">
@@ -35,7 +36,7 @@
             <div class="doc" id="resume"></div>
             <input type="button" onclick="hidePreview('aboutme-edit')" value="Hide Preview"/>
         </div>
-    </div>
+    </div></div>
      @footer.render()
     </body>
 </html>

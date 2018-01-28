@@ -9,6 +9,7 @@
     @head.render("")
     <body><div class="page-wrap">
     @navbar.render("Projects")
+    <div class="page-wrap">
         <div id="projects-index-error" class="error" style="display: none"></div>
         <div id="projects-index-success" class="success" style="display: none"></div>
         <div id="projects-list">
@@ -31,7 +32,7 @@
         <div class="loader"></div>
         <input type="hidden" name="csrf" id="csrf" value="@token.csrf"/>
         <a id="downloadAnchorElem" style="display:none"></a>
-    </div>
+    </div></div>
      @footer.render()
     </body>
 </html>

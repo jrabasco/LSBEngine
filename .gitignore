@@ -67,3 +67,9 @@ src/main/resources/assets/*.pdf
 assets/*.pdf
 # environment folder
 env/*
+
+#build artefacts
+nginx/*.back
+nginx/assets/*
+nginx/css/*
+nginx/js/*

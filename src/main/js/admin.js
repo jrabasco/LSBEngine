@@ -3,7 +3,7 @@ showdown.setOption('headerLevelStart', 2);
 //Extension
 showdown.extension('header-anchors', function() {
 
-	var ancTpl = '$1<a id="user-content-$3" class="anchor" href="#$3" aria-hidden="true"><img src="/assets/link.svg" /></a>$4';
+  var ancTpl = '$1<a id="user-content-$3" class="anchor" href="#$3" aria-hidden="true"><img src="/assets/link.svg" /></a>$4';
 
   return [{
     type: 'html',
@@ -30,9 +30,9 @@ function leftPad(str, goalLength, padChar) {
 }
 
 function getConverter() {
-	return new showdown.Converter({
-		  extensions: ['header-anchors']
-	});
+  return new showdown.Converter({
+      extensions: ['header-anchors']
+  });
 }
 
 function doLogout() {
@@ -306,7 +306,7 @@ function update(type, add, formName) {
         };
 
         if (type === "posts") {
-        	addPostValues(form, doc);
+          addPostValues(form, doc);
         }
 
         var reqType = add ? "POST" : "PUT";
@@ -342,11 +342,11 @@ function update(type, add, formName) {
 }
 
 function addPostValues(form, doc) {
-	var category = $("#category option:selected").text();
-	if (category !== "None") {
-		doc.category = category;
-	}
-	doc.explicit = form[0].explicit.checked;
+  var category = $("#category option:selected").text();
+  if (category !== "None") {
+    doc.category = category;
+  }
+  doc.explicit = form[0].explicit.checked;
 }
 
 function submitNavbarConf() {
@@ -552,29 +552,29 @@ function resetFields(formName, errorId) {
 }
 
 function removeCategory(id) {
-	$('#category'+id).remove();
+  $('#category'+id).remove();
 }
 
 function addCategory() {
-	var form = $('form[name="edit-categories"]');
-	var nextCat = form[0].nextcat;
-	var id = nextCat.value;
-	var newCat = form[0].newcategory;
-	var newCatName = newCat.value;
-	if (newCatName !== "") {
-		$('#categories').append(
-		  '<div class="listitem" id="category'+id+'">'+
-		     '<label>'+newCatName+'</label><div class="remove-icon" style="cursor: pointer;" onclick="removeCategory('+id+')">&#10006;</div>'+
-		  '</div>'
-		);
-		newCat.value = '';
-		nextCat.value = id + 1;
-	}
+  var form = $('form[name="edit-categories"]');
+  var nextCat = form[0].nextcat;
+  var id = nextCat.value;
+  var newCat = form[0].newcategory;
+  var newCatName = newCat.value;
+  if (newCatName !== "") {
+    $('#categories').append(
+      '<div class="listitem" id="category'+id+'">'+
+         '<label>'+newCatName+'</label><div class="remove-icon" style="cursor: pointer;" onclick="removeCategory('+id+')">&#10006;</div>'+
+      '</div>'
+    );
+    newCat.value = '';
+    nextCat.value = id + 1;
+  }
 }
 
 function submitCategories() {
-	var form = $('form[name="edit-categories"]');
-	var formTitle = $('#cat-title');
+  var form = $('form[name="edit-categories"]');
+  var formTitle = $('#cat-title');
     var loader = $('.loader');
     if (!waiting) {
         hideMessage("form-error");
@@ -583,19 +583,19 @@ function submitCategories() {
         formTitle.hide();
         loader.show();
 
-    	var nextCat = form[0].nextcat.value;
-    	var categories = {titles: []};
-    	var order = 0;
-    	for (var i = 0; i < nextCat; ++i) {
-    		var cat = $('#category'+i);
-    		if (cat.length) {
-    			categories.titles.push({
-    				title: cat.children('label').text(),
-    				order: order
-    			});
-    			order++;
-    		}
-    	}
+      var nextCat = form[0].nextcat.value;
+      var categories = {titles: []};
+      var order = 0;
+      for (var i = 0; i < nextCat; ++i) {
+        var cat = $('#category'+i);
+        if (cat.length) {
+          categories.titles.push({
+            title: cat.children('label').text(),
+            order: order
+          });
+          order++;
+        }
+      }
 
 
         $.ajax({
@@ -629,12 +629,16 @@ function submitCategories() {
     }
 }
 
+function submitNewImage() {
+  var form = $('form[name="upload-image"]');
+  var formTitle = $('#???');
+}
 
 // Transforms date in local format
 $(function () {
-	$('[data-raw-date]').each( function () {
-		var rawDate = $(this).html();
-		const options = { weekday: "short", year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "numeric"};
-		$(this).html(new Date(rawDate).toLocaleString("en-GB", options));
-	});
+  $('[data-raw-date]').each( function () {
+    var rawDate = $(this).html();
+    const options = { weekday: "short", year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "numeric"};
+    $(this).html(new Date(rawDate).toLocaleString("en-GB", options));
+  });
 });

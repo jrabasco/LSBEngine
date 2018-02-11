@@ -1,0 +1,32 @@
+@import me.lsbengine.components.admin.html.{head, navbar}
+@import me.lsbengine.components.html.footer
+@import me.lsbengine.database.model.{NavBarConf, Categories, Token}
+@(token: Token)
+<!DOCTYPE html>
+<html lang="en">
+		@head.render("")
+<body><div class="page-wrap">
+		@navbar.render("Images")
+		<div class="content-wrap">
+		<div id="form-error" class="error" style="display: none"></div>
+		<div id="form-success" class="success" style="display: none"></div>
+		<div class="loader"></div>
+		<h2 id="img-title">Upload Image:</h2>
+		<form name="upload-image" class="small-form">
+			<div class="label-field img-field">
+				<label for="image">Image:</label>
+				<input type="file" id="image" name="image"/>
+			</div>
+			<div class="label-field">
+					<label for="name">Name (optional):</label>
+					<input type="text" id="title" name="title"/>
+			</div>
+			<input type="hidden" name="csrf" value="@token.csrf">
+			<div class="buttons">
+					<input type="button" onclick="submitNewImage()" value="Upload"/>
+			</div>
+		</form>
+		</div></div>
+		@footer.render()
+</body>
+</html>

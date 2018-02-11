@@ -70,8 +70,14 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
               ctx => personalDetailsEdition(ctx, token)
             }
           }
+        } 
+      } ~ pathPrefix("images") {
+          pathEndOrSingleSlash {
+            get {
+              ctx => uploadImagesPage(ctx, token)
+            }
+          }
         }
-      }
     }
 
   val apiRoutes: Route =
@@ -377,6 +383,14 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
       aboutMeAccessor.getResource.flatMap { aboutMe =>
         requestContext.complete(admin.html.perso.render(aboutMe, token))
       }
+    }.recoverWith {
+      case e => requestContext.complete(InternalServerError, errors.html.internalerror(s"$e"))
+    }
+  }
+
+  private def uploadImagesPage(requestContext: RequestContext, token: Token): Future[RouteResult] = {
+    handleWithDb(requestContext) { db =>
+        requestContext.complete(admin.html.images.render(token))
     }.recoverWith {
       case e => requestContext.complete(InternalServerError, errors.html.internalerror(s"$e"))
     }

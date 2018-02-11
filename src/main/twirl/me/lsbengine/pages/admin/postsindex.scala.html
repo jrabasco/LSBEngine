@@ -20,7 +20,7 @@
         @defining(DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ")) { formatter =>
             @for(post <- posts) {
                 <div class="doc-summary">
-                    <h4>@post.title</h4>
+                  <h4><a href="/posts/@post.id">@post.title</a></h4>
                     @{post.`abstract`}
                     <div data-raw-date>@post.published.toString(formatter)</div>
                     <input type="button" onclick="edit('posts', @post.id)" value="Edit"/>

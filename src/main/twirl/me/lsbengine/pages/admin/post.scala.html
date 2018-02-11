@@ -1,0 +1,25 @@
+@import me.lsbengine.database.model.{Post}
+@import me.lsbengine.components.admin.html.{head, navbar}
+@import me.lsbengine.components.html.footer
+@import com.github.nscala_time.time.Imports._
+@(post: Post)
+<!DOCTYPE html>
+<html lang="en">
+    @head.render("")
+    <body><div class="page-wrap">
+    		@navbar.render("Posts")
+        <div class="content-wrap">
+        <div class="docs">
+          <div class="doc">
+            <h1><a href="/posts/@post.id">@post.title</a></h1> 
+            @defining(DateTimeFormat.forPattern("d MMM Y")) { formatter =>
+            <i class="small-date">@post.published.toString(formatter)</i>
+            }
+            <br/>
+            @Html(post.content.html)
+          </div>
+        </div>
+    </div></div>
+    @footer.render()
+    </body>
+</html>

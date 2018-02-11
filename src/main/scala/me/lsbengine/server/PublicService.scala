@@ -49,7 +49,7 @@ class PublicService(dbConnection: MongoConnection, dbName: String, log: LoggingA
 
   override val apiScope: String = "public"
 
-  def index(requestContext: RequestContext, cat: Option[String], page: Option[Int], postsPerPage: Option[Int]): Future[RouteResult] = {
+  private def index(requestContext: RequestContext, cat: Option[String], page: Option[Int], postsPerPage: Option[Int]): Future[RouteResult] = {
     handleWithNavBarConf(requestContext) { (db, conf) =>
       val postsAccessor = getPostsAccessor(db)
       val aboutMeAccessor = new AboutMeAccessor(db)
@@ -71,7 +71,7 @@ class PublicService(dbConnection: MongoConnection, dbName: String, log: LoggingA
     }
   }
 
-  def postsRssFeed(requestContext: RequestContext): Future[RouteResult] = {
+  private def postsRssFeed(requestContext: RequestContext): Future[RouteResult] = {
     handleWithDb(requestContext) { db =>
       val postsAccessor = getPostsAccessor(db)
       
@@ -85,7 +85,7 @@ class PublicService(dbConnection: MongoConnection, dbName: String, log: LoggingA
     }
   }
 
-  def individualPost(requestContext: RequestContext, id: Int): Future[RouteResult] = {
+  private def individualPost(requestContext: RequestContext, id: Int): Future[RouteResult] = {
     handleWithNavBarConf(requestContext) { (db, conf) =>
       val postsAccessor = getPostsAccessor(db)
       postsAccessor.getPost(id).flatMap {
@@ -100,7 +100,7 @@ class PublicService(dbConnection: MongoConnection, dbName: String, log: LoggingA
     }
   }
 
-  def about(requestContext: RequestContext): Future[RouteResult] = {
+  private def about(requestContext: RequestContext): Future[RouteResult] = {
     handleWithNavBarConf(requestContext) { (db, conf) =>
       val aboutMeAccessor = new AboutMeAccessor(db)
       aboutMeAccessor.getResource.flatMap { aboutMe =>
@@ -111,7 +111,7 @@ class PublicService(dbConnection: MongoConnection, dbName: String, log: LoggingA
     }
   }
 
-  def projects(requestContext: RequestContext): Future[RouteResult] = {
+  private def projects(requestContext: RequestContext): Future[RouteResult] = {
     handleWithNavBarConf(requestContext) { (db, conf) =>
       val projectsAccessor = getProjectsAccessor(db)
 
@@ -124,7 +124,7 @@ class PublicService(dbConnection: MongoConnection, dbName: String, log: LoggingA
     }
   }
 
-  def projectsRssFeed(requestContext: RequestContext): Future[RouteResult] = {
+  private def projectsRssFeed(requestContext: RequestContext): Future[RouteResult] = {
     handleWithDb(requestContext) { db =>
       val projectsAccessor = getProjectsAccessor(db)
       
@@ -137,7 +137,7 @@ class PublicService(dbConnection: MongoConnection, dbName: String, log: LoggingA
     }
   }
 
-  def individualProject(requestContext: RequestContext, id: Int): Future[RouteResult] = {
+  private def individualProject(requestContext: RequestContext, id: Int): Future[RouteResult] = {
     handleWithNavBarConf(requestContext) { (db, conf) =>
       val projectsAccessor = getProjectsAccessor(db)
       projectsAccessor.getProject(id).flatMap {

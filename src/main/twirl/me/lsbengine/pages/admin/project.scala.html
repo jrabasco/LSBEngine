@@ -1,0 +1,19 @@
+@import me.lsbengine.database.model.{Project}
+@import me.lsbengine.components.admin.html.{head, navbar}
+@import me.lsbengine.components.html.footer
+@(project: Project)
+<!DOCTYPE html>
+<html lang="en">
+    @head.render("")
+    <body><div class="page-wrap">
+        @navbar.render("Projects")
+        <div class="content-wrap">
+        <div class="docs">
+          <div class="doc">
+            <h1><a href="/projects/@project.id">@project.title</a></h1> @Html(project.content.html)
+          </div>
+        </div>
+    </div></div>
+    @footer.render()
+    </body>
+</html>

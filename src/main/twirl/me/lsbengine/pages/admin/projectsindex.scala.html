@@ -16,7 +16,7 @@
         @defining(DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ")) { formatter =>
             @for(project <- projects) {
                 <div class="doc-summary">
-                    <h4>@project.title</h4>
+                  <h4><a href="/projects/@project.id">@project.title</a></h4>
                     @{project.`abstract`}
                     <div data-raw-date>@project.published.toString(formatter)</div>
                     <input type="button" onclick="edit('projects', @project.id)" value="Edit"/>

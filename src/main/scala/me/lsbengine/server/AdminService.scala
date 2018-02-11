@@ -44,7 +44,17 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
       }
     } ~ cookieAuthenticator { token =>
       resourceForms("posts", token, postsIndex, editPostForm, addPostForm) ~
+      pathPrefix("posts") {
+        path(IntNumber) { id =>
+          ctx => individualPost(ctx, id)
+        }
+      } ~
         resourceForms("projects", token, projectsIndex, editProjectForm, addProjectForm) ~
+        pathPrefix("projects") {
+          path(IntNumber) { id =>
+            ctx => individualProject(ctx, id)
+          }
+        } ~
         pathPrefix("password") {
           path("edit") {
             get {
@@ -291,6 +301,22 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
     }
   }
 
+  private def individualPost(requestContext: RequestContext, id: Int): Future[RouteResult] = {
+    handleWithDb(requestContext) { db =>
+      val postsAccessor = getPostsAccessor(db)
+      postsAccessor.getPost(id).flatMap {
+        case Some(post) =>
+          requestContext.complete(admin.html.post.render(post))
+        case None =>
+          requestContext.complete(NotFound, errors.html.notfound.render(s"Post $id not found."))
+      }.recoverWith {
+        case _ =>
+          requestContext.complete(InternalServerError, errors.html.internalerror(s"Database access failed."))
+      }
+    }
+  }
+
+
   private def projectsIndex(requestContext: RequestContext, token: Token, page: Option[Int], projectsPerPage: Option[Int]): Future[RouteResult] = {
     handleWithDb(requestContext) { db =>
       val projectsAccessor = new AdminProjectsAccessor(db)
@@ -300,6 +326,21 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
       }.recoverWith {
         case _ =>
           requestContext.complete(admin.html.projectsindex.render(token, List()))
+      }
+    }
+  }
+
+  private def individualProject(requestContext: RequestContext, id: Int): Future[RouteResult] = {
+    handleWithDb(requestContext) { db =>
+      val projectsAccessor = getProjectsAccessor(db)
+      projectsAccessor.getProject(id).flatMap {
+        case Some(project) =>
+          requestContext.complete(admin.html.project.render(project))
+        case None =>
+          requestContext.complete(NotFound, errors.html.notfound.render(s"Project $id not found."))
+      }.recoverWith {
+        case _ =>
+          requestContext.complete(InternalServerError, errors.html.internalerror(s"Database access failed."))
       }
     }
   }

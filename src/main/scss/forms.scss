@@ -142,8 +142,9 @@ form {
   border: 2px solid $border-color;
   background: $box-background-color;
   max-width: $page-max-width;
-  text-align: center;
+  text-align: left;
   border-radius: 10px;
+	line-height: $docs-line-height;
 }
 
 input[type=button] {

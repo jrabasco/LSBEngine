@@ -72,7 +72,7 @@ function delDoc(type, id, statusId, toHide, homeFn) {
             success: function () {
                 waiting = false;
                 loader.hide();
-                showMessage(statusId + "-success", "Deletion successful.");
+                showMessage(statusId + "-success", "Devarion successful.");
                 setTimeout(function () {
                     homeFn()
                 }, 500);
@@ -129,7 +129,7 @@ function purgeTrash(type, statusId) {
             },
             success: function () {
                 waiting = false;
-                showMessage(statusId + "-success", "Deleted items purged.");
+                showMessage(statusId + "-success", "Devared items purged.");
                 setTimeout(function () {
                     hideMessage(statusId + "-success");
                 }, 1000);
@@ -575,63 +575,102 @@ function addCategory() {
 function submitCategories() {
   var form = $('form[name="edit-categories"]');
   var formTitle = $('#cat-title');
-    var loader = $('.loader');
-    if (!waiting) {
-        hideMessage("form-error");
-        waiting = true;
-        form.hide();
-        formTitle.hide();
-        loader.show();
+  var loader = $('.loader');
+  if (!waiting) {
+    hideMessage("form-error");
+    waiting = true;
+    form.hide();
+    formTitle.hide();
+    loader.show();
 
-      var nextCat = form[0].nextcat.value;
-      var categories = {titles: []};
-      var order = 0;
-      for (var i = 0; i < nextCat; ++i) {
-        var cat = $('#category'+i);
-        if (cat.length) {
-          categories.titles.push({
-            title: cat.children('label').text(),
-            order: order
-          });
-          order++;
-        }
-      }
-
-
-        $.ajax({
-            type: "PUT",
-            url: "/api/categories",
-            data: JSON.stringify(categories),
-            cache: false,
-            contentType: "application/json",
-            headers: {
-                'X-Csrf-Protection': form[0].csrf.value
-            },
-            success: function () {
-                waiting = false;
-                loader.hide();
-                showMessage("form-success", "Update successful.");
-                setTimeout(function () {
-                    hideMessage("form-success");
-                    form.show();
-                    formTitle.show();
-                }, 500);
-            },
-            error: function (resp) {
-                console.log(resp);
-                waiting = false;
-                loader.hide();
-                form.show();
-                formTitle.show();
-                showMessage("form-error", "Could not update categories for the following reason: " + resp.responseText);
-            }
+    var nextCat = form[0].nextcat.value;
+    var categories = {titles: []};
+    var order = 0;
+    for (var i = 0; i < nextCat; ++i) {
+      var cat = $('#category'+i);
+      if (cat.length) {
+        categories.titles.push({
+          title: cat.children('label').text(),
+          order: order
         });
+        order++;
+      }
     }
+
+    $.ajax({
+      type: "PUT",
+      url: "/api/categories",
+      data: JSON.stringify(categories),
+      cache: false,
+      contentType: "application/json",
+      headers: {
+        'X-Csrf-Protection': form[0].csrf.value
+      },
+      success: function () {
+        waiting = false;
+        loader.hide();
+        showMessage("form-success", "Update successful.");
+        setTimeout(function () {
+          hideMessage("form-success");
+          form.show();
+          formTitle.show();
+        }, 500);
+      },
+      error: function (resp) {
+        console.log(resp);
+        waiting = false;
+        loader.hide();
+        form.show();
+        formTitle.show();
+        showMessage("form-error", "Could not update categories for the following reason: " + resp.responseText);
+      }
+    });
+  }
 }
 
 function submitNewImage() {
   var form = $('form[name="upload-image"]');
-  var formTitle = $('#???');
+  var formTitle = $('#img-title');
+  var loader = $('.loader');
+  if (!waiting && form[0].image.value) {
+    hideMessage("form-error");
+    waiting = true;
+    form.hide();
+    formTitle.hide();
+    loader.show();
+		var formData = new FormData();
+		var fileName = form[0].title.value;
+		formData.append("fileName", fileName);
+		formData.append("data", form[0].image.files[0]);
+
+    $.ajax({
+      type: "POST",
+      url: "/api/images",
+      data: formData,
+      cache: false,
+      contentType: false,
+			processData: false,
+      headers: {
+        'X-Csrf-Protection': form[0].csrf.value
+      },
+      success: function () {
+        waiting = false;
+        loader.hide();
+        showMessage("form-success", "Update successful.");
+        setTimeout(function () {
+          window.location.reload();
+        }, 500);
+      },
+      error: function (resp) {
+        console.log(resp);
+        waiting = false;
+        loader.hide();
+        form.show();
+        formTitle.show();
+        showMessage("form-error", "Could not upload image for the following reason: " + resp.responseText);
+      }
+    });
+  }
 }
 
 // Transforms date in local format

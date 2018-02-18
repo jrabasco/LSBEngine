@@ -19,6 +19,7 @@ object BlogConfiguration {
   val hashIterations: Int = envOrElse("HASH_ITERATIONS", "300000").toInt
   val headerTitle: String = envOrElse("HEADER_TITLE", "LSBEngine")
   val hostName: String = envOrElse("SERVER_HOST", "localhost")
+  val imagesLocation: String = envOrElse("IMAGES_LOCATION", "/home/jrabasco/images/")
   val mongoDBHost: String = envOrElse("MONGO_HOST", "localhost")
   val mongoDBName: String = envOrElse("MONGO_NAME", "lsbengine")
   val mongoDBPort: Int = envOrElse("MONGO_CUST_PORT", "27017").toInt

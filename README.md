@@ -32,6 +32,7 @@ takes around 1 second to perform a hash)
 - `BLOG_META_DESCRIPTION`: short description for the blog (default `My name is Jeremy Rabasco. I am a Computer Science major and I currently work at <JOB_HERE>.`)
 - `CONTACT_ADDRESS`: email for the footer (default `rabasco.jeremy@gmail.com`)
 - `HEADER_TITLE`: title in the header (default `LSBEngine`)
+- `IMAGES_LOCATION`: location where the uploaded images are saved (default `/home/jrabasco/images`)
 - `SITE_URL`: the URL of the website (default `local.lsbengine.me`)
 - `RESUME_REPO`: link to your resume repository, see the Resume section
 - `DISCLAIMER`: A disclaimer that will appear in the footer (default `My opinions do not necessarily represent those of my employer.`)

@@ -7,6 +7,7 @@ import akka.http.scaladsl.server._
 import akka.http.scaladsl.unmarshalling.FromRequestUnmarshaller
 import com.github.nscala_time.time.Imports._
 import me.lsbengine.api.{PostsAccessor, ProjectsAccessor}
+import com.github.nscala_time.time.DurationBuilder
 import me.lsbengine.api.admin.security.CredentialsAuthenticator.Credentials
 import me.lsbengine.api.admin.security._
 import me.lsbengine.api.admin._
@@ -16,9 +17,12 @@ import me.lsbengine.errors
 import me.lsbengine.pages.admin
 import reactivemongo.api.{DefaultDB, MongoConnection}
 
+import java.io.{FileInputStream, FileOutputStream, File}
 import scala.language.postfixOps
+import scala.collection.immutable.Stream
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.duration.{SECONDS, FiniteDuration}
 import scala.util.{Failure, Success}
 
 class AdminService(val dbConnection: MongoConnection, val dbName: String, val log: LoggingAdapter)
@@ -70,14 +74,16 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
               ctx => personalDetailsEdition(ctx, token)
             }
           }
-        } 
+        }
       } ~ pathPrefix("images") {
+        cookieAuthenticator { token =>
           pathEndOrSingleSlash {
             get {
               ctx => uploadImagesPage(ctx, token)
             }
           }
         }
+      }
     }
 
   val apiRoutes: Route =
@@ -207,8 +213,29 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
         handleSingleResourceUpdate[AboutMe]("perso", new AboutMeAccessor(_))
       } ~ {
         handleSingleResourceUpdate[Categories]("categories", new CategoriesAccessor(_))
+      } ~ imagesRoute
+    }
+
+  val imagesRoute: Route = toStrictEntity(new FiniteDuration(10, SECONDS)) {
+    path("images") {
+      cookieWithCsrfCheck {
+        pathEndOrSingleSlash {
+          post {
+            formField('fileName) { fileName =>
+              uploadedFile("data") {
+                case (metadata, file) =>
+                  val finalName = if (fileName.length > 0) fileName else metadata.fileName
+                  val dest = new File(BlogConfiguration.imagesLocation, finalName)
+                  copyFile(file, dest)
+                  file.delete()
+                  complete("OK")
+              }
+            }
+          }
+        }
       }
     }
+  }
 
   override val ownRoutes: Route = frontendRoutes ~ apiRoutes
 
@@ -596,6 +623,17 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
 
   private def passwordForm(requestContext: RequestContext, token: Token): Future[RouteResult] = {
     requestContext.complete(admin.html.editpassword.render(token))
+  }
+
+  private def copyFile(source: File, dest: File) = {
+      val is = new FileInputStream(source);
+      val os = new FileOutputStream(dest);
+      val bs = Stream.continually(is.read).takeWhile(_ != -1)
+
+      bs.foreach(os.write(_))
+
+      is.close();
+      os.close();
   }
 
 }

@@ -34,37 +34,41 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
     }
 
   val frontendRoutes: Route =
-    pathEndOrSingleSlash {
-      handleRejections(loginRejectionHandler) {
+    handleRejections(loginRejectionHandler) {
+      pathEndOrSingleSlash {
         cookieAuthenticator { token =>
           get {
             ctx => index(ctx, token)
           }
         }
-      }
-    } ~ cookieAuthenticator { token =>
-      resourceForms("posts", token, postsIndex, editPostForm, addPostForm) ~
+      } ~ resourceForms("posts", postsIndex, editPostForm, addPostForm) ~
       pathPrefix("posts") {
-        path(IntNumber) { id =>
-          ctx => individualPost(ctx, id)
+        cookieAuthenticator { _ =>
+          path(IntNumber) { id =>
+            ctx => individualPost(ctx, id)
+          }
         }
-      } ~
-        resourceForms("projects", token, projectsIndex, editProjectForm, addProjectForm) ~
-        pathPrefix("projects") {
+      } ~ resourceForms("projects", projectsIndex, editProjectForm, addProjectForm) ~
+      pathPrefix("projects") {
+        cookieAuthenticator { _ =>
           path(IntNumber) { id =>
             ctx => individualProject(ctx, id)
           }
-        } ~
-        pathPrefix("password") {
+        }
+      } ~ pathPrefix("password") {
+        cookieAuthenticator { token =>
           path("edit") {
             get {
               ctx => passwordForm(ctx, token)
             }
           }
-        } ~ pathPrefix("perso") {
-        path("edit") {
-          get {
-            ctx => personalDetailsEdition(ctx, token)
+        }
+      } ~ pathPrefix("perso") {
+        cookieAuthenticator { token =>
+          path("edit") {
+            get {
+              ctx => personalDetailsEdition(ctx, token)
+            }
           }
         }
       }
@@ -210,25 +214,27 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
     new AdminProjectsAccessor(database)
   }
 
-  private def resourceForms(resourceName: String, token: Token,
+  private def resourceForms(resourceName: String,
                             index: (RequestContext, Token, Option[Int], Option[Int]) => Future[RouteResult],
                             edit: (RequestContext, Token, Int) => Future[RouteResult],
                             add: (RequestContext, Token) => Future[RouteResult]): Route = {
     pathPrefix(resourceName) {
-      pathEndOrSingleSlash {
-        parameters("page".as[Int]?, "items_per_page".as[Int]?) {
-          (page, itemsPerPage) =>
-            ctx => index(ctx, token, page, itemsPerPage)
-        }
-      } ~ pathPrefix("edit") {
-        path(IntNumber) { id =>
-          get {
-            ctx => edit(ctx, token, id)
+      cookieAuthenticator { token =>
+        pathEndOrSingleSlash {
+          parameters("page".as[Int]?, "items_per_page".as[Int]?) {
+            (page, itemsPerPage) =>
+              ctx => index(ctx, token, page, itemsPerPage)
           }
-        }
-      } ~ pathPrefix("add") {
-        get {
-          ctx => add(ctx, token)
+        } ~ pathPrefix("edit") {
+          path(IntNumber) { id =>
+            get {
+              ctx => edit(ctx, token, id)
+            }
+          }
+        } ~ pathPrefix("add") {
+          get {
+            ctx => add(ctx, token)
+          }
         }
       }
     }
@@ -242,7 +248,7 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
         deleteCookie(cookieName) {
           complete(admin.html.login.render())
         }
-    }.result().withFallback(RejectionHandler.default)
+    }.result()
 
   private def updatePassword(requestContext: RequestContext, newCredentials: NewCredentials): Future[RouteResult] = {
     handleWithDb(requestContext) { db =>

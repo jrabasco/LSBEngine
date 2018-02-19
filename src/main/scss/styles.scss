@@ -53,6 +53,21 @@ h2 {
   font-size: 30px;
 }
 
+.side-by-side-ul {
+	ul {
+		display: inline-block;
+		vertical-align: top;
+		list-style-type: none;
+		width: 30%
+	}
+}
+
+.listitem {
+  .remove-icon {
+    display: inline-block;
+  }
+}
+
 .page-wrap {
   min-height: 90vh;
 }

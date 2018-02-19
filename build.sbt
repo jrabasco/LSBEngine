@@ -1,6 +1,6 @@
 name := "LSBEngine"
 
-version := "1.0.3"
+version := "1.0.4"
 
 scalaVersion := "2.12.4"
 
@@ -67,3 +67,4 @@ import com.typesafe.sbt.packager.docker._
 dockerBaseImage := "openjdk:jre-alpine"
 dockerEntrypoint := Seq("bin/blog")
 dockerExposedPorts := Seq(9090, 8080)
+dockerExposedVolumes := Seq("/opt/docker/images")

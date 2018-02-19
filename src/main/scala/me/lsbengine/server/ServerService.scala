@@ -58,7 +58,9 @@ abstract class ServerService(dbConnection: MongoConnection, dbName: String, log:
         getFromResourceDirectory("js")
       }
     } ~ pathPrefix("assets") {
-      get {
+      pathPrefix("images") {
+        getFromBrowseableDirectory(BlogConfiguration.imagesLocation)
+      } ~ get {
         getFromResourceDirectory("assets")
       }
     }

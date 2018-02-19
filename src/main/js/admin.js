@@ -56,7 +56,7 @@ function delDoc(type, id, statusId, toHide, homeFn) {
     var csrfInput = $('input[name="csrf"]');
     var toHideObject = $(toHide);
     var loader = $('.loader');
-    if (!waiting && confirm("This will delete the post, are you sure you want to continue?")) {
+    if (!waiting && confirm("This will delete the document, are you sure you want to continue?")) {
         hideMessage(statusId + "-error");
         waiting = true;
         toHideObject.hide();
@@ -72,7 +72,7 @@ function delDoc(type, id, statusId, toHide, homeFn) {
             success: function () {
                 waiting = false;
                 loader.hide();
-                showMessage(statusId + "-success", "Devarion successful.");
+                showMessage(statusId + "-success", "Deletion successful.");
                 setTimeout(function () {
                     homeFn()
                 }, 500);
@@ -129,7 +129,7 @@ function purgeTrash(type, statusId) {
             },
             success: function () {
                 waiting = false;
-                showMessage(statusId + "-success", "Devared items purged.");
+                showMessage(statusId + "-success", "Deleted items purged.");
                 setTimeout(function () {
                     hideMessage(statusId + "-success");
                 }, 1000);
@@ -668,6 +668,44 @@ function submitNewImage() {
         form.show();
         formTitle.show();
         showMessage("form-error", "Could not upload image for the following reason: " + resp.responseText);
+      }
+    });
+  }
+}
+
+function deleteImage(imageName) {
+  var form = $('form[name="upload-image"]');
+  var imgList = $('#img-list');
+  var loader = $('.loader');
+  if (!waiting && confirm('This will delete the image called "' + imageName + '", are you sure you want to continue?')) {
+    hideMessage("form-error");
+    waiting = true;
+    imgList.hide();
+    loader.show();
+
+    $.ajax({
+      type: "DELETE",
+      url: "/api/images/" + imageName,
+      cache: false,
+      contentType: "application/json",
+      headers: {
+        'X-Csrf-Protection': form[0].csrf.value
+      },
+      success: function () {
+        waiting = false;
+        loader.hide();
+        showMessage("form-success", "Deletion successful.");
+        setTimeout(function () {
+          window.location.reload();
+        }, 500);
+      },
+      error: function (resp) {
+        console.log(resp);
+        waiting = false;
+        loader.hide();
+        form.show();
+        imgList.show();
+        showMessage("form-error", "Could not delete image for the following reason: " + resp.responseText);
       }
     });
   }

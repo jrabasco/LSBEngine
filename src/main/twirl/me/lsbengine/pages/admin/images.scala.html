@@ -1,7 +1,7 @@
 @import me.lsbengine.components.admin.html.{head, navbar}
 @import me.lsbengine.components.html.footer
-@import me.lsbengine.database.model.{NavBarConf, Categories, Token}
-@(token: Token)
+@import me.lsbengine.database.model.{NavBarConf, Categories, Token, Image}
+@(token: Token, images: List[Image])
 <!DOCTYPE html>
 <html lang="en">
 		@head.render("")
@@ -26,6 +26,27 @@
 					<input type="button" onclick="submitNewImage()" value="Upload"/>
 			</div>
 		</form>
+		<div id="img-list">
+			<div>
+				<h3>List of uploaded images:</h2>
+				To use an image in a post, simply link to /assets/images/IMAGE_NAME.
+			</div>
+			<br/>
+			<div class="side-by-side-ul">
+				@defining(images.length - images.length/2) { firstHalf =>
+				<ul>
+					@for(image <- images.take(firstHalf)) {
+					<div class="listitem"><label><a href="/assets/images/@{image.name}.@{image.extension}" target="__blank">@{image.name}.@{image.extension}</a></label><div class="remove-icon" style="cursor: pointer;" onclick="deleteImage('@image.name')">&#10006;</div></div>
+					}
+				</ul>
+				<ul>
+					@for(image <- images.drop(firstHalf)) {
+					<li class="listitem"><a href="/assets/images/@{image.name}.@{image.extension}" target="__blank">@{image.name}.@{image.extension}</a><div class="remove-icon" style="cursor: pointer;" onclick="deleteImage('@image.name')">&#10006;</div></li>
+					}
+				</ul>
+				}
+			</div>
+		</div>
 		</div></div>
 		@footer.render()
 </body>

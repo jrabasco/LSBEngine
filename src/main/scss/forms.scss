@@ -60,11 +60,16 @@ form {
     margin-left: 2px
   }
 
-  .listitem {
-    .remove-icon {
-      display: inline-block;
+	.img-field {
+    label {
+      width: 35%;
     }
-  }
+
+    input {
+      width: 55%;
+      margin-right: 5%;
+    }
+	}
 }
 
 .big-form {

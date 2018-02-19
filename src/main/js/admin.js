@@ -3,7 +3,7 @@ showdown.setOption('headerLevelStart', 2);
 //Extension
 showdown.extension('header-anchors', function() {
 
-	var ancTpl = '$1<a id="user-content-$3" class="anchor" href="#$3" aria-hidden="true"><img src="/assets/link.svg" /></a>$4';
+  var ancTpl = '$1<a id="user-content-$3" class="anchor" href="#$3" aria-hidden="true"><img src="/assets/link.svg" /></a>$4';
 
   return [{
     type: 'html',
@@ -30,9 +30,9 @@ function leftPad(str, goalLength, padChar) {
 }
 
 function getConverter() {
-	return new showdown.Converter({
-		  extensions: ['header-anchors']
-	});
+  return new showdown.Converter({
+      extensions: ['header-anchors']
+  });
 }
 
 function doLogout() {
@@ -56,7 +56,7 @@ function delDoc(type, id, statusId, toHide, homeFn) {
     var csrfInput = $('input[name="csrf"]');
     var toHideObject = $(toHide);
     var loader = $('.loader');
-    if (!waiting && confirm("This will delete the post, are you sure you want to continue?")) {
+    if (!waiting && confirm("This will delete the document, are you sure you want to continue?")) {
         hideMessage(statusId + "-error");
         waiting = true;
         toHideObject.hide();
@@ -306,7 +306,7 @@ function update(type, add, formName) {
         };
 
         if (type === "posts") {
-        	addPostValues(form, doc);
+          addPostValues(form, doc);
         }
 
         var reqType = add ? "POST" : "PUT";
@@ -342,11 +342,11 @@ function update(type, add, formName) {
 }
 
 function addPostValues(form, doc) {
-	var category = $("#category option:selected").text();
-	if (category !== "None") {
-		doc.category = category;
-	}
-	doc.explicit = form[0].explicit.checked;
+  var category = $("#category option:selected").text();
+  if (category !== "None") {
+    doc.category = category;
+  }
+  doc.explicit = form[0].explicit.checked;
 }
 
 function submitNavbarConf() {
@@ -552,89 +552,170 @@ function resetFields(formName, errorId) {
 }
 
 function removeCategory(id) {
-	$('#category'+id).remove();
+  $('#category'+id).remove();
 }
 
 function addCategory() {
-	var form = $('form[name="edit-categories"]');
-	var nextCat = form[0].nextcat;
-	var id = nextCat.value;
-	var newCat = form[0].newcategory;
-	var newCatName = newCat.value;
-	if (newCatName !== "") {
-		$('#categories').append(
-		  '<div class="listitem" id="category'+id+'">'+
-		     '<label>'+newCatName+'</label><div class="remove-icon" style="cursor: pointer;" onclick="removeCategory('+id+')">&#10006;</div>'+
-		  '</div>'
-		);
-		newCat.value = '';
-		nextCat.value = id + 1;
-	}
+  var form = $('form[name="edit-categories"]');
+  var nextCat = form[0].nextcat;
+  var id = nextCat.value;
+  var newCat = form[0].newcategory;
+  var newCatName = newCat.value;
+  if (newCatName !== "") {
+    $('#categories').append(
+      '<div class="listitem" id="category'+id+'">'+
+         '<label>'+newCatName+'</label><div class="remove-icon" style="cursor: pointer;" onclick="removeCategory('+id+')">&#10006;</div>'+
+      '</div>'
+    );
+    newCat.value = '';
+    nextCat.value = id + 1;
+  }
 }
 
 function submitCategories() {
-	var form = $('form[name="edit-categories"]');
-	var formTitle = $('#cat-title');
-    var loader = $('.loader');
-    if (!waiting) {
-        hideMessage("form-error");
-        waiting = true;
-        form.hide();
-        formTitle.hide();
-        loader.show();
+  var form = $('form[name="edit-categories"]');
+  var formTitle = $('#cat-title');
+  var loader = $('.loader');
+  if (!waiting) {
+    hideMessage("form-error");
+    waiting = true;
+    form.hide();
+    formTitle.hide();
+    loader.show();
 
-    	var nextCat = form[0].nextcat.value;
-    	var categories = {titles: []};
-    	var order = 0;
-    	for (var i = 0; i < nextCat; ++i) {
-    		var cat = $('#category'+i);
-    		if (cat.length) {
-    			categories.titles.push({
-    				title: cat.children('label').text(),
-    				order: order
-    			});
-    			order++;
-    		}
-    	}
-
-
-        $.ajax({
-            type: "PUT",
-            url: "/api/categories",
-            data: JSON.stringify(categories),
-            cache: false,
-            contentType: "application/json",
-            headers: {
-                'X-Csrf-Protection': form[0].csrf.value
-            },
-            success: function () {
-                waiting = false;
-                loader.hide();
-                showMessage("form-success", "Update successful.");
-                setTimeout(function () {
-                    hideMessage("form-success");
-                    form.show();
-                    formTitle.show();
-                }, 500);
-            },
-            error: function (resp) {
-                console.log(resp);
-                waiting = false;
-                loader.hide();
-                form.show();
-                formTitle.show();
-                showMessage("form-error", "Could not update categories for the following reason: " + resp.responseText);
-            }
+    var nextCat = form[0].nextcat.value;
+    var categories = {titles: []};
+    var order = 0;
+    for (var i = 0; i < nextCat; ++i) {
+      var cat = $('#category'+i);
+      if (cat.length) {
+        categories.titles.push({
+          title: cat.children('label').text(),
+          order: order
         });
+        order++;
+      }
     }
+
+    $.ajax({
+      type: "PUT",
+      url: "/api/categories",
+      data: JSON.stringify(categories),
+      cache: false,
+      contentType: "application/json",
+      headers: {
+        'X-Csrf-Protection': form[0].csrf.value
+      },
+      success: function () {
+        waiting = false;
+        loader.hide();
+        showMessage("form-success", "Update successful.");
+        setTimeout(function () {
+          hideMessage("form-success");
+          form.show();
+          formTitle.show();
+        }, 500);
+      },
+      error: function (resp) {
+        console.log(resp);
+        waiting = false;
+        loader.hide();
+        form.show();
+        formTitle.show();
+        showMessage("form-error", "Could not update categories for the following reason: " + resp.responseText);
+      }
+    });
+  }
 }
 
+function submitNewImage() {
+  var form = $('form[name="upload-image"]');
+  var formTitle = $('#img-title');
+  var loader = $('.loader');
+  if (!waiting && form[0].image.value) {
+    hideMessage("form-error");
+    waiting = true;
+    form.hide();
+    formTitle.hide();
+    loader.show();
+		var formData = new FormData();
+		var fileName = form[0].title.value;
+		formData.append("fileName", fileName);
+		formData.append("data", form[0].image.files[0]);
+
+    $.ajax({
+      type: "POST",
+      url: "/api/images",
+      data: formData,
+      cache: false,
+      contentType: false,
+			processData: false,
+      headers: {
+        'X-Csrf-Protection': form[0].csrf.value
+      },
+      success: function () {
+        waiting = false;
+        loader.hide();
+        showMessage("form-success", "Update successful.");
+        setTimeout(function () {
+          window.location.reload();
+        }, 500);
+      },
+      error: function (resp) {
+        console.log(resp);
+        waiting = false;
+        loader.hide();
+        form.show();
+        formTitle.show();
+        showMessage("form-error", "Could not upload image for the following reason: " + resp.responseText);
+      }
+    });
+  }
+}
+
+function deleteImage(imageName) {
+  var form = $('form[name="upload-image"]');
+  var imgList = $('#img-list');
+  var loader = $('.loader');
+  if (!waiting && confirm('This will delete the image called "' + imageName + '", are you sure you want to continue?')) {
+    hideMessage("form-error");
+    waiting = true;
+    imgList.hide();
+    loader.show();
+
+    $.ajax({
+      type: "DELETE",
+      url: "/api/images/" + imageName,
+      cache: false,
+      contentType: "application/json",
+      headers: {
+        'X-Csrf-Protection': form[0].csrf.value
+      },
+      success: function () {
+        waiting = false;
+        loader.hide();
+        showMessage("form-success", "Deletion successful.");
+        setTimeout(function () {
+          window.location.reload();
+        }, 500);
+      },
+      error: function (resp) {
+        console.log(resp);
+        waiting = false;
+        loader.hide();
+        form.show();
+        imgList.show();
+        showMessage("form-error", "Could not delete image for the following reason: " + resp.responseText);
+      }
+    });
+  }
+}
 
 // Transforms date in local format
 $(function () {
-	$('[data-raw-date]').each( function () {
-		var rawDate = $(this).html();
-		const options = { weekday: "short", year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "numeric"};
-		$(this).html(new Date(rawDate).toLocaleString("en-GB", options));
-	});
+  $('[data-raw-date]').each( function () {
+    var rawDate = $(this).html();
+    const options = { weekday: "short", year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "numeric"};
+    $(this).html(new Date(rawDate).toLocaleString("en-GB", options));
+  });
 });

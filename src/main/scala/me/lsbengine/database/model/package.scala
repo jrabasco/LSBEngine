@@ -8,6 +8,7 @@ package object model {
   object MongoCollections {
     val postsCollectionName = "posts"
     val projectsCollectionName = "projects"
+    val imagesCollectionName = "images"
     val aboutMeCollectionName = "aboutMe"
     val categoriesCollectionName = "categories"
     val navBarConfCollectionName = "navBarConf"
@@ -26,6 +27,8 @@ package object model {
   case class Categories(titles: List[OrderedTitle])
 
   case class Project(id: Int, title: String, `abstract`: String, content: HtmlMarkdownContent, published: DateTime)
+
+  case class Image(name: String, extension: String, path: String)
 
   case class AboutMe(introduction: Option[HtmlMarkdownContent], resume: Option[HtmlMarkdownContent])
 
@@ -48,6 +51,7 @@ package object model {
 
     implicit val postFormat: Formatter[Post] = Macros.handler[Post]
     implicit val projectFormat: Formatter[Project] = Macros.handler[Project]
+    implicit val imageFormat: Formatter[Image] = Macros.handler[Image]
     implicit val aboutMeFormat: Formatter[AboutMe] = Macros.handler[AboutMe]
     implicit val orderedTitleFormat: Formatter[OrderedTitle] = Macros.handler[OrderedTitle]
     implicit val categoriesFormat: Formatter[Categories] = Macros.handler[Categories]

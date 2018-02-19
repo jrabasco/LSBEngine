@@ -4,9 +4,11 @@ import akka.event.LoggingAdapter
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model.headers.`Access-Control-Allow-Credentials`
 import akka.http.scaladsl.server._
+import akka.http.scaladsl.server.directives.FileInfo
 import akka.http.scaladsl.unmarshalling.FromRequestUnmarshaller
 import com.github.nscala_time.time.Imports._
 import me.lsbengine.api.{PostsAccessor, ProjectsAccessor}
+import com.github.nscala_time.time.DurationBuilder
 import me.lsbengine.api.admin.security.CredentialsAuthenticator.Credentials
 import me.lsbengine.api.admin.security._
 import me.lsbengine.api.admin._
@@ -17,9 +19,12 @@ import me.lsbengine.pages.admin
 import reactivemongo.api.{DefaultDB, MongoConnection}
 
 import scala.language.postfixOps
+import scala.collection.immutable.Stream
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.duration.{SECONDS, FiniteDuration}
 import scala.util.{Failure, Success}
+import java.io.File
 
 class AdminService(val dbConnection: MongoConnection, val dbName: String, val log: LoggingAdapter)
   extends ServerService(dbConnection, dbName, log)
@@ -68,6 +73,14 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
           path("edit") {
             get {
               ctx => personalDetailsEdition(ctx, token)
+            }
+          }
+        }
+      } ~ pathPrefix("images") {
+        cookieAuthenticator { token =>
+          pathEndOrSingleSlash {
+            get {
+              ctx => uploadImagesPage(ctx, token)
             }
           }
         }
@@ -201,8 +214,29 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
         handleSingleResourceUpdate[AboutMe]("perso", new AboutMeAccessor(_))
       } ~ {
         handleSingleResourceUpdate[Categories]("categories", new CategoriesAccessor(_))
+      } ~ imagesRoute
+    }
+
+  val imagesRoute: Route = toStrictEntity(new FiniteDuration(10, SECONDS)) {
+    pathPrefix("images") {
+      cookieWithCsrfCheck {
+        pathEndOrSingleSlash {
+          post {
+            formField('fileName) { fileName =>
+              uploadedFile("data") { case (metadata, file) =>
+                ctx => uploadImage(ctx, metadata, file, fileName)
+              }
+            }
+          }
+        } ~ path("""(.+)""".r) { imageName =>
+          delete {
+            ctx => 
+              deleteImage(ctx, imageName)
+          }
+        }
       }
     }
+  }
 
   override val ownRoutes: Route = frontendRoutes ~ apiRoutes
 
@@ -294,6 +328,50 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
     }
   }
 
+  private def uploadImage(requestContext: RequestContext, metadata: FileInfo, file: File, passedFileName: String): Future[RouteResult] = {
+    val pattern = """(.*)[.]([^.]*)""".r
+    metadata.fileName match {
+      case pattern(fn, ext) =>
+        handleWithDb(requestContext) { db =>
+          val finalName = if (passedFileName.length > 0) passedFileName else fn
+          val dest = new File(BlogConfiguration.imagesLocation, finalName + s".$ext")
+          val imagesAccessor = new ImagesAccessor(db)
+          imagesAccessor.getImage(finalName).flatMap {
+            case Some(_) =>
+              requestContext.complete(Conflict, s"Image with name '$finalName' already exists.")
+            case None =>
+              val img = Image(finalName, ext, dest.toPath.toString)
+              imagesAccessor.saveImage(img, file).flatMap { updateWriteResult =>
+                if (updateWriteResult.ok) {
+                  requestContext.complete("Image saved.")
+                } else {
+                  requestContext.complete(InternalServerError, "Write result not ok.")
+                }
+              }.recoverWith {
+                case e => requestContext.complete(InternalServerError, s"$e")
+              }
+          }
+        }
+      case _ =>
+        requestContext.complete(BadRequest, "File has no extension.")
+    }
+  }
+
+  private def deleteImage(requestContext: RequestContext, imageName: String): Future[RouteResult] = {
+    handleWithDb(requestContext) { db =>
+      val imagesAccessor = new ImagesAccessor(db)
+      imagesAccessor.deleteImage(imageName).flatMap { writeResult =>
+        if (writeResult.ok) {
+          requestContext.complete("Deleted.")
+        } else {
+          requestContext.complete(InternalServerError, "Write result is not ok.")
+        }
+      }.recoverWith {
+        case e => requestContext.complete(InternalServerError, s"$e")
+      }
+    }
+  }
+
   private def postsIndex(requestContext: RequestContext, token: Token, page: Option[Int], postsPerPage: Option[Int]): Future[RouteResult] = {
     handleWithDb(requestContext) { db =>
       val postsAccessor = new AdminPostsAccessor(db)
@@ -376,6 +454,17 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
       val aboutMeAccessor = new AboutMeAccessor(db)
       aboutMeAccessor.getResource.flatMap { aboutMe =>
         requestContext.complete(admin.html.perso.render(aboutMe, token))
+      }
+    }.recoverWith {
+      case e => requestContext.complete(InternalServerError, errors.html.internalerror(s"$e"))
+    }
+  }
+
+  private def uploadImagesPage(requestContext: RequestContext, token: Token): Future[RouteResult] = {
+    handleWithDb(requestContext) { db =>
+      val imagesAccessor = new ImagesAccessor(db)
+      imagesAccessor.getImages.flatMap { images =>
+        requestContext.complete(admin.html.images.render(token, images))
       }
     }.recoverWith {
       case e => requestContext.complete(InternalServerError, errors.html.internalerror(s"$e"))

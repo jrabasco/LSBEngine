@@ -2,11 +2,13 @@ version: '3'
 
 services:
   lsbengine:
-    image: lsbengine:1.0.3
+    image: lsbengine:1.0.4
     links:
       - mongo
     env_file:
       - env/docker.env
+    volumes:
+      - /var/www/assets/images:/opt/docker/images
   
   mongo:
     image: mongo:3.4
@@ -23,3 +25,4 @@ services:
     volumes:
       - /etc/ssl/dhparams:/etc/ssl/dhparams
       - /etc/letsencrypt:/etc/letsencrypt
+      - /var/www/assets/images:/var/www/assets/images

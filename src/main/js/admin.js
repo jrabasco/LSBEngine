@@ -343,8 +343,12 @@ function update(type, add, formName) {
 
 function addPostValues(form, doc) {
   var category = $("#category option:selected").text();
+  var thumbnail = $("#thumbnail option:selected").text();
   if (category !== "None") {
     doc.category = category;
+  }
+  if (thumbnail !== "None") {
+    doc.thumbnail = thumbnail;
   }
   doc.explicit = form[0].explicit.checked;
 }
@@ -430,7 +434,10 @@ function fillDocPreview(formName) {
     var contentMarkdown = form[0].contentmarkdown.value;
     var contentHtml = converter.makeHtml(contentMarkdown);
 
-    previewDoc.html("<h1>" + title + "</h1>" + contentHtml);
+    var thumbnail = $("#thumbnail option:selected").text();
+    thumbnail = thumbnail && thumbnail !== 'None' ? '<img src="/assets/images/' + thumbnail + '" />' : '';
+
+    previewDoc.html(thumbnail + "<h1>" + title + "</h1>" + contentHtml);
     $('pre code').each(function (i, block) {
         hljs.highlightBlock(block);
     });
@@ -630,18 +637,20 @@ function submitCategories() {
 
 function submitNewImage() {
   var form = $('form[name="upload-image"]');
+  var imgList = $('#img-list');
   var formTitle = $('#img-title');
   var loader = $('.loader');
   if (!waiting && form[0].image.value) {
     hideMessage("form-error");
     waiting = true;
     form.hide();
+    imgList.hide();
     formTitle.hide();
     loader.show();
-		var formData = new FormData();
-		var fileName = form[0].title.value;
-		formData.append("fileName", fileName);
-		formData.append("data", form[0].image.files[0]);
+    var formData = new FormData();
+    var fileName = form[0].title.value;
+    formData.append("fileName", fileName);
+    formData.append("data", form[0].image.files[0]);
 
     $.ajax({
       type: "POST",
@@ -649,7 +658,7 @@ function submitNewImage() {
       data: formData,
       cache: false,
       contentType: false,
-			processData: false,
+      processData: false,
       headers: {
         'X-Csrf-Protection': form[0].csrf.value
       },
@@ -667,6 +676,7 @@ function submitNewImage() {
         loader.hide();
         form.show();
         formTitle.show();
+        imgList.show();
         showMessage("form-error", "Could not upload image for the following reason: " + resp.responseText);
       }
     });
@@ -676,11 +686,14 @@ function submitNewImage() {
 function deleteImage(imageName) {
   var form = $('form[name="upload-image"]');
   var imgList = $('#img-list');
+  var formTitle = $('#img-title');
   var loader = $('.loader');
   if (!waiting && confirm('This will delete the image called "' + imageName + '", are you sure you want to continue?')) {
     hideMessage("form-error");
     waiting = true;
     imgList.hide();
+    form.hide();
+    formTitle.hide();
     loader.show();
 
     $.ajax({
@@ -705,6 +718,7 @@ function deleteImage(imageName) {
         loader.hide();
         form.show();
         imgList.show();
+        formTitle.show();
         showMessage("form-error", "Could not delete image for the following reason: " + resp.responseText);
       }
     });

@@ -20,7 +20,7 @@ package object model {
 
   case class HtmlMarkdownContent(html: String, markdown: String)
 
-  case class Post(id: Int, title: String, `abstract`: String, content: HtmlMarkdownContent, published: DateTime, explicit: Boolean, category: Option[String])
+  case class Post(id: Int, title: String, `abstract`: String, content: HtmlMarkdownContent, published: DateTime, explicit: Boolean, category: Option[String], thumbnail: Option[String] = None)
   
   case class OrderedTitle(title: String, order: Int)
   

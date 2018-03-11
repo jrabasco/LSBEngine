@@ -334,22 +334,28 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
       case pattern(fn, ext) =>
         handleWithDb(requestContext) { db =>
           val finalName = if (passedFileName.length > 0) passedFileName else fn
-          val dest = new File(BlogConfiguration.imagesLocation, finalName + s".$ext")
-          val imagesAccessor = new ImagesAccessor(db)
-          imagesAccessor.getImage(finalName).flatMap {
-            case Some(_) =>
-              requestContext.complete(Conflict, s"Image with name '$finalName' already exists.")
-            case None =>
-              val img = Image(finalName, ext, dest.toPath.toString)
-              imagesAccessor.saveImage(img, file).flatMap { updateWriteResult =>
-                if (updateWriteResult.ok) {
-                  requestContext.complete("Image saved.")
-                } else {
-                  requestContext.complete(InternalServerError, "Write result not ok.")
-                }
-              }.recoverWith {
-                case e => requestContext.complete(InternalServerError, s"$e")
+          val namePattern = """([a-zA-Z0-9\.\-_]*)""".r
+          finalName match {
+            case namePattern(nm) =>
+              val dest = new File(BlogConfiguration.imagesLocation, finalName + s".$ext")
+              val imagesAccessor = new ImagesAccessor(db)
+              imagesAccessor.getImage(finalName).flatMap {
+                case Some(_) =>
+                  requestContext.complete(Conflict, s"Image with name '$finalName' already exists.")
+                case None =>
+                  val img = Image(finalName, ext, dest.toPath.toString)
+                  imagesAccessor.saveImage(img, file).flatMap { updateWriteResult =>
+                    if (updateWriteResult.ok) {
+                      requestContext.complete("Image saved.")
+                    } else {
+                      requestContext.complete(InternalServerError, "Write result not ok.")
+                    }
+                  }.recoverWith {
+                    case e => requestContext.complete(InternalServerError, s"$e")
+                  }
               }
+            case _ =>
+              requestContext.complete(BadRequest, "File name must be only comprised of letters, numbers, underscores, hyphens or dots.")
           }
         }
       case _ =>
@@ -360,12 +366,18 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
   private def deleteImage(requestContext: RequestContext, imageName: String): Future[RouteResult] = {
     handleWithDb(requestContext) { db =>
       val imagesAccessor = new ImagesAccessor(db)
-      imagesAccessor.deleteImage(imageName).flatMap { writeResult =>
-        if (writeResult.ok) {
-          requestContext.complete("Deleted.")
-        } else {
-          requestContext.complete(InternalServerError, "Write result is not ok.")
-        }
+      val postsAccessor = new AdminPostsAccessor(db)
+      postsAccessor.findPostByThumbnail(imageName).flatMap {
+        case Some(post) =>
+          requestContext.complete(BadRequest, s"Could not delete image '$imageName' because post ${post.id} (${post.title}) uses it as a thumbnail.")
+        case None =>
+          imagesAccessor.deleteImage(imageName).flatMap { writeResult =>
+            if (writeResult.ok) {
+              requestContext.complete("Deleted.")
+            } else {
+              requestContext.complete(InternalServerError, "Write result is not ok.")
+            }
+          }
       }.recoverWith {
         case e => requestContext.complete(InternalServerError, s"$e")
       }
@@ -644,8 +656,12 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
   private def addPostForm(requestContext: RequestContext, token: Token): Future[RouteResult] = {
     handleWithDb(requestContext) { db =>
       val categoriesAccessor = new CategoriesAccessor(db)
+      val imagesAccessor = new ImagesAccessor(db)
       categoriesAccessor.getResource.flatMap { categories =>
-        requestContext.complete(admin.html.addeditpost.render(token, Post(-1, "", "", HtmlMarkdownContent("", ""), DateTime.now + 10.years, explicit=false, category=None), categories, add = true))
+        imagesAccessor.getImages.flatMap { images =>
+          val imageNames = images.map(img => img.name + "." +  img.extension)
+          requestContext.complete(admin.html.addeditpost.render(token, Post(-1, "", "", HtmlMarkdownContent("", ""), DateTime.now + 10.years, explicit=false, category=None), categories, add = true, imageNames))
+        }
       }
     }
   }
@@ -654,13 +670,17 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
     handleWithDb(requestContext) { db =>
       val postsAccessor = new AdminPostsAccessor(db)
       val categoriesAccessor = new CategoriesAccessor(db)
+      val imagesAccessor = new ImagesAccessor(db)
 
       categoriesAccessor.getResource.flatMap { categories =>
-        postsAccessor.getPost(id).flatMap {
-          case Some(post) =>
-            requestContext.complete(admin.html.addeditpost.render(token, post, categories, add = false))
-          case None =>
-            requestContext.complete(NotFound, errors.html.notfound.render(s"Post $id does not exist."))
+        imagesAccessor.getImages.flatMap { images =>
+          val imageNames = images.map(img => img.name + "." +  img.extension)
+          postsAccessor.getPost(id).flatMap {
+            case Some(post) =>
+              requestContext.complete(admin.html.addeditpost.render(token, post, categories, add = false, imageNames))
+            case None =>
+              requestContext.complete(NotFound, errors.html.notfound.render(s"Post $id does not exist."))
+          }
         }
       }.recoverWith {
         case e =>

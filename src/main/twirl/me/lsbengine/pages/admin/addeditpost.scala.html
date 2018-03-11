@@ -3,7 +3,7 @@
 @import me.lsbengine.components.html.footer
 @import me.lsbengine.components.admin.html.{navbar, head}
 @import com.github.nscala_time.time.Imports._
-@(token: Token, post: Post, categories: Categories, add: Boolean)
+@(token: Token, post: Post, categories: Categories, add: Boolean, images: List[String])
 <!DOCTYPE html>
 <html lang="en">
     @head.render(
@@ -43,10 +43,19 @@
                 <input type="checkbox" id="explicit" name="explicit" @if(post.explicit) {checked} />
             </div>
             <div class="label-field">
+              <label for="thumbnail">Thumbnail:</label>
+              <select id="thumbnail">
+                <option @if(post.thumbnail.isEmpty) {selected="selected"}>None</option>
+                @for(image <- images) {
+                <option @if(post.thumbnail.contains(image)){selected="selected"}>@image</option>
+                }
+              </select>
+            </div>
+            <div class="label-field">
               <label for="category">Category:</label>
               <select id="category">
                 <option @if(post.category.isEmpty) {selected="selected"}>None</option>
-                  @for(title <- categories.titles.sortBy(_.order)) {
+                @for(title <- categories.titles.sortBy(_.order)) {
                 <option @if(post.category.contains(title.title)){selected="selected"}>@title.title</option>
                 }
               </select>

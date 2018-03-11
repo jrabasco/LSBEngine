@@ -343,11 +343,11 @@ function update(type, add, formName) {
 
 function addPostValues(form, doc) {
   var category = $("#category option:selected").text();
-  var thumbnail = $("#thumbnail option:selected").text();
+  var thumbnail = $("#thumbnail").val();
   if (category !== "None") {
     doc.category = category;
   }
-  if (thumbnail !== "None") {
+  if (thumbnail && thumbnail !== "None") {
     doc.thumbnail = thumbnail;
   }
   doc.explicit = form[0].explicit.checked;
@@ -434,7 +434,7 @@ function fillDocPreview(formName) {
     var contentMarkdown = form[0].contentmarkdown.value;
     var contentHtml = converter.makeHtml(contentMarkdown);
 
-    var thumbnail = $("#thumbnail option:selected").text();
+    var thumbnail = $("#thumbnail").val();
     thumbnail = thumbnail && thumbnail !== 'None' ? '<img src="/assets/images/' + thumbnail + '" />' : '';
 
     previewDoc.html(thumbnail + "<h1>" + title + "</h1>" + contentHtml);

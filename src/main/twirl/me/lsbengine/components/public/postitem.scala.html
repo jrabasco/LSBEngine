@@ -6,8 +6,8 @@
     <i class="small-date">@post.published.toString(formatter)</i>
     }
     <br/>
-    <br/>
   @for(thumbnail <- post.thumbnail){
+  <br/>
   <img src="/assets/images/@thumbnail" />
   }
 @if(post.explicit) {

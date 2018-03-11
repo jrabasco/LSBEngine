@@ -44,12 +44,14 @@
             </div>
             <div class="label-field">
               <label for="thumbnail">Thumbnail:</label>
-              <select id="thumbnail">
-                <option @if(post.thumbnail.isEmpty) {selected="selected"}>None</option>
-                @for(image <- images) {
-                <option @if(post.thumbnail.contains(image)){selected="selected"}>@image</option>
-                }
-              </select>
+							@defining(post.thumbnail.flatMap(thumb => images.filter(image => thumb == image).headOption)) { selectedImage =>
+							<input list="thumbnails-list" id="thumbnail" placeholder="Search..." name="thumbnail" @for(img <- selectedImage){value="@img" }/>
+							<datalist id="thumbnails-list">
+                  @for(image <- images) {
+									<option value="@image" />
+                  }
+							</datalist>
+							}
             </div>
             <div class="label-field">
               <label for="category">Category:</label>

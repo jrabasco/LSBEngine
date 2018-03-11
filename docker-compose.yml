@@ -2,7 +2,7 @@ version: '3'
 
 services:
   lsbengine:
-    image: lsbengine:1.0.4
+    image: lsbengine:1.0.5
     links:
       - mongo
     env_file:

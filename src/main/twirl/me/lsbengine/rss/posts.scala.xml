@@ -2,7 +2,7 @@
 @import me.lsbengine.database.model.Post
 @import com.github.nscala_time.time.Imports._
 @(posts: List[Post])<?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<rss version="2.0" xmlns:atom="https://www.w3.org/2005/Atom" xmlns:media="https://search.yahoo.com/mrss/">
   <channel>
     <title>@BlogConfiguration.blogOwner's blog posts</title>
     <link>@BlogConfiguration.siteUrl</link>
@@ -21,6 +21,9 @@
       <description>
         @Html(p.content.html)
       </description>
+      @for(img <- p.thumbnail){
+      <media:thumbnail url="@{BlogConfiguration.siteUrl}/assets/images/@img" />
+      }
       }
       <pubDate>@p.published.toString(formatter)</pubDate>
       <link>@{BlogConfiguration.siteUrl}/posts/@p.id</link>

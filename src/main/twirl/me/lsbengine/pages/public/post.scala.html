@@ -1,4 +1,4 @@
-@import me.lsbengine.database.model.{Post, NavBarConf}
+@import me.lsbengine.database.model.{Post, NavBarConf, Image}
 @import me.lsbengine.components.public.html.{head, navbar}
 @import me.lsbengine.components.html.footer
 @import com.github.nscala_time.time.Imports._
@@ -13,6 +13,9 @@
         <div class="content-wrap">
         <div class="docs">
           <div class="doc">
+            @for(thumbnail <- post.thumbnail){
+            <img src="/assets/images/@thumbnail" />
+            }
             <h1><a href="/posts/@post.id">@post.title</a></h1> 
             @defining(DateTimeFormat.forPattern("d MMM Y")) { formatter =>
             <i class="small-date">@post.published.toString(formatter)</i>

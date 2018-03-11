@@ -8,7 +8,7 @@ import me.lsbengine.server.BlogConfiguration
 import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.api.commands.{UpdateWriteResult, WriteConcern}
 import reactivemongo.api.{Cursor, DefaultDB}
-import reactivemongo.bson.BSONDocument
+import reactivemongo.bson.{BSONDocument, BSONRegex}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -57,6 +57,12 @@ class AdminPostsAccessor(db: DefaultDB)
             Future(UpdateWriteResult(ok = false, 0, 0, Seq(), Seq(), None, None, None))
         }
     }
+  }
+
+  def findPostByThumbnail(thumbnail: String): Future[Option[Post]] = {
+    val escaped = thumbnail.replace(".", "\\.")
+    val query = BSONDocument("thumbnail" -> BSONRegex("^" + thumbnail + "\\.[a-zA-Z0-9]+$", ""))
+    super.getItem(query)
   }
 
   def createPost(post: Post): Future[Option[Post]] = {

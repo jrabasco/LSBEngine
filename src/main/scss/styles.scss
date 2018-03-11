@@ -29,7 +29,7 @@ body {
   font: 100% $font-stack;
   color: $font-color;
   text-align: center;
-	background: $background-color;
+  background: $background-color;
 }
 
 html, body {
@@ -38,7 +38,7 @@ html, body {
 
 h1 {
   font-size: 40px;
-	margin: 35px 0;
+  margin: 35px 0;
 }
 
 h1,h2,h3,h4 {
@@ -54,12 +54,12 @@ h2 {
 }
 
 .side-by-side-ul {
-	ul {
-		display: inline-block;
-		vertical-align: top;
-		list-style-type: none;
-		width: 30%
-	}
+  ul {
+    display: inline-block;
+    vertical-align: top;
+    list-style-type: none;
+    width: 30%
+  }
 }
 
 .listitem {
@@ -174,7 +174,11 @@ h2 {
   padding-bottom: 20px;
   font-size: 20px;
   text-align: left;
-	word-break: break-word;
+  word-break: break-word;
+
+	img {
+		max-width: 100%;
+	}
 
   blockquote {
     display: block;
@@ -203,18 +207,18 @@ h2 {
     }
   }
 
-	h3, h4 {
-		margin: 20px 0;
-	}
+  h3, h4 {
+    margin: 20px 0;
+  }
 
-	p {
-		margin-bottom: 10px;
-		line-height: $docs-line-height;
-	}
+  p {
+    margin-bottom: 10px;
+    line-height: $docs-line-height;
+  }
 
-	ul {
-		line-height: $docs-line-height;
-	}
+  ul {
+    line-height: $docs-line-height;
+  }
 
 }
 
@@ -223,6 +227,6 @@ h2 {
 }
 
 .small-date {
-	font-size: 16px;
+  font-size: 16px;
 }
 

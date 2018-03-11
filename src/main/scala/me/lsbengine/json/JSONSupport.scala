@@ -45,7 +45,7 @@ trait JSONSupport extends SprayJsonSupport with DefaultJsonProtocol with Collect
 
   implicit val htmlMarkdownContentFormat: RootJsonFormat[HtmlMarkdownContent] = jsonFormat2(HtmlMarkdownContent)
 
-  implicit val postFormat: RootJsonFormat[Post] = jsonFormat7(Post)
+  implicit val postFormat: RootJsonFormat[Post] = jsonFormat8(Post)
   implicit val projectFormat: RootJsonFormat[Project] = jsonFormat5(Project)
   implicit val aboutMeFormat: RootJsonFormat[AboutMe] = jsonFormat2(AboutMe)
   implicit val orderedTitleFormat: RootJsonFormat[OrderedTitle] = jsonFormat2(OrderedTitle)

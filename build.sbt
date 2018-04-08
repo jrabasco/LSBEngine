@@ -68,3 +68,4 @@ dockerBaseImage := "openjdk:jre-alpine"
 dockerEntrypoint := Seq("bin/blog")
 dockerExposedPorts := Seq(9090, 8080)
 dockerExposedVolumes := Seq("/opt/docker/images")
+dockerUpdateLatest := true

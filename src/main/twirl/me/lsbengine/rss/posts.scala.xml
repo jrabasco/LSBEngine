@@ -18,12 +18,15 @@
         <i><a href="/posts/@p.id">Read more (warning: explicit)</a></i>
       </description>
       }else{
-      <description>
-        @Html(p.content.html)
-      </description>
       @for(img <- p.thumbnail){
       <media:thumbnail url="@{BlogConfiguration.siteUrl}/assets/images/@img" />
       }
+      <description>
+        @for(img <- p.thumbnail){
+        <img src="@{BlogConfiguration.siteUrl}/assets/images/@img" />
+        }
+        @Html(p.content.html)
+      </description>
       }
       <pubDate>@p.published.toString(formatter)</pubDate>
       <link>@{BlogConfiguration.siteUrl}/posts/@p.id</link>

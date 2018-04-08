@@ -39,7 +39,7 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
     }
 
   val frontendRoutes: Route =
-    handleRejections(loginRejectionHandler) {
+    handleRejections(rejectionHandler) {
       pathEndOrSingleSlash {
         cookieAuthenticator { token =>
           get {
@@ -238,7 +238,7 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
     }
   }
 
-  override val ownRoutes: Route = frontendRoutes ~ apiRoutes
+  override val ownRoutes: Route = apiRoutes ~ frontendRoutes
 
   override def getPostsAccessor(database: DefaultDB): PostsAccessor = {
     new AdminPostsAccessor(database)
@@ -274,7 +274,7 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
     }
   }
 
-  private def loginRejectionHandler: RejectionHandler =
+  private def rejectionHandler: RejectionHandler =
     RejectionHandler.newBuilder().handle {
       case MissingCookieRejection(providedName) if providedName == cookieName =>
         complete(admin.html.login.render())
@@ -282,7 +282,8 @@ class AdminService(val dbConnection: MongoConnection, val dbName: String, val lo
         deleteCookie(cookieName) {
           complete(admin.html.login.render())
         }
-    }.result()
+    }.handleNotFound { complete((NotFound, admin.html.notfound.render())) }
+    .result()
 
   private def updatePassword(requestContext: RequestContext, newCredentials: NewCredentials): Future[RouteResult] = {
     handleWithDb(requestContext) { db =>

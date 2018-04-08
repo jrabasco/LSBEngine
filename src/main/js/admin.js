@@ -677,7 +677,11 @@ function submitNewImage() {
         form.show();
         formTitle.show();
         imgList.show();
-        showMessage("form-error", "Could not upload image for the following reason: " + resp.responseText);
+        if (resp.status == 413) {
+          showMessage("form-error", "Could not upload image for the following reason: the file is too large, it should be less than 4 MB.");
+        } else {
+          showMessage("form-error", "Could not upload image for the following reason: " + resp.responseText);
+        }
       }
     });
   }

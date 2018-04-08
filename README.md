@@ -31,6 +31,7 @@ takes around 1 second to perform a hash)
 - `BLOG_SHORT_DESCRIPTION`: short description of the blog, for the RSS flux (default `My Personal Blog`)
 - `BLOG_META_DESCRIPTION`: short description for the blog (default `My name is Jeremy Rabasco. I am a Computer Science major and I currently work at <JOB_HERE>.`)
 - `CONTACT_ADDRESS`: email for the footer (default `rabasco.jeremy@gmail.com`)
+- `GTAG_KEY`: Google analytics tracking key, leave empty if you do not wish to use Google analytics.
 - `HEADER_TITLE`: title in the header (default `LSBEngine`)
 - `IMAGES_LOCATION`: location where the uploaded images are saved (default `/home/jrabasco/images`)
 - `SITE_URL`: the URL of the website (default `local.lsbengine.me`)

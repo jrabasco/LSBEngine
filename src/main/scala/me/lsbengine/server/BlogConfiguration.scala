@@ -16,6 +16,7 @@ object BlogConfiguration {
   val copyright: String = envOrElse("COPYRIGHT", "")
   val defaultPostsPerPage: Int = envOrElse("DEFAULT_POSTS_PER_PAGE", "5").toInt
   val disclaimer: String = envOrElse("DISCLAIMER", "My opinions do not necessarily represent those of my employer.")
+  val gtagKey: String = envOrElse("GTAG_KEY", "")
   val hashIterations: Int = envOrElse("HASH_ITERATIONS", "300000").toInt
   val headerTitle: String = envOrElse("HEADER_TITLE", "LSBEngine")
   val hostName: String = envOrElse("SERVER_HOST", "localhost")

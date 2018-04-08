@@ -2,6 +2,7 @@ package me.lsbengine.server
 
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.model.StatusCodes.{InternalServerError, NotFound}
+import akka.http.scaladsl.server._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{RequestContext, Route, RouteResult}
 
@@ -22,32 +23,37 @@ class PublicService(dbConnection: MongoConnection, dbName: String, log: LoggingA
   extends ServerService(dbConnection, dbName, log) {
 
   override val ownRoutes: Route =
-    pathSingleSlash {
-      parameter("category"?, "page".as[Int]?, "posts_per_page".as[Int]?) {
-        (cat, page, postsPerPage) =>
-          ctx => index(ctx, cat, page, postsPerPage)
-      }
-    } ~ pathPrefix("posts") {
-      path(IntNumber) { id =>
-        ctx => individualPost(ctx, id)
-      }
-    } ~ pathPrefix("about") {
-      ctx => about(ctx)
-    } ~ pathPrefix("projects") {
-      pathEndOrSingleSlash {
-        ctx => projects(ctx)
-      } ~ path(IntNumber) { id =>
-        ctx => individualProject(ctx, id)
-      }
-    } ~ pathPrefix("feed") {
-      path("posts") {
-        ctx => postsRssFeed(ctx)
-      } ~ path("projects") {
-        ctx => projectsRssFeed(ctx)
+    handleRejections(rejectionHandler) {
+      pathSingleSlash {
+        parameter("category"?, "page".as[Int]?, "posts_per_page".as[Int]?) {
+          (cat, page, postsPerPage) =>
+            ctx => index(ctx, cat, page, postsPerPage)
+        }
+      } ~ pathPrefix("posts") {
+        path(IntNumber) { id =>
+          ctx => individualPost(ctx, id)
+        }
+      } ~ pathPrefix("about") {
+        ctx => about(ctx)
+      } ~ pathPrefix("projects") {
+        pathEndOrSingleSlash {
+          ctx => projects(ctx)
+        } ~ path(IntNumber) { id =>
+          ctx => individualProject(ctx, id)
+        }
+      } ~ pathPrefix("feed") {
+        path("posts") {
+          ctx => postsRssFeed(ctx)
+        } ~ path("projects") {
+          ctx => projectsRssFeed(ctx)
+        }
       }
     }
 
   override val apiScope: String = "public"
+
+  private def rejectionHandler: RejectionHandler =
+    RejectionHandler.newBuilder().handleNotFound { complete((NotFound, html.notfound.render())) }.result()
 
   private def index(requestContext: RequestContext, cat: Option[String], page: Option[Int], postsPerPage: Option[Int]): Future[RouteResult] = {
     handleWithNavBarConf(requestContext) { (db, conf) =>

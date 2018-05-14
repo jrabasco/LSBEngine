@@ -1,5 +1,5 @@
 # LSBEngine
-Lovely Scala Blogging Engine provides a basic blog CMS, all written with love, Scala and coffein!
+Lovely Scala Blogging Engine provides a basic blog CMS, all written with love, Scala and coffein! My own deployed version can be found [here](https://jrabasco.me).
 
 # Usage
 

@@ -14,7 +14,7 @@
         <div class="docs">
           <div class="doc">
             @for(thumbnail <- post.thumbnail){
-            <img src="/assets/images/@thumbnail" />
+            <a href="/posts/@post.id"><img src="/assets/images/@thumbnail" /></a>
             }
             <h1><a href="/posts/@post.id">@post.title</a></h1> 
             @defining(DateTimeFormat.forPattern("d MMM Y")) { formatter =>

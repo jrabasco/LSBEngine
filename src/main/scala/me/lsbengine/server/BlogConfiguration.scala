@@ -14,7 +14,7 @@ object BlogConfiguration {
   val blogShortDesc: String = envOrElse("BLOG_SHORT_DESCRIPTION", "My Personal Blog")
   val contactAddress: String = envOrElse("CONTACT_ADDRESS", "rabasco.jeremy@gmail.com")
   val copyright: String = envOrElse("COPYRIGHT", "")
-  val defaultPostsPerPage: Int = envOrElse("DEFAULT_POSTS_PER_PAGE", "5").toInt
+  val defaultPostsPerPage: Int = envOrElse("DEFAULT_POSTS_PER_PAGE", "10").toInt
   val disclaimer: String = envOrElse("DISCLAIMER", "My opinions do not necessarily represent those of my employer.")
   val gtagKey: String = envOrElse("GTAG_KEY", "")
   val hashIterations: Int = envOrElse("HASH_ITERATIONS", "300000").toInt

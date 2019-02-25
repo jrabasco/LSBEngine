@@ -25,7 +25,7 @@
         @for(img <- p.thumbnail){
         <img src="@{BlogConfiguration.siteUrl}/assets/images/@img" />
         }
-        @Html(p.content.html)
+        @{p.`abstract`}
       </description>
       }
       <pubDate>@p.published.toString(formatter)</pubDate>

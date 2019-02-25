@@ -12,7 +12,7 @@
     <item>
       <title>@p.title</title>
       <description>
-        @Html(p.content.html)
+        @{p.`abstract`}
       </description>
       <pubDate>@p.published.toString(formatter)</pubDate>
       <link>@{BlogConfiguration.siteUrl}/projects/@p.id</link>

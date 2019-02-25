@@ -1,7 +1,7 @@
 @import com.github.nscala_time.time.Imports._
 @import me.lsbengine.database.model.Post
 @(post: Post)
-<h1><a href="/posts/@post.id" target="_blank">@post.title</a></h1>
+<h1><a href="/posts/@post.id">@post.title</a></h1>
     @defining(DateTimeFormat.forPattern("d MMM Y")) { formatter =>
     <i class="small-date">@post.published.toString(formatter)</i>
     }
@@ -10,13 +10,13 @@
   <br/>
   <img src="/assets/images/@thumbnail" />
   }
-@if(post.explicit) {
 <div>
     @{post.`abstract`}
 </div>
-<div class="explicit-link">
+<div class="small-link">
+@if(post.explicit) {
     <i><a href="/posts/@post.id">Read more (warning: explicit)</a></i>
-</div>
 } else {
-@Html(post.content.html)
+    <i><a href="/posts/@post.id">Read more ...</a></i>
 }
+</div>

@@ -30,6 +30,8 @@ build-lsbengine-docker: build
 	sbt docker:publishLocal
 
 build-nginx: build
+	echo "Have you ran the env file ../prod.sh?"
+	read
 	cp -r assets nginx/
 	cp -r js nginx/
 	cp -r css nginx/
